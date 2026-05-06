@@ -1,0 +1,153 @@
+<div class="main-content">
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявку...</p>
+  } @else if (!order()) {
+    <div class="page-shell">
+      <p class="hint-text">Заявка не найдена.</p>
+      <a routerLink="/master/orders" class="btn-secondary btn-sm">← Назад</a>
+    </div>
+  } @else {
+    <div class="page-shell" style="max-width:760px">
+
+      <div class="page-header">
+        <a routerLink="/master/orders" class="btn-secondary btn-sm">← Назад</a>
+        <h1 class="page-title" style="flex:1">{{ order()!.work_types?.name ?? 'Заявка' }}</h1>
+      </div>
+
+      <div class="form-section">
+        <h2 class="section-title">Детали</h2>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-label">Площадь</span>
+            <span class="detail-value">{{ order()!.area_sqm }} м²</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Адрес</span>
+            <span class="detail-value">{{ order()!.address }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Создана</span>
+            <span class="detail-value">{{ formatDate(order()!.created_at) }}</span>
+          </div>
+          @if (order()!.description) {
+            <div class="detail-row detail-row--column">
+              <span class="detail-label">Описание</span>
+              <span class="detail-value">{{ order()!.description }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (order()!.photo_urls?.length) {
+        <div class="form-section">
+          <h2 class="section-title">Фотографии</h2>
+          <div class="photos-grid">
+            @for (url of order()!.photo_urls; track url) {
+              <a [href]="url" target="_blank" class="photo-thumb">
+                <img [src]="url" alt="фото" />
+              </a>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="form-section">
+        @if (myResponse()) {
+          <h2 class="section-title">Ваш отклик отправлен</h2>
+          <div class="response-sent">
+            <div class="response-sent__row">
+              <span class="detail-label">Цена</span>
+              <span class="detail-value">{{ formatPrice(myResponse()!.proposed_price) }}</span>
+            </div>
+            @if (myResponse()!.estimated_days) {
+              <div class="response-sent__row">
+                <span class="detail-label">Срок</span>
+                <span class="detail-value">{{ myResponse()!.estimated_days }} дн.</span>
+              </div>
+            }
+            @if (myResponse()!.comment) {
+              <div class="response-sent__row response-sent__row--column">
+                <span class="detail-label">Комментарий</span>
+                <span class="detail-value">{{ myResponse()!.comment }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <h2 class="section-title">Оставить отклик</h2>
+
+          @if (error()) {
+            <div class="form-error-box" style="margin-bottom:16px">{{ error() }}</div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="submit()" class="profile-form">
+            <div class="form-field">
+              <label class="form-label">Предлагаемая цена, ₽ <span class="req">*</span></label>
+              <input formControlName="proposed_price" type="number" min="1"
+                     class="form-input" placeholder="например, 16000" />
+              <span class="field-hint">Авторасчёт: площадь × ваша ставка. Можете изменить.</span>
+              @if (form.get('proposed_price')?.touched && form.get('proposed_price')?.invalid) {
+                <span class="field-error">Укажите цену</span>
+              }
+            </div>
+
+            <div class="form-field">
+              <label class="form-label">Срок выполнения, дней <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
+              <input formControlName="estimated_days" type="number" min="1"
+                     class="form-input" placeholder="например, 7" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label">Комментарий <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
+              <textarea formControlName="comment" class="form-input"
+                        rows="3" placeholder="Расскажите о своём опыте, подходе к работе..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-primary" [disabled]="submitting()">
+                {{ submitting() ? 'Отправляем...' : 'Отправить отклик' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+
+    </div>
+  }
+</div>
+
+<style>
+.detail-rows { display: flex; flex-direction: column; gap: 0; }
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0EEEA;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row--column { flex-direction: column; gap: 4px; }
+.detail-label { font-size: 13px; color: var(--color-text-secondary); min-width: 90px; }
+.detail-value { font-size: 14px; color: var(--color-text); }
+.photos-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.photo-thumb {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.field-hint { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; display: block; }
+.response-sent { display: flex; flex-direction: column; gap: 0; }
+.response-sent__row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0EEEA;
+}
+.response-sent__row:last-child { border-bottom: none; }
+.response-sent__row--column { flex-direction: column; gap: 4px; }
+.hint-text { color: var(--color-text-secondary); }
+</style>
