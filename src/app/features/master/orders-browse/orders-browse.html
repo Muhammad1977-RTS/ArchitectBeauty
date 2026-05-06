@@ -1,0 +1,76 @@
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">Открытые заявки</h1>
+  </div>
+
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявки...</p>
+  } @else if (orders().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p class="empty-text">Пока нет открытых заявок</p>
+    </div>
+  } @else {
+    <div class="orders-grid">
+      @for (order of orders(); track order.id) {
+        <a [routerLink]="['/master/orders', order.id]" class="order-card card">
+          <div class="order-card__head">
+            <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
+            <span class="order-card__area">{{ order.area_sqm }} м²</span>
+          </div>
+          <div class="order-card__meta">
+            <span>{{ order.address }}</span>
+          </div>
+          @if (order.profiles?.city_district) {
+            <div class="order-card__district">{{ order.profiles!.city_district }}</div>
+          }
+          <div class="order-card__date">{{ formatDate(order.created_at) }}</div>
+        </a>
+      }
+    </div>
+  }
+</div>
+
+<style>
+.orders-grid { display: flex; flex-direction: column; gap: 12px; }
+.order-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 18px 20px;
+}
+.order-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.order-card__type { font-weight: 600; font-size: 15px; }
+.order-card__area {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+.order-card__meta {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+.order-card__district {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+.order-card__date { font-size: 12px; color: var(--color-text-secondary); }
+.hint-text { color: var(--color-text-secondary); }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.empty-icon { font-size: 40px; }
+.empty-text { font-size: 16px; color: var(--color-text-secondary); margin: 0; }
+</style>
