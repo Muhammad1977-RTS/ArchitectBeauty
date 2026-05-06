@@ -3,7 +3,7 @@
 
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('order-photos', 'order-photos', true)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET public = true;
 
 -- Публичное чтение
 CREATE POLICY "order-photos: public read" ON storage.objects
