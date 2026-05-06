@@ -41,6 +41,15 @@ export interface Order {
   profiles?: Profile;
 }
 
+export interface ResponseOrder {
+  id: string;
+  area_sqm: number;
+  address: string;
+  status: OrderStatus;
+  selected_master_id: string | null;
+  work_types?: WorkType;
+}
+
 export interface Response {
   id: string;
   order_id: string;
@@ -50,5 +59,5 @@ export interface Response {
   estimated_days: number | null;
   created_at: string;
   profiles?: Profile;
-  master_rates?: MasterRate[];
+  orders?: ResponseOrder;
 }
