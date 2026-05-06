@@ -224,6 +224,7 @@ body {
   &::placeholder { color: #AAAAAA; }
   &:hover  { border-color: var(--color-border-strong); }
   &:focus  { border-color: var(--color-primary); }
+  &.ng-invalid.ng-touched { border-color: var(--color-error); }
 }
 
 .field-error { font-size: 12px; color: var(--color-error); }

@@ -30,6 +30,7 @@ export class LoginComponent {
   });
 
   async submit() {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const { email, password } = this.form.value;
     const ok = await this.auth.signIn(email!, password!);

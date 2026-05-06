@@ -23,6 +23,9 @@
             placeholder="you@example.com"
             autocomplete="email"
           />
+          @if (form.get('email')!.invalid && form.get('email')!.touched) {
+            <span class="field-error">Введите корректный email</span>
+          }
         </div>
 
         <div class="form-field">
@@ -35,6 +38,9 @@
             placeholder="Ваш пароль"
             autocomplete="current-password"
           />
+          @if (form.get('password')!.invalid && form.get('password')!.touched) {
+            <span class="field-error">Введите пароль</span>
+          }
         </div>
 
         <button
@@ -43,7 +49,7 @@
           (click)="showReset.set(true)"
         >Забыли пароль?</button>
 
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+        <button type="submit" class="btn-primary" [disabled]="loading()">
           @if (loading()) { Вход... } @else { Войти }
         </button>
       </form>

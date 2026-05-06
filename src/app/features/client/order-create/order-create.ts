@@ -64,6 +64,12 @@ export class OrderCreateComponent implements OnInit {
       if (url) photoUrls.push(url);
     }
 
+    if (this.selectedFiles.length > 0 && photoUrls.length === 0) {
+      this.error.set('Не удалось загрузить фотографии. Проверьте подключение и попробуйте снова.');
+      this.loading.set(false);
+      return;
+    }
+
     const { work_type_id, area_sqm, address, description } = this.form.value;
     const order = await this.orderService.createOrder({
       client_id: user.id,
