@@ -42,6 +42,15 @@ export class OrderService {
     return data as Order;
   }
 
+  async getOpenOrders(): Promise<Order[]> {
+    const { data } = await this.db
+      .from('orders')
+      .select('*, work_types(id, name, slug), profiles!client_id(name, city_district)')
+      .eq('status', 'new')
+      .order('created_at', { ascending: false });
+    return (data as Order[]) ?? [];
+  }
+
   async updateOrderStatus(
     id: string,
     status: OrderStatus,
