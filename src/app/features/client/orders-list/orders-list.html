@@ -1,0 +1,102 @@
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">Мои заявки</h1>
+    <a routerLink="/client/orders/new" class="btn-primary btn-sm">+ Новая заявка</a>
+  </div>
+
+  <div class="filter-tabs">
+    @for (f of filters; track f.value) {
+      <button class="filter-tab" [class.filter-tab--active]="filter() === f.value"
+              (click)="filter.set(f.value)">
+        {{ f.label }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявки...</p>
+  } @else if (filtered().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p class="empty-text">Заявок нет</p>
+      @if (filter() === 'all') {
+        <a routerLink="/client/orders/new" class="btn-primary btn-sm">Создать первую заявку</a>
+      }
+    </div>
+  } @else {
+    <div class="orders-grid">
+      @for (order of filtered(); track order.id) {
+        <a [routerLink]="['/client/orders', order.id]" class="order-card card">
+          <div class="order-card__head">
+            <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
+            <span class="status-badge status-{{ order.status }}">{{ statusLabel(order.status) }}</span>
+          </div>
+          <div class="order-card__meta">
+            <span>{{ order.area_sqm }} м²</span>
+            <span class="dot">·</span>
+            <span>{{ order.address }}</span>
+          </div>
+          <div class="order-card__date">{{ formatDate(order.created_at) }}</div>
+        </a>
+      }
+    </div>
+  }
+</div>
+
+<style>
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.filter-tab {
+  padding: 6px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.filter-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filter-tab--active { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+.orders-grid { display: flex; flex-direction: column; gap: 12px; }
+.order-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 18px 20px;
+}
+.order-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.order-card__type { font-weight: 600; font-size: 15px; }
+.order-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+.dot { color: var(--color-border-strong); }
+.order-card__date { font-size: 12px; color: var(--color-text-secondary); }
+.hint-text { color: var(--color-text-secondary); }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.empty-icon { font-size: 40px; }
+.empty-text { font-size: 16px; color: var(--color-text-secondary); margin: 0; }
+</style>

@@ -1,0 +1,91 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-icon">🏗️</span>
+      <h1 class="auth-title">ArchitectBeauty</h1>
+    </div>
+
+    @if (!showReset()) {
+      <h2 class="auth-heading">Войти</h2>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+        @if (error()) {
+          <div class="form-error-box">{{ error() }}</div>
+        }
+
+        <div class="form-field">
+          <label class="form-label" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="form-input"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="password">Пароль</label>
+          <input
+            id="password"
+            type="password"
+            class="form-input"
+            formControlName="password"
+            placeholder="Ваш пароль"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="forgot-link"
+          (click)="showReset.set(true)"
+        >Забыли пароль?</button>
+
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+          @if (loading()) { Вход... } @else { Войти }
+        </button>
+      </form>
+
+    } @else {
+      <h2 class="auth-heading">Сброс пароля</h2>
+
+      @if (resetSent()) {
+        <div class="success-box">
+          Ссылка для сброса отправлена на вашу почту
+        </div>
+        <button class="auth-link block-link" (click)="showReset.set(false); resetSent.set(false)">
+          Вернуться к входу
+        </button>
+      } @else {
+        <form [formGroup]="resetForm" (ngSubmit)="sendReset()" class="auth-form">
+          @if (error()) {
+            <div class="form-error-box">{{ error() }}</div>
+          }
+          <div class="form-field">
+            <label class="form-label" for="reset-email">Email</label>
+            <input
+              id="reset-email"
+              type="email"
+              class="form-input"
+              formControlName="email"
+              placeholder="you@example.com"
+            />
+          </div>
+          <button type="submit" class="btn-primary" [disabled]="resetForm.invalid || loading()">
+            @if (loading()) { Отправка... } @else { Отправить ссылку }
+          </button>
+          <button type="button" class="auth-link block-link" (click)="showReset.set(false)">
+            Назад
+          </button>
+        </form>
+      }
+    }
+
+    <p class="auth-footer">
+      Нет аккаунта?
+      <a routerLink="/auth/register" class="auth-link">Зарегистрироваться</a>
+    </p>
+  </div>
+</div>

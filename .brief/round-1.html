@@ -1,0 +1,1333 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>project brief · раунд 1</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --page: #ffffff;
+      --ink: #0a0a0a;
+      --pencil: #737373;
+      --graphite: #a3a3a3;
+      --rule: rgba(10, 10, 10, 0.08);
+      --rule-strong: rgba(10, 10, 10, 0.18);
+      --field: rgba(10, 10, 10, 0.04);
+      --field-focus: rgba(10, 10, 10, 0.065);
+      --toast-shadow: 0 1px 2px rgba(10, 10, 10, 0.06), 0 8px 24px rgba(10, 10, 10, 0.10);
+    }
+    html[data-theme="dark"] {
+      --page: #0a0a0a;
+      --ink: #fafafa;
+      --pencil: #8c8c8c;
+      --graphite: #525252;
+      --rule: rgba(250, 250, 250, 0.10);
+      --rule-strong: rgba(250, 250, 250, 0.22);
+      --field: rgba(250, 250, 250, 0.085);
+      --field-focus: rgba(250, 250, 250, 0.13);
+      --toast-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      background: var(--page);
+      color: var(--ink);
+      font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 240ms cubic-bezier(0.2, 0, 0, 1), color 240ms cubic-bezier(0.2, 0, 0, 1);
+    }
+
+    ::selection { background: var(--ink); color: var(--page); }
+
+    .shell {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 32px 80px 32px;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--pencil);
+      margin-bottom: 36px;
+    }
+
+    .theme-switch {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: none;
+      color: var(--ink);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .theme-switch::before { content: ""; position: absolute; inset: -12px; }
+    .theme-switch svg {
+      display: block;
+      transition: transform 420ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    html[data-theme="dark"] .theme-switch svg { transform: rotate(180deg); }
+    .theme-switch:focus-visible { outline: none; }
+    .theme-switch:focus-visible svg circle { stroke-width: 1.6; }
+
+    .spine {
+      position: fixed;
+      top: 40px;
+      bottom: 40px;
+      left: max(24px, calc(50% - 300px - 56px));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+    }
+    .spine-track {
+      position: relative;
+      flex: 1;
+      width: 1px;
+      background: var(--rule-strong);
+    }
+    .spine-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 0;
+      background: var(--ink);
+      transition: height 380ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    .spine-pct {
+      font-size: 11px;
+      color: var(--pencil);
+      font-variant-numeric: tabular-nums;
+      margin-top: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .section { margin: 0 0 36px; }
+    .section:last-of-type { margin-bottom: 12px; }
+
+    .section-num {
+      font-size: 11px;
+      color: var(--pencil);
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      margin-bottom: 4px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.005em;
+      margin: 0 0 4px;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .section-sub {
+      font-size: 12.5px;
+      color: var(--pencil);
+      margin: 0 0 18px;
+    }
+
+    .q { margin-bottom: 18px; }
+    .q-label {
+      display: inline-block;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+    .q-label .req {
+      color: var(--pencil);
+      font-weight: 400;
+      margin-left: 6px;
+      font-size: 12px;
+    }
+    .q-hint {
+      display: block;
+      font-size: 12.5px;
+      color: var(--pencil);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    textarea {
+      display: block;
+      width: 100%;
+      background: var(--field);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 14px;
+      color: var(--ink);
+      outline: none;
+      resize: none;
+      transition: background-color 180ms cubic-bezier(0.2, 0, 0, 1), border-color 180ms;
+    }
+    textarea {
+      min-height: 56px;
+      line-height: 1.55;
+    }
+    input[type="text"]::placeholder,
+    textarea::placeholder { color: var(--graphite); }
+    input[type="text"]:hover,
+    textarea:hover { background: var(--field-focus); }
+    input[type="text"]:focus,
+    textarea:focus {
+      background: var(--field-focus);
+      border-color: var(--rule-strong);
+    }
+
+    .opts { list-style: none; padding: 0; margin: 0; }
+    .opts li {
+      position: relative;
+      cursor: pointer;
+    }
+    .opts li > label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 6px 0;
+      cursor: pointer;
+      width: 100%;
+    }
+    .opts input[type="radio"],
+    .opts input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
+    .mark {
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
+      margin-top: 5px;
+      border: 1px solid var(--rule-strong);
+      background: transparent;
+      position: relative;
+      transition: border-color 180ms cubic-bezier(0.2, 0, 0, 1);
+    }
+    .opts[data-type="radio"] .mark { border-radius: 50%; }
+    .opts[data-type="check"] .mark { border-radius: 2px; }
+    .opts li:hover .mark { border-color: var(--ink); }
+    .opts input:checked ~ .mark { border-color: var(--ink); }
+    .opts input:checked ~ .mark::after {
+      content: "";
+      position: absolute;
+      inset: 2px;
+      background: var(--ink);
+    }
+    .opts[data-type="radio"] input:checked ~ .mark::after { border-radius: 50%; }
+    .opts[data-type="check"] input:checked ~ .mark::after { border-radius: 1px; }
+    .opts input:focus-visible ~ .mark {
+      box-shadow: 0 0 0 2px var(--page), 0 0 0 3px var(--ink);
+    }
+
+    .opt-body { flex: 1; min-width: 0; }
+    .opt-text { color: var(--ink); font-size: 14px; line-height: 1.45; }
+    .opt-rec {
+      display: block;
+      font-size: 12px;
+      color: var(--pencil);
+      margin-top: 3px;
+      line-height: 1.45;
+    }
+    .opt-rec strong {
+      font-weight: 500;
+      color: var(--ink);
+      opacity: 0.62;
+    }
+    .opt-other-input {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      background: var(--field);
+      border: 1px solid transparent;
+      border-radius: 5px;
+      padding: 6px 10px;
+      font: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      transition: background-color 180ms, border-color 180ms;
+    }
+    .opt-other-input:focus {
+      background: var(--field-focus);
+      border-color: var(--rule-strong);
+    }
+    .opt-other-input:disabled { display: none; }
+
+    .opts li[data-other] { display: block; }
+    .opts li[data-other] > .opt-other-input {
+      margin-left: 22px;
+      width: calc(100% - 22px);
+    }
+
+    .opts li[data-defer] {
+      margin-top: 4px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--rule);
+    }
+    .opts li[data-defer] .opt-text {
+      color: var(--pencil);
+      font-style: italic;
+    }
+    .opts li[data-defer]:hover .opt-text { color: var(--ink); }
+    .opts li[data-defer] input:checked ~ .mark { border-color: var(--pencil); }
+    .opts li[data-defer] input:checked ~ .mark::after { background: var(--pencil); }
+
+    .q-explain-toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      margin-left: 6px;
+      padding: 0;
+      border: 1px solid var(--rule-strong);
+      border-radius: 50%;
+      background: transparent;
+      color: var(--pencil);
+      font-size: 9.5px;
+      font-weight: 500;
+      font-family: inherit;
+      line-height: 1;
+      cursor: pointer;
+      vertical-align: middle;
+      transition: border-color 180ms cubic-bezier(0.2, 0, 0, 1), color 180ms, background-color 180ms;
+    }
+    .q-explain-toggle::before { content: ""; position: absolute; inset: -8px; }
+    .q-explain-toggle:hover { border-color: var(--ink); color: var(--ink); }
+    .q-explain-toggle:focus-visible { outline: none; border-color: var(--ink); color: var(--ink); }
+    .q-explain-toggle[aria-expanded="true"] {
+      border-color: var(--ink);
+      color: var(--ink);
+      background: var(--field);
+    }
+
+    .q-explain {
+      display: block;
+      margin: 6px 0 8px;
+      padding: 10px 12px 10px 14px;
+      border-left: 2px solid var(--rule-strong);
+      background: var(--field);
+      border-radius: 0 4px 4px 0;
+      font-size: 12.5px;
+      color: var(--pencil);
+      line-height: 1.55;
+    }
+    .q-explain[hidden] { display: none; }
+    .q-explain p { margin: 0 0 6px; }
+    .q-explain p:last-child { margin-bottom: 0; }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+    }
+    .action {
+      position: relative;
+      background: none;
+      border: none;
+      padding: 4px 0;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      border-bottom: 1px solid var(--rule-strong);
+      transition: border-bottom-color 180ms cubic-bezier(0.2, 0, 0, 1), color 180ms;
+    }
+    .action::before { content: ""; position: absolute; inset: -12px -8px; }
+    .action:hover { border-bottom-color: var(--ink); }
+    .action.quiet { color: var(--pencil); font-weight: 400; }
+    .action.quiet:hover { color: var(--ink); }
+    .action:focus-visible { outline: none; border-bottom-color: var(--ink); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 6px);
+      background: var(--ink);
+      color: var(--page);
+      font-size: 12.5px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      box-shadow: var(--toast-shadow);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 220ms cubic-bezier(0.2, 0, 0, 1), transform 220ms cubic-bezier(0.2, 0, 0, 1);
+      z-index: 10;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 720px) {
+      .shell { padding: 32px 24px 72px 56px; max-width: none; }
+      .spine { left: 18px; top: 32px; bottom: 32px; }
+    }
+    @media (max-width: 480px) {
+      .shell { padding: 28px 18px 64px 44px; }
+      .spine { left: 12px; top: 28px; bottom: 28px; }
+      .meta { margin-bottom: 28px; }
+      .section { margin-bottom: 28px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="spine" aria-hidden="true">
+    <div class="spine-track">
+      <div class="spine-fill" id="spineFill"></div>
+    </div>
+    <div class="spine-pct"><span id="spinePct">0</span>%</div>
+  </aside>
+
+  <main class="shell">
+    <div class="meta">
+      <span>project brief &middot; раунд 1</span>
+      <button class="theme-switch" id="themeSwitch" type="button" aria-label="переключить тему">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1"></circle>
+          <path d="M 8 1.5 A 6.5 6.5 0 0 0 8 14.5 Z" fill="currentColor"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form id="briefForm" autocomplete="off">
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 1 — ОБЗОР
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="обзор">
+        <div class="section-num">раздел один</div>
+        <h2 class="section-title">обзор</h2>
+        <p class="section-sub">общая суть продукта — одним абзацем</p>
+
+        <div class="q">
+          <label class="q-label" for="q-name">название продукта <span class="req">обязательно</span></label>
+          <input type="text" id="q-name" data-q="название продукта" data-required placeholder="например: ArchitectBeauty">
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-pitch">суть в одной фразе <span class="req">обязательно</span></label>
+          <span class="q-hint">закончи предложение: «это ___, который ___»</span>
+          <input type="text" id="q-pitch" data-q="суть продукта" data-required placeholder="это маркетплейс, который соединяет клиентов с мастерами-ремонтниками">
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-audience">для кого это</label>
+          <span class="q-hint">опиши конкретного человека — не «пользователи»</span>
+          <textarea id="q-audience" data-q="целевая аудитория" placeholder="Клиент: человек, которому нужен ремонт квартиры — ищет мастера без посредников.&#10;Мастер: частный прораб или бригада, ищет заказы онлайн без рекламы."></textarea>
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-geography">география запуска</label>
+          <span class="q-hint">один город, страна или везде сразу?</span>
+          <input type="text" id="q-geography" data-q="география запуска" placeholder="один город (Ташкент / Алматы / Москва)">
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 2 — РОЛИ ПОЛЬЗОВАТЕЛЕЙ
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="роли">
+        <div class="section-num">раздел два</div>
+        <h2 class="section-title">роли пользователей</h2>
+        <p class="section-sub">что умеет каждая роль и какие данные о себе хранит</p>
+
+        <div class="q">
+          <label class="q-label">регистрация</label>
+          <span class="q-hint">как люди входят в приложение — только почта, или через Google?</span>
+          <ul class="opts" data-type="radio" data-q="метод авторизации">
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="auth" value="email-password">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">email + пароль</span>
+                  <span class="opt-rec"><strong>рекомендуется</strong> — Supabase Auth из коробки, работает без внешних провайдеров, подходит для СНГ-аудитории</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="auth" value="magic-link">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">magic link (ссылка на почту)</span></span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="auth" value="phone-otp">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">телефон + SMS-код</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="auth" value="oauth-google">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">Google OAuth</span></span>
+              </label>
+            </li>
+            <li data-other>
+              <label style="display:contents;">
+                <input type="radio" name="auth" value="__other__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">другое</span></span>
+              </label>
+              <input type="text" class="opt-other-input" data-other-for="auth" placeholder="опиши..." disabled>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="auth" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-client-fields">профиль клиента</label>
+          <span class="q-hint">какие поля хранит клиент о себе — одно на строку</span>
+          <textarea id="q-client-fields" data-q="поля профиля клиента" style="min-height: 72px;" placeholder="имя&#10;телефон&#10;город / район"></textarea>
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-master-fields">профиль мастера</label>
+          <span class="q-hint">что мастер указывает о себе при регистрации — одно на строку</span>
+          <textarea id="q-master-fields" data-q="поля профиля мастера" style="min-height: 96px;" placeholder="имя&#10;телефон&#10;специализация (плитка, сантехника, электрика…)&#10;опыт (лет)&#10;портфолио (фото работ)&#10;ставка за м²"></textarea>
+        </div>
+
+        <div class="q">
+          <label class="q-label">верификация мастера</label>
+          <span class="q-hint">нужно ли проверять мастеров вручную перед тем, как они смогут брать заказы?</span>
+          <ul class="opts" data-type="radio" data-q="верификация мастера">
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="master-verify" value="none">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">нет — зарегистрировался и сразу работает</span></span>
+              </label>
+            </li>
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="master-verify" value="admin">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">ручная проверка администратором</span>
+                  <span class="opt-rec"><strong>рекомендуется</strong> — минимальный контроль качества, снижает риск мошенников на старте</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="master-verify" value="documents">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">загрузка документов (паспорт / ИП)</span></span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="master-verify" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 3 — ЗАЯВКИ
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="заявки">
+        <div class="section-num">раздел три</div>
+        <h2 class="section-title">заявки</h2>
+        <p class="section-sub">что клиент указывает при создании заявки</p>
+
+        <div class="q">
+          <label class="q-label">виды работ в MVP</label>
+          <span class="q-hint">какие типы ремонта будут доступны на старте — выбери все нужные</span>
+          <ul class="opts" data-type="check" data-q="виды работ MVP">
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="tile"><span class="mark"></span><span class="opt-body"><span class="opt-text">укладка плитки</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="painting"><span class="mark"></span><span class="opt-body"><span class="opt-text">покраска стен</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="plumbing"><span class="mark"></span><span class="opt-body"><span class="opt-text">сантехника</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="electrical"><span class="mark"></span><span class="opt-body"><span class="opt-text">электрика</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="flooring"><span class="mark"></span><span class="opt-body"><span class="opt-text">напольные покрытия (ламинат, паркет)</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="ceiling"><span class="mark"></span><span class="opt-body"><span class="opt-text">потолки (натяжные, гипсокартон)</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="work-types" value="general"><span class="mark"></span><span class="opt-body"><span class="opt-text">общестроительные работы (под ключ)</span></span></label></li>
+            <li data-other>
+              <label style="display:contents;">
+                <input type="checkbox" name="work-types" value="__other__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">другое</span></span>
+              </label>
+              <input type="text" class="opt-other-input" data-other-for="work-types" placeholder="другие виды..." disabled>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="checkbox" name="work-types" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-order-fields">поля заявки <span class="req">обязательно</span></label>
+          <span class="q-hint">что клиент заполняет при создании заявки — одно на строку</span>
+          <textarea id="q-order-fields" data-q="поля заявки" data-required style="min-height: 96px;" placeholder="тип работы&#10;площадь (м²)&#10;описание&#10;адрес / район&#10;желаемые сроки&#10;фото (необязательно)"></textarea>
+        </div>
+
+        <div class="q">
+          <label class="q-label">кто видит заявки</label>
+          <span class="q-hint">мастера видят все открытые заявки или только те, что подходят по специализации?</span>
+          <ul class="opts" data-type="radio" data-q="видимость заявок для мастеров">
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="order-visibility" value="all">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">все мастера видят все заявки</span>
+                  <span class="opt-rec"><strong>рекомендуется для MVP</strong> — проще реализовать, мастер сам фильтрует нужное</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="order-visibility" value="by-spec">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">только заявки по специализации мастера</span></span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="order-visibility" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label">статусы заявки</label>
+          <span class="q-hint">как меняется состояние заявки от создания до завершения?</span>
+          <div class="q-explain" hidden>
+            <p>Статус — это «в каком состоянии сейчас заявка». Например: <strong>новая</strong> → мастер откликнулся → клиент выбрал мастера → работа выполнена.</p>
+            <p>Чем меньше статусов на старте, тем проще. Можно добавить «в работе» и «завершена» позже.</p>
+          </div>
+          <ul class="opts" data-type="radio" data-q="схема статусов заявки">
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="order-statuses" value="simple">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">простая: новая → мастер выбран → завершена</span>
+                  <span class="opt-rec"><strong>рекомендуется для MVP</strong> — минимум состояний, легко понять и реализовать</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="order-statuses" value="extended">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">расширенная: новая → отклики → мастер выбран → в работе → завершена → отменена</span></span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="order-statuses" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 4 — ОТКЛИКИ И ВЫБОР МАСТЕРА
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="отклики">
+        <div class="section-num">раздел четыре</div>
+        <h2 class="section-title">отклики и выбор мастера</h2>
+        <p class="section-sub">как мастер откликается и как клиент выбирает исполнителя</p>
+
+        <div class="q">
+          <label class="q-label" for="q-response-fields">что мастер указывает в отклике</label>
+          <span class="q-hint">одно поле на строку — что мастер заполняет, когда откликается на заявку</span>
+          <textarea id="q-response-fields" data-q="поля отклика мастера" style="min-height: 72px;" placeholder="предлагаемая цена (или цена по расчёту)&#10;комментарий&#10;предполагаемые сроки"></textarea>
+        </div>
+
+        <div class="q">
+          <label class="q-label">лимит откликов на одну заявку</label>
+          <span class="q-hint">сколько мастеров максимум может откликнуться на одну заявку?</span>
+          <ul class="opts" data-type="radio" data-q="лимит откликов">
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="response-limit" value="unlimited">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">без ограничений</span></span>
+              </label>
+            </li>
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="response-limit" value="5-10">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">5–10 мастеров</span>
+                  <span class="opt-rec"><strong>рекомендуется</strong> — клиенту проще выбирать из ограниченного списка</span>
+                </span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="response-limit" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label">уведомления</label>
+          <span class="q-hint">нужны ли push или email-уведомления когда приходит отклик или выбирают мастера?</span>
+          <ul class="opts" data-type="radio" data-q="уведомления в MVP">
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="notifications" value="none">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">нет — клиент проверяет сам</span></span>
+              </label>
+            </li>
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="notifications" value="email">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">email (через Supabase / Resend)</span>
+                  <span class="opt-rec"><strong>рекомендуется</strong> — Supabase поддерживает из коробки, не нужен отдельный сервис</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="notifications" value="push">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">push-уведомления в браузере</span></span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="notifications" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 5 — РАСЧЁТ СТОИМОСТИ
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="стоимость">
+        <div class="section-num">раздел пять</div>
+        <h2 class="section-title">расчёт стоимости</h2>
+        <p class="section-sub">как считается цена работ</p>
+
+        <div class="q">
+          <label class="q-label">формула расчёта</label>
+          <span class="q-hint">как именно считается цена — по фиксированной ставке или мастер сам называет цену?</span>
+          <ul class="opts" data-type="radio" data-q="формула расчёта стоимости">
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="price-formula" value="area-rate">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">площадь × ставка мастера за м²</span>
+                  <span class="opt-rec"><strong>рекомендуется для MVP</strong> — простая формула, данные уже есть в заявке и профиле</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="price-formula" value="master-free">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">мастер сам указывает итоговую цену в отклике</span></span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="price-formula" value="both">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">оба: автоматический расчёт + возможность мастеру скорректировать</span></span>
+              </label>
+            </li>
+            <li data-other>
+              <label style="display:contents;">
+                <input type="radio" name="price-formula" value="__other__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">другое</span></span>
+              </label>
+              <input type="text" class="opt-other-input" data-other-for="price-formula" placeholder="опиши формулу..." disabled>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="price-formula" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-price-per-type">разные ставки для разных работ?</label>
+          <span class="q-hint">плитка и покраска стоят по-разному — или единая ставка на всё?</span>
+          <ul class="opts" data-type="radio" data-q="дифференциация ставок по типу работ">
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="price-diff" value="single">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">одна ставка на все типы работ</span></span>
+              </label>
+            </li>
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="price-diff" value="per-type">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">мастер задаёт ставку отдельно для каждого типа работ</span>
+                  <span class="opt-rec"><strong>рекомендуется</strong> — реалистичнее и точнее, чуть сложнее UI</span>
+                </span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="price-diff" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label">оплата внутри приложения</label>
+          <span class="q-hint">клиенты платят мастерам через приложение или договариваются напрямую?</span>
+          <ul class="opts" data-type="radio" data-q="онлайн-оплата в MVP">
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="payment" value="offline">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">только договорённость — оплата напрямую между людьми</span>
+                  <span class="opt-rec"><strong>рекомендуется для MVP</strong> — не нужен платёжный шлюз, запускаем быстрее</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="payment" value="online">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">онлайн-оплата внутри приложения</span></span>
+              </label>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="payment" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 6 — НЕ ВХОДИТ В MVP
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="вне MVP">
+        <div class="section-num">раздел шесть</div>
+        <h2 class="section-title">вне MVP</h2>
+        <p class="section-sub">что явно не делаем сейчас и как поймём, что MVP готов</p>
+
+        <div class="q">
+          <label class="q-label">что точно не входит в MVP</label>
+          <span class="q-hint">выбери фичи, которые откладываем на потом — это поможет не расползтись в разработке</span>
+          <ul class="opts" data-type="check" data-q="функционал вне MVP">
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="chat"><span class="mark"></span><span class="opt-body"><span class="opt-text">чат между клиентом и мастером</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="reviews"><span class="mark"></span><span class="opt-body"><span class="opt-text">отзывы и рейтинги мастеров</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="payment"><span class="mark"></span><span class="opt-body"><span class="opt-text">онлайн-оплата / эскроу</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="materials"><span class="mark"></span><span class="opt-body"><span class="opt-text">магазин стройматериалов</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="logistics"><span class="mark"></span><span class="opt-body"><span class="opt-text">грузоперевозки</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="mobile-app"><span class="mark"></span><span class="opt-body"><span class="opt-text">мобильное приложение (iOS / Android)</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="admin-panel"><span class="mark"></span><span class="opt-body"><span class="opt-text">панель администратора</span></span></label></li>
+            <li><label style="display:contents;"><input type="checkbox" name="out-of-scope" value="portfolio"><span class="mark"></span><span class="opt-body"><span class="opt-text">портфолио мастера с галереей «до/после»</span></span></label></li>
+            <li data-other>
+              <label style="display:contents;">
+                <input type="checkbox" name="out-of-scope" value="__other__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">другое</span></span>
+              </label>
+              <input type="text" class="opt-other-input" data-other-for="out-of-scope" placeholder="опиши..." disabled>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="checkbox" name="out-of-scope" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+
+        <div class="q">
+          <label class="q-label">MVP считается готовым когда</label>
+          <span class="q-hint">что должно произойти, чтобы сказать «MVP запущен»?</span>
+          <ul class="opts" data-type="radio" data-q="критерий готовности MVP">
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="done" value="self">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">я сам могу создать заявку и получить отклик</span></span>
+              </label>
+            </li>
+            <li data-recommended>
+              <label style="display:contents;">
+                <input type="radio" name="done" value="first-deal">
+                <span class="mark"></span>
+                <span class="opt-body">
+                  <span class="opt-text">первая реальная сделка между клиентом и мастером через приложение</span>
+                  <span class="opt-rec"><strong>рекомендуется</strong> — объективная проверка полного цикла</span>
+                </span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="done" value="ten-users">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">10 реальных пользователей (клиентов + мастеров) зарегистрировались</span></span>
+              </label>
+            </li>
+            <li>
+              <label style="display:contents;">
+                <input type="radio" name="done" value="public-launch">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">публичный запуск — ссылка в соцсетях</span></span>
+              </label>
+            </li>
+            <li data-other>
+              <label style="display:contents;">
+                <input type="radio" name="done" value="__other__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">другое</span></span>
+              </label>
+              <input type="text" class="opt-other-input" data-other-for="done" placeholder="опиши..." disabled>
+            </li>
+            <li data-defer>
+              <label style="display:contents;">
+                <input type="radio" name="done" value="__defer__">
+                <span class="mark"></span>
+                <span class="opt-body"><span class="opt-text">пусть клод решит</span></span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════
+           РАЗДЕЛ 7 — ОТКРЫТЫЕ ВОПРОСЫ
+      ══════════════════════════════════════════ -->
+      <section class="section" data-title="вопросы">
+        <div class="section-num">раздел семь</div>
+        <h2 class="section-title">открытые вопросы</h2>
+        <p class="section-sub">что пока непонятно — следующий раунд разберёт это подробнее</p>
+
+        <div class="q">
+          <label class="q-label" for="q-open">что тебя беспокоит или пока непонятно</label>
+          <span class="q-hint">любые сомнения по архитектуре, бизнес-логике, дизайну — по одному на строку</span>
+          <textarea id="q-open" data-q="открытые вопросы" style="min-height: 100px;" placeholder="как считать если у мастера нет ставки за м²?&#10;нужна ли карта для поиска мастеров по геолокации?&#10;что делать если мастер не пришёл — механизм жалоб?"></textarea>
+        </div>
+
+        <div class="q">
+          <label class="q-label" for="q-deadline">когда нужно запустить MVP</label>
+          <span class="q-hint">дата или ориентировочный срок</span>
+          <input type="text" id="q-deadline" data-q="дедлайн запуска" placeholder="например: через 2 месяца / к 1 июля 2026">
+        </div>
+      </section>
+
+    </form>
+
+    <div class="actions">
+      <button type="button" class="action" id="copyBtn">скопировать ответы</button>
+      <button type="button" class="action quiet" id="resetBtn">сбросить</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">скопировано в буфер</div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'project-brief:round-1:architectbeauty';
+      const THEME_KEY = 'project-brief:theme';
+
+      const form = document.getElementById('briefForm');
+      const sections = Array.from(form.querySelectorAll('.section'));
+      const spineFill = document.getElementById('spineFill');
+      const spinePct = document.getElementById('spinePct');
+      const themeSwitch = document.getElementById('themeSwitch');
+      const copyBtn = document.getElementById('copyBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const toast = document.getElementById('toast');
+
+      const themeMql = window.matchMedia('(prefers-color-scheme: dark)');
+      const applyTheme = () => {
+        const stored = localStorage.getItem(THEME_KEY);
+        const dark = stored ? stored === 'dark' : themeMql.matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      };
+      applyTheme();
+      themeMql.addEventListener('change', () => {
+        if (!localStorage.getItem(THEME_KEY)) applyTheme();
+      });
+      themeSwitch.addEventListener('click', () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem(THEME_KEY, next);
+      });
+
+      function collectRecommendations(list) {
+        const recs = [];
+        list.querySelectorAll('li[data-recommended]').forEach((li) => {
+          const optEl = li.querySelector('.opt-text');
+          const recEl = li.querySelector('.opt-rec');
+          if (!optEl) return;
+          recs.push({
+            option: optEl.textContent.trim(),
+            note: recEl ? recEl.textContent.replace(/\s+/g, ' ').trim() : ''
+          });
+        });
+        return recs;
+      }
+
+      function collectAnswers() {
+        const sectionData = [];
+        sections.forEach((section) => {
+          const title = (section.querySelector('.section-title') || {}).textContent || '';
+          const answers = [];
+          section.querySelectorAll('[data-q]').forEach((el) => {
+            const q = el.dataset.q;
+            if (el.tagName === 'INPUT' && el.type === 'text') {
+              answers.push({ q, value: el.value.trim(), type: 'text' });
+            } else if (el.tagName === 'TEXTAREA') {
+              answers.push({ q, value: el.value.trim(), type: 'textarea' });
+            } else if (el.classList && el.classList.contains('opts')) {
+              const type = el.dataset.type;
+              const inputs = el.querySelectorAll('input');
+              const recommendations = collectRecommendations(el);
+              if (type === 'radio') {
+                let chosen = null;
+                let deferred = false;
+                inputs.forEach((inp) => {
+                  if (inp.checked) {
+                    if (inp.value === '__defer__') {
+                      deferred = true;
+                    } else if (inp.value === '__other__') {
+                      const otherInput = el.querySelector('.opt-other-input');
+                      chosen = otherInput && otherInput.value.trim() ? otherInput.value.trim() : '(другое — не заполнено)';
+                    } else {
+                      const textEl = inp.parentElement.querySelector('.opt-text');
+                      chosen = textEl ? textEl.textContent.trim() : inp.value;
+                    }
+                  }
+                });
+                const entry = { q, value: chosen, type: 'radio' };
+                if (deferred) entry.deferred = true;
+                if (recommendations.length) entry.recommendations = recommendations;
+                answers.push(entry);
+              } else if (type === 'check') {
+                const picked = [];
+                let deferred = false;
+                inputs.forEach((inp) => {
+                  if (inp.checked) {
+                    if (inp.value === '__defer__') {
+                      deferred = true;
+                    } else if (inp.value === '__other__') {
+                      const otherInput = el.querySelector('.opt-other-input');
+                      if (otherInput && otherInput.value.trim()) picked.push(otherInput.value.trim());
+                    } else {
+                      const textEl = inp.parentElement.querySelector('.opt-text');
+                      picked.push(textEl ? textEl.textContent.trim() : inp.value);
+                    }
+                  }
+                });
+                const entry = { q, value: picked, type: 'check' };
+                if (deferred) entry.deferred = true;
+                if (recommendations.length) entry.recommendations = recommendations;
+                answers.push(entry);
+              }
+            }
+          });
+          sectionData.push({ title: title.trim(), answers });
+        });
+        return sectionData;
+      }
+
+      function isAnswered(entry) {
+        if (entry.deferred) return true;
+        if (entry.value == null) return false;
+        if (Array.isArray(entry.value)) return entry.value.length > 0;
+        return String(entry.value).trim().length > 0;
+      }
+
+      function updateProgress() {
+        const data = collectAnswers();
+        let total = 0, filled = 0;
+        data.forEach((section) => {
+          section.answers.forEach((a) => {
+            total++;
+            if (isAnswered(a)) filled++;
+          });
+        });
+        const pct = total === 0 ? 0 : Math.round((filled / total) * 100);
+        spineFill.style.height = pct + '%';
+        spinePct.textContent = pct;
+        persist();
+      }
+
+      function persist() {
+        const snapshot = {};
+        form.querySelectorAll('input[type="text"], textarea').forEach((el) => {
+          if (el.id) snapshot[el.id] = el.value;
+          else if (el.dataset.otherFor) snapshot['__other__' + el.dataset.otherFor] = el.value;
+        });
+        form.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((el) => {
+          if (el.name) snapshot[el.name + ':' + el.value] = el.checked;
+        });
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot)); } catch (e) {}
+      }
+
+      function restore() {
+        let snapshot = {};
+        try { snapshot = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) {}
+        form.querySelectorAll('input[type="text"], textarea').forEach((el) => {
+          if (el.id && snapshot[el.id] != null) el.value = snapshot[el.id];
+          else if (el.dataset.otherFor && snapshot['__other__' + el.dataset.otherFor] != null) {
+            el.value = snapshot['__other__' + el.dataset.otherFor];
+          }
+        });
+        form.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((el) => {
+          const key = el.name + ':' + el.value;
+          if (snapshot[key]) el.checked = true;
+        });
+        form.querySelectorAll('[data-other] input[type="radio"], [data-other] input[type="checkbox"]').forEach((inp) => {
+          if (inp.checked) {
+            const other = inp.closest('li').querySelector('.opt-other-input');
+            if (other) other.disabled = false;
+          }
+        });
+      }
+
+      form.querySelectorAll('[data-other]').forEach((li) => {
+        const input = li.querySelector('input[type="radio"], input[type="checkbox"]');
+        const other = li.querySelector('.opt-other-input');
+        if (!input || !other) return;
+
+        input.addEventListener('change', () => {
+          if (input.type === 'radio') {
+            const name = input.name;
+            form.querySelectorAll('input[name="' + name + '"]').forEach((sibling) => {
+              const siblingOther = sibling.closest('li').querySelector('.opt-other-input');
+              if (siblingOther) {
+                siblingOther.disabled = true;
+                if (sibling !== input) siblingOther.value = '';
+              }
+            });
+          }
+          if (input.checked) {
+            other.disabled = false;
+            setTimeout(() => other.focus(), 50);
+          } else {
+            other.disabled = true;
+          }
+        });
+
+        other.addEventListener('mousedown', () => {
+          if (!input.checked) {
+            input.checked = true;
+            other.disabled = false;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+        other.addEventListener('input', updateProgress);
+      });
+
+      form.querySelectorAll('.opts[data-type="radio"]').forEach((list) => {
+        list.querySelectorAll('input[type="radio"]').forEach((radio) => {
+          radio.addEventListener('change', () => {
+            if (radio.value !== '__other__') {
+              const other = list.querySelector('.opt-other-input');
+              if (other) { other.disabled = true; other.value = ''; }
+            }
+          });
+        });
+      });
+
+      form.querySelectorAll('li[data-defer]').forEach((li) => {
+        const list = li.closest('.opts');
+        if (!list) return;
+        const deferInput = li.querySelector('input');
+        if (!deferInput || deferInput.type !== 'checkbox') return;
+        const others = list.querySelectorAll('input[type="checkbox"]:not([value="__defer__"])');
+        deferInput.addEventListener('change', () => {
+          if (deferInput.checked) {
+            others.forEach((o) => { o.checked = false; });
+            const otherText = list.querySelector('.opt-other-input');
+            if (otherText) { otherText.value = ''; otherText.disabled = true; }
+          }
+        });
+        others.forEach((o) => {
+          o.addEventListener('change', () => {
+            if (o.checked) deferInput.checked = false;
+          });
+        });
+      });
+
+      form.querySelectorAll('.q-explain').forEach((panel) => {
+        const q = panel.closest('.q');
+        if (!q) return;
+        const label = q.querySelector('.q-label');
+        if (!label) return;
+        if (q.querySelector('.q-explain-toggle')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'q-explain-toggle';
+        btn.setAttribute('aria-label', 'объяснить вопрос');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = '?';
+        label.insertAdjacentElement('afterend', btn);
+        btn.addEventListener('click', () => {
+          const isOpen = !panel.hasAttribute('hidden');
+          if (isOpen) {
+            panel.setAttribute('hidden', '');
+            btn.setAttribute('aria-expanded', 'false');
+          } else {
+            panel.removeAttribute('hidden');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      form.addEventListener('input', updateProgress);
+      form.addEventListener('change', updateProgress);
+
+      function buildMarkdown(data) {
+        const lines = [];
+        lines.push('# project brief — раунд 1');
+        lines.push('');
+        data.forEach((section) => {
+          const any = section.answers.some(isAnswered);
+          if (!any) return;
+          lines.push('## ' + section.title);
+          section.answers.forEach((a) => {
+            if (!isAnswered(a)) return;
+            if (a.deferred) {
+              lines.push('**' + a.q + ':** _(пусть клод решит)_');
+              lines.push('');
+              return;
+            }
+            if (Array.isArray(a.value)) {
+              lines.push('**' + a.q + ':**');
+              a.value.forEach((v) => lines.push('- ' + v));
+            } else if (a.type === 'textarea') {
+              lines.push('**' + a.q + ':**');
+              lines.push('');
+              a.value.split('\n').forEach((line) => lines.push('> ' + line));
+            } else {
+              lines.push('**' + a.q + ':** ' + a.value);
+            }
+            lines.push('');
+          });
+        });
+        lines.push('```json');
+        lines.push(JSON.stringify({ round: 1, sections: data }, null, 2));
+        lines.push('```');
+        return lines.join('\n');
+      }
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+      }
+
+      copyBtn.addEventListener('click', async () => {
+        const md = buildMarkdown(collectAnswers());
+        try {
+          await navigator.clipboard.writeText(md);
+          showToast('скопировано в буфер');
+        } catch (e) {
+          const ta = document.createElement('textarea');
+          ta.value = md;
+          ta.style.position = 'fixed';
+          ta.style.top = '-1000px';
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); showToast('скопировано в буфер'); }
+          catch (e2) { showToast('не удалось скопировать — выдели и скопируй вручную'); }
+          document.body.removeChild(ta);
+        }
+      });
+
+      resetBtn.addEventListener('click', () => {
+        if (!confirm('сбросить все ответы?')) return;
+        form.reset();
+        form.querySelectorAll('.opt-other-input').forEach((el) => { el.value = ''; el.disabled = true; });
+        localStorage.removeItem(STORAGE_KEY);
+        updateProgress();
+        showToast('сброшено');
+      });
+
+      restore();
+      updateProgress();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<div class="page-shell">
+  <div class="page-header">
+    <h1 class="page-title">Мой профиль</h1>
+    @if (role()) {
+      <span class="role-badge-sm">
+        {{ role() === 'master' ? '🔨 Мастер' : '🏠 Клиент' }}
+      </span>
+    }
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
+
+    <section class="form-section">
+      <h2 class="section-title">Личные данные</h2>
+
+      <div class="form-field">
+        <label class="form-label" for="name">Имя <span class="req">*</span></label>
+        <input
+          id="name"
+          type="text"
+          class="form-input"
+          formControlName="name"
+          placeholder="Ваше имя"
+        />
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <span class="field-error">Введите имя (минимум 2 символа)</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="phone">Телефон</label>
+        <input
+          id="phone"
+          type="tel"
+          class="form-input"
+          formControlName="phone"
+          placeholder="+7 (999) 123-45-67"
+        />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="city">Город / район</label>
+        <input
+          id="city"
+          type="text"
+          class="form-input"
+          formControlName="city_district"
+          placeholder="Грозный, Октябрьский район"
+        />
+      </div>
+    </section>
+
+    @if (role() === 'master') {
+      <section class="form-section">
+        <h2 class="section-title">Ставки за м²</h2>
+        <p class="section-hint">
+          Укажите вашу цену за 1 м² для каждого вида работ.
+          Оставьте пустым — заявки по этому виду всё равно будете видеть,
+          но цену придётся вводить вручную при отклике.
+        </p>
+
+        <div class="rates-grid">
+          @for (wt of workTypes(); track wt.id) {
+            <div class="rate-row">
+              <span class="rate-name">{{ wt.name }}</span>
+              <div class="rate-input-wrap">
+                <input
+                  type="number"
+                  class="form-input rate-input"
+                  [value]="rateInput()[wt.id] || ''"
+                  (input)="updateRate(wt.id, $any($event.target).value)"
+                  placeholder="—"
+                  min="1"
+                  step="10"
+                />
+                <span class="rate-unit">₽/м²</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || saving()">
+        @if (saving()) { Сохранение... } @else { Сохранить }
+      </button>
+      @if (saved()) {
+        <span class="saved-badge">✓ Сохранено</span>
+      }
+    </div>
+
+  </form>
+</div>

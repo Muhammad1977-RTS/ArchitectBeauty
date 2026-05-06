@@ -1,0 +1,88 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-icon">🏗️</span>
+      <h1 class="auth-title">ArchitectBeauty</h1>
+    </div>
+
+    <h2 class="auth-heading">Создать аккаунт</h2>
+
+    @if (!selectedRole()) {
+      <p class="auth-sub">Кто вы?</p>
+      <div class="role-grid">
+        <button class="role-card" type="button" (click)="selectRole('client')">
+          <span class="role-icon">🏠</span>
+          <span class="role-name">Клиент</span>
+          <span class="role-desc">Ищу мастера для ремонта</span>
+        </button>
+        <button class="role-card" type="button" (click)="selectRole('master')">
+          <span class="role-icon">🔨</span>
+          <span class="role-name">Мастер</span>
+          <span class="role-desc">Ищу заказы на ремонт</span>
+        </button>
+      </div>
+    } @else {
+      <button class="role-badge" type="button" (click)="selectedRole.set(null)">
+        {{ selectedRole() === 'client' ? '🏠 Клиент' : '🔨 Мастер' }}
+        <span class="role-badge-change">изменить</span>
+      </button>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+        @if (error()) {
+          <div class="form-error-box">{{ error() }}</div>
+        }
+
+        <div class="form-field">
+          <label class="form-label" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="form-input"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="field-error">Введите корректный email</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="password">Пароль</label>
+          <input
+            id="password"
+            type="password"
+            class="form-input"
+            formControlName="password"
+            placeholder="Минимум 6 символов"
+            autocomplete="new-password"
+          />
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <span class="field-error">Минимум 6 символов</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="passwordConfirm">Повторите пароль</label>
+          <input
+            id="passwordConfirm"
+            type="password"
+            class="form-input"
+            formControlName="passwordConfirm"
+            placeholder="Повторите пароль"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+          @if (loading()) { Регистрация... } @else { Зарегистрироваться }
+        </button>
+      </form>
+    }
+
+    <p class="auth-footer">
+      Уже есть аккаунт?
+      <a routerLink="/auth/login" class="auth-link">Войти</a>
+    </p>
+  </div>
+</div>

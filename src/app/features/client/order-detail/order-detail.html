@@ -1,0 +1,88 @@
+<div class="main-content">
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявку...</p>
+  } @else if (!order()) {
+    <div class="page-shell">
+      <p class="hint-text">Заявка не найдена.</p>
+      <a routerLink="/client/orders" class="btn-secondary btn-sm">← Мои заявки</a>
+    </div>
+  } @else {
+    <div class="page-shell" style="max-width:760px">
+
+      <div class="page-header">
+        <a routerLink="/client/orders" class="btn-secondary btn-sm">← Назад</a>
+        <h1 class="page-title" style="flex:1">{{ order()!.work_types?.name ?? 'Заявка' }}</h1>
+        <span class="status-badge status-{{ order()!.status }}">{{ statusLabel(order()!.status) }}</span>
+      </div>
+
+      <div class="form-section">
+        <h2 class="section-title">Детали</h2>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-label">Площадь</span>
+            <span class="detail-value">{{ order()!.area_sqm }} м²</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Адрес</span>
+            <span class="detail-value">{{ order()!.address }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Создана</span>
+            <span class="detail-value">{{ formatDate(order()!.created_at) }}</span>
+          </div>
+          @if (order()!.description) {
+            <div class="detail-row detail-row--column">
+              <span class="detail-label">Описание</span>
+              <span class="detail-value">{{ order()!.description }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (order()!.photo_urls?.length) {
+        <div class="form-section">
+          <h2 class="section-title">Фотографии</h2>
+          <div class="photos-grid">
+            @for (url of order()!.photo_urls; track url) {
+              <a [href]="url" target="_blank" class="photo-thumb">
+                <img [src]="url" alt="фото" />
+              </a>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="form-section">
+        <h2 class="section-title">Отклики мастеров</h2>
+        <p class="section-hint">Отклики появятся здесь после того, как мастера ответят на заявку.</p>
+      </div>
+
+    </div>
+  }
+</div>
+
+<style>
+.detail-rows { display: flex; flex-direction: column; gap: 0; }
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0EEEA;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row--column { flex-direction: column; gap: 4px; }
+.detail-label { font-size: 13px; color: var(--color-text-secondary); min-width: 90px; }
+.detail-value { font-size: 14px; color: var(--color-text); }
+.photos-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.photo-thumb {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hint-text { color: var(--color-text-secondary); }
+</style>
