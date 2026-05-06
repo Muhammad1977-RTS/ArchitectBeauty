@@ -34,7 +34,7 @@ export class ResponseService {
   async getMyResponses(masterId: string): Promise<Response[]> {
     const { data } = await this.db
       .from('responses')
-      .select('*, orders(id, area_sqm, address, status, work_types(name))')
+      .select('*, orders(id, area_sqm, address, status, selected_master_id, work_types(name))')
       .eq('master_id', masterId)
       .order('created_at', { ascending: false });
     return (data as Response[]) ?? [];
