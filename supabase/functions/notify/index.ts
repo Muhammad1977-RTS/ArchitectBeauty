@@ -1,3 +1,4 @@
+// @ts-nocheck — Deno runtime, URL-импорты не поддерживаются Node.js TypeScript-компилятором
 import { serve } from 'https://deno.land/std@0.224.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -43,7 +44,7 @@ function emailLayout(body: string) {
   `
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   const payload: WebhookPayload = await req.json()
   const { type, table, record, old_record } = payload
 
