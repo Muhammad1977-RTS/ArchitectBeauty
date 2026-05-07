@@ -40,7 +40,15 @@ export class OrderCreateComponent implements OnInit {
   onPhotos(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files) return;
-    const files = Array.from(input.files).slice(0, 5 - this.selectedFiles.length);
+    const MAX_SIZE_MB = 10;
+    const allowed = Array.from(input.files).filter(f => {
+      if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+        this.error.set(`Файл "${f.name}" превышает ${MAX_SIZE_MB} МБ. Выберите меньший файл.`);
+        return false;
+      }
+      return true;
+    });
+    const files = allowed.slice(0, 5 - this.selectedFiles.length);
     this.selectedFiles = [...this.selectedFiles, ...files].slice(0, 5);
     this.previews.set(this.selectedFiles.map(f => URL.createObjectURL(f)));
   }
@@ -61,8 +69,12 @@ export class OrderCreateComponent implements OnInit {
 
     const photoUrls: string[] = [];
     for (const file of this.selectedFiles) {
-      const url = await this.storageService.uploadPhoto(file, user.id);
-      if (url) photoUrls.push(url);
+      const result = await this.storageService.uploadPhoto(file, user.id);
+      if (result.url) {
+        photoUrls.push(result.url);
+      } else {
+        console.error(`Failed to upload ${file.name}:`, result.error);
+      }
     }
 
     if (this.selectedFiles.length > 0 && photoUrls.length === 0) {
