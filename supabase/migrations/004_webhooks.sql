@@ -1,9 +1,5 @@
 -- ArchitectBeauty — триггеры уведомлений через pg_net → Edge Function
 --
--- Перед запуском этой миграции выполни в SQL Editor:
---   ALTER DATABASE postgres SET app.notify_url  = 'https://<ref>.supabase.co/functions/v1/notify';
---   ALTER DATABASE postgres SET app.notify_auth = 'Bearer <anon-key>';
---
 -- Secrets в Supabase Dashboard → Settings → Edge Functions:
 --   RESEND_API_KEY        — ключ из resend.com
 --   APP_URL               — https://architectbeauty.ru (или твой домен)
@@ -14,17 +10,13 @@ CREATE EXTENSION IF NOT EXISTS pg_net;
 -- ── Вспомогательная функция-диспетчер ────────────────────────────────────────
 CREATE OR REPLACE FUNCTION _notify_edge(payload jsonb)
 RETURNS void LANGUAGE plpgsql AS $$
-DECLARE
-  _url  text := current_setting('app.notify_url',  true);
-  _auth text := current_setting('app.notify_auth', true);
 BEGIN
-  IF _url IS NULL OR _url = '' THEN RETURN; END IF;
   PERFORM net.http_post(
-    url     := _url,
+    url     := 'https://tzawdrrgmkiptpykrnqm.supabase.co/functions/v1/notify',
     body    := payload::text,
     headers := jsonb_build_object(
       'Content-Type',  'application/json',
-      'Authorization', coalesce(_auth, '')
+      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6YXdkcnJnbWtpcHRweWtybnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMTcwNDYsImV4cCI6MjA5MzU5MzA0Nn0.4iInOmxHgWm6DLmTBEPvLIzk82fwB-QjUIk4ZL3bVkI'
     )
   );
 END;
