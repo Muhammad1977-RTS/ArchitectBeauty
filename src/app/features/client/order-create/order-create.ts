@@ -51,6 +51,7 @@ export class OrderCreateComponent implements OnInit {
   }
 
   async submit() {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const user = this.auth.user();
     if (!user) return;

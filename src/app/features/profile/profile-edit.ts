@@ -62,6 +62,7 @@ export class ProfileEditComponent implements OnInit {
   }
 
   async save() {
+    this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const user = this.auth.user();
     if (!user) return;

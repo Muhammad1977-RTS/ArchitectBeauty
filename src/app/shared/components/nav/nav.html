@@ -6,8 +6,13 @@
 
   @if (isAuthenticated()) {
     <div class="nav-links">
-      <a routerLink="/client/orders" routerLinkActive="nav-link--active" class="nav-link">Заявки</a>
-      <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
+      @if (role() === 'client') {
+        <a routerLink="/client/orders" routerLinkActive="nav-link--active" class="nav-link">Мои заявки</a>
+      }
+      @if (role() === 'master') {
+        <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
+        <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+      }
     </div>
     <div class="nav-right">
       <a routerLink="/profile" routerLinkActive="nav-link--active" class="nav-link">Профиль</a>
