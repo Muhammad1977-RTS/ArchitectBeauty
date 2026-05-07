@@ -7,7 +7,7 @@ import { NavComponent } from './shared/components/nav/nav';
   imports: [RouterOutlet, NavComponent],
   template: `
     <app-nav />
-    <main class="main-content">
+    <main>
       <router-outlet />
     </main>
   `,
