@@ -13,7 +13,7 @@ RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
   PERFORM net.http_post(
     url     := 'https://tzawdrrgmkiptpykrnqm.supabase.co/functions/v1/notify',
-    body    := payload::text,
+    body    := payload,
     headers := jsonb_build_object(
       'Content-Type',  'application/json',
       'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6YXdkcnJnbWtpcHRweWtybnFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwMTcwNDYsImV4cCI6MjA5MzU5MzA0Nn0.4iInOmxHgWm6DLmTBEPvLIzk82fwB-QjUIk4ZL3bVkI'
