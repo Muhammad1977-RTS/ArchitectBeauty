@@ -1,0 +1,341 @@
+<div class="main-content">
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявку...</p>
+  } @else if (!order()) {
+    <div class="page-shell">
+      <p class="hint-text">Заявка не найдена.</p>
+      <a routerLink="/client/orders" class="btn-secondary btn-sm">← Мои заявки</a>
+    </div>
+  } @else {
+    <div class="page-shell" style="max-width:760px">
+
+      <div class="page-header">
+        <a routerLink="/client/orders" class="btn-secondary btn-sm">← Назад</a>
+        <h1 class="page-title" style="flex:1">{{ order()!.work_types?.name ?? 'Заявка' }}</h1>
+        <span class="status-badge status-{{ order()!.status }}">{{ statusLabel(order()!.status) }}</span>
+      </div>
+
+      <div class="form-section">
+        <h2 class="section-title">Детали</h2>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-label">Площадь</span>
+            <span class="detail-value">{{ order()!.area_sqm }} м²</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Адрес</span>
+            <span class="detail-value">{{ order()!.address }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Создана</span>
+            <span class="detail-value">{{ formatDate(order()!.created_at) }}</span>
+          </div>
+          @if (order()!.description) {
+            <div class="detail-row detail-row--column">
+              <span class="detail-label">Описание</span>
+              <span class="detail-value">{{ order()!.description }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (order()!.photo_urls.length) {
+        <div class="form-section">
+          <h2 class="section-title">Фотографии</h2>
+          <div class="photos-grid">
+            @for (url of order()!.photo_urls; track url) {
+              <a [href]="url" target="_blank" class="photo-thumb">
+                <img [src]="url" alt="фото" />
+              </a>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ── Отклики (карточки → модалка) ───────────────────────────── -->
+      <div class="form-section">
+        <h2 class="section-title">
+          Отклики мастеров
+          @if (responses().length) {
+            <span class="responses-count">{{ responses().length }}</span>
+          }
+        </h2>
+
+        @if (responses().length === 0) {
+          <p class="section-hint">Отклики появятся здесь после того, как мастера ответят на заявку.</p>
+        } @else {
+          <div class="cards-grid">
+            @for (r of responses(); track r.id) {
+              @let isSelected = order()!.selected_master_id === r.master_id;
+              @let stats = masterStats()[r.master_id];
+
+              <button class="m-card" [class.m-card--selected]="isSelected" (click)="openModal(r)">
+                <div class="m-card__head">
+                  <span class="m-card__name">{{ r.profiles?.name ?? 'Мастер' }}</span>
+                  @if (isSelected) {
+                    <span class="selected-badge">Выбран</span>
+                  }
+                </div>
+                @if (stats?.reviews_count) {
+                  <span class="m-card__rating">★ {{ stats.avg_rating }} <span class="m-card__rating-count">({{ stats.reviews_count }})</span></span>
+                }
+                <span class="m-card__price">{{ formatPrice(r.proposed_price) }}</span>
+                @if (r.estimated_days) {
+                  <span class="m-card__days">{{ r.estimated_days }} дн.</span>
+                }
+                @if (r.comment) {
+                  <p class="m-card__comment-preview">{{ r.comment }}</p>
+                }
+                <span class="m-card__read">Читать подробнее →</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      @if (order()!.status === 'master_selected') {
+        <div class="form-section">
+          <button class="btn-secondary complete-btn"
+                  [disabled]="actionLoading() === 'complete'"
+                  (click)="complete()">
+            {{ actionLoading() === 'complete' ? 'Завершаем...' : 'Отметить как завершённую' }}
+          </button>
+        </div>
+      }
+
+      @if (order()!.status === 'completed') {
+        @if (!order()!.rating) {
+          <div class="form-section rating-section">
+            <h2 class="section-title">Оцените мастера</h2>
+            <p class="section-hint">Поделитесь опытом — это помогает другим клиентам выбрать исполнителя.</p>
+            <div class="stars-row">
+              @for (n of starRange; track n) {
+                <button class="star-btn"
+                        [class.star-btn--active]="starActive(n)"
+                        (click)="ratingSelected.set(n)"
+                        (mouseenter)="ratingHovered.set(n)"
+                        (mouseleave)="ratingHovered.set(0)">★</button>
+              }
+            </div>
+            @if (ratingSelected()) {
+              <textarea class="field-input rating-textarea" rows="3"
+                        placeholder="Комментарий (необязательно)"
+                        (input)="reviewText.set($any($event.target).value)"></textarea>
+              <button class="btn-primary"
+                      [disabled]="actionLoading() === 'rating'"
+                      (click)="submitRating()">
+                {{ actionLoading() === 'rating' ? 'Сохраняем...' : 'Отправить оценку' }}
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="form-section">
+            <h2 class="section-title">Ваша оценка</h2>
+            <div class="rating-done">
+              <span class="rating-done__stars">{{ starsDisplay(order()!.rating!) }}</span>
+              @if (order()!.review_text) {
+                <p class="rating-done__text">{{ order()!.review_text }}</p>
+              }
+            </div>
+          </div>
+        }
+      }
+
+    </div>
+  }
+</div>
+
+<!-- ── Модалка ──────────────────────────────────────────────────────── -->
+@if (modalResponse()) {
+  @let r = modalResponse()!;
+  @let stats = masterStats()[r.master_id];
+
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+
+      <button class="modal-close" (click)="closeModal()">✕</button>
+
+      <div class="modal-head">
+        <div>
+          <div class="modal-master-name">{{ r.profiles?.name ?? 'Мастер' }}</div>
+          @if (stats?.reviews_count) {
+            <div class="modal-rating">★ {{ stats.avg_rating }} · {{ stats.reviews_count }} отзывов</div>
+          }
+        </div>
+        <div class="modal-price">{{ formatPrice(r.proposed_price) }}</div>
+      </div>
+
+      <div class="modal-body">
+        @if (r.estimated_days) {
+          <div class="modal-row">
+            <span class="modal-label">Срок</span>
+            <span>{{ r.estimated_days }} дн.</span>
+          </div>
+        }
+        @if (r.comment) {
+          <div class="modal-section">
+            <div class="modal-label">Комментарий мастера</div>
+            <p class="modal-comment">{{ r.comment }}</p>
+          </div>
+        } @else {
+          <p class="modal-no-comment">Мастер не оставил комментарий</p>
+        }
+      </div>
+
+      @if (order()!.status === 'new') {
+        <div class="modal-footer">
+          <button class="btn-secondary modal-cancel" (click)="closeModal()">Закрыть</button>
+          <button class="btn-primary modal-confirm"
+                  [disabled]="actionLoading() === r.id"
+                  (click)="selectMaster(r)">
+            {{ actionLoading() === r.id ? 'Выбираем...' : 'Выбрать этого мастера' }}
+          </button>
+        </div>
+      } @else if (order()!.selected_master_id === r.master_id) {
+        <div class="modal-footer">
+          <span class="modal-selected-note">Этот мастер выбран</span>
+          <button class="btn-secondary" (click)="closeModal()">Закрыть</button>
+        </div>
+      } @else {
+        <div class="modal-footer">
+          <button class="btn-secondary" (click)="closeModal()">Закрыть</button>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<style>
+.detail-rows { display: flex; flex-direction: column; }
+.detail-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-row--column { flex-direction: column; gap: 4px; }
+.detail-label { font-size: 13px; color: var(--color-text-secondary); min-width: 90px; }
+.detail-value { font-size: 14px; color: var(--color-text); }
+.photos-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+.photo-thumb {
+  display: block; width: 120px; height: 120px;
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--color-border);
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.responses-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--color-primary); color: #fff;
+  font-size: 12px; font-weight: 600; margin-left: 8px; vertical-align: middle;
+}
+
+/* ── Карточки ──────────────────────────────────────────────────────── */
+.cards-grid { display: flex; flex-direction: column; gap: 8px; }
+
+.m-card {
+  width: 100%;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.m-card:hover {
+  border-color: #C8C2BA;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.m-card--selected { border-color: var(--color-primary); background: #FFF8F8; }
+
+.m-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.m-card__name { font-weight: 600; font-size: 15px; color: var(--color-text); }
+.m-card__rating { font-size: 12px; color: #E5A000; font-weight: 600; }
+.m-card__rating-count { font-weight: 400; color: var(--color-text-secondary); }
+.m-card__price { font-weight: 700; font-size: 16px; color: var(--color-primary); }
+.m-card__days { font-size: 13px; color: var(--color-text-secondary); }
+.m-card__comment-preview {
+  font-size: 13px; color: var(--color-text-secondary);
+  margin: 2px 0 0; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.m-card__read { font-size: 12px; color: var(--color-primary); font-weight: 500; margin-top: 4px; }
+
+.selected-badge {
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--color-primary); color: #fff;
+  font-size: 11px; font-weight: 600;
+}
+
+/* ── Модалка ───────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fade-in 0.15s ease;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%; max-width: 480px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: slide-up 0.2s ease;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: var(--color-text-secondary);
+  line-height: 1; padding: 4px;
+}
+.modal-close:hover { color: var(--color-text); }
+
+.modal-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #F0EEEA;
+  gap: 12px;
+}
+.modal-master-name { font-size: 18px; font-weight: 700; color: var(--color-text); }
+.modal-rating { font-size: 13px; color: #E5A000; font-weight: 600; margin-top: 4px; }
+.modal-price { font-size: 22px; font-weight: 700; color: var(--color-primary); white-space: nowrap; }
+
+.modal-body { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+.modal-row { display: flex; gap: 12px; font-size: 14px; }
+.modal-label { color: var(--color-text-secondary); min-width: 80px; font-size: 13px; }
+.modal-section { display: flex; flex-direction: column; gap: 6px; }
+.modal-comment { font-size: 14px; color: var(--color-text); line-height: 1.6; margin: 0; }
+.modal-no-comment { font-size: 13px; color: var(--color-text-secondary); font-style: italic; margin: 0; }
+
+.modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid #F0EEEA;
+}
+.modal-cancel { flex-shrink: 0; }
+.modal-confirm { flex-shrink: 0; }
+.modal-selected-note { font-size: 13px; color: var(--color-text-secondary); margin-right: auto; }
+
+/* Завершение / рейтинг */
+.complete-btn { width: 100%; }
+.hint-text { color: var(--color-text-secondary); }
+.rating-section { display: flex; flex-direction: column; gap: 12px; }
+.stars-row { display: flex; gap: 4px; }
+.star-btn {
+  background: none; border: none; font-size: 32px;
+  color: #DDD; cursor: pointer; padding: 0 2px; line-height: 1;
+  transition: color 0.1s, transform 0.1s;
+}
+.star-btn--active { color: #E5A000; }
+.star-btn:hover { transform: scale(1.15); }
+.rating-textarea { width: 100%; resize: vertical; margin-top: 4px; }
+.rating-done { display: flex; flex-direction: column; gap: 6px; }
+.rating-done__stars { font-size: 24px; color: #E5A000; letter-spacing: 2px; }
+.rating-done__text { font-size: 14px; color: var(--color-text); margin: 0; }
+
+@keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes slide-up { from { transform: translateY(16px); opacity: 0 } to { transform: none; opacity: 1 } }
+</style>

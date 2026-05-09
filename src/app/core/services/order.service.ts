@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
-import { Order, OrderStatus } from '../models/types';
+import { Order, OrderStatus, MasterStats } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -59,6 +59,27 @@ export class OrderService {
     const updates: Partial<Order> = { status };
     if (selectedMasterId) updates.selected_master_id = selectedMasterId;
     const { error } = await this.db.from('orders').update(updates).eq('id', id);
+    return !error;
+  }
+
+  async rateOrder(id: string, rating: number, reviewText?: string): Promise<boolean> {
+    const { error } = await this.db
+      .from('orders')
+      .update({ rating, review_text: reviewText || null })
+      .eq('id', id);
+    return !error;
+  }
+
+  async getMasterStats(masterIds: string[]): Promise<MasterStats[]> {
+    const { data } = await this.db
+      .from('master_stats')
+      .select('*')
+      .in('master_id', masterIds);
+    return (data as MasterStats[]) ?? [];
+  }
+
+  async deleteOrder(id: string): Promise<boolean> {
+    const { error } = await this.db.from('orders').delete().eq('id', id);
     return !error;
   }
 }

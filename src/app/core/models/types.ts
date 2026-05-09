@@ -35,10 +35,28 @@ export interface Order {
   photo_urls: string[];
   status: OrderStatus;
   selected_master_id: string | null;
+  rating: number | null;
+  review_text: string | null;
   created_at: string;
   updated_at: string;
   work_types?: WorkType;
   profiles?: Profile;
+}
+
+export interface MasterStats {
+  master_id: string;
+  reviews_count: number;
+  avg_rating: number | null;
+}
+
+export interface Message {
+  id: string;
+  order_id: string;
+  master_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  profiles?: { name: string };
 }
 
 export interface ResponseOrder {

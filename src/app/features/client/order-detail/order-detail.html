@@ -13,6 +13,11 @@
         <a routerLink="/client/orders" class="btn-secondary btn-sm">← Назад</a>
         <h1 class="page-title" style="flex:1">{{ order()!.work_types?.name ?? 'Заявка' }}</h1>
         <span class="status-badge status-{{ order()!.status }}">{{ statusLabel(order()!.status) }}</span>
+        <button class="btn-delete btn-sm"
+                [disabled]="actionLoading() === 'delete'"
+                (click)="deleteOrder()">
+          {{ actionLoading() === 'delete' ? '...' : 'Удалить' }}
+        </button>
       </div>
 
       <div class="form-section">
@@ -52,6 +57,7 @@
         </div>
       }
 
+      <!-- ── Отклики (аккордеон + чат) ───────────────────────────────── -->
       <div class="form-section">
         <h2 class="section-title">
           Отклики мастеров
@@ -63,28 +69,93 @@
         @if (responses().length === 0) {
           <p class="section-hint">Отклики появятся здесь после того, как мастера ответят на заявку.</p>
         } @else {
-          <div class="responses-list">
+          <div class="accordion">
             @for (r of responses(); track r.id) {
-              <div class="response-card" [class.response-card--selected]="order()!.selected_master_id === r.master_id">
-                <div class="response-card__head">
-                  <span class="response-card__name">{{ r.profiles?.name ?? 'Мастер' }}</span>
-                  <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
+              @let isOpen = expandedResponseId() === r.id;
+              @let isSelected = order()!.selected_master_id === r.master_id;
+              @let stats = masterStats()[r.master_id];
+              @let msgs = chatMessages()[r.master_id] ?? [];
+
+              <div class="acc-card" [class.acc-card--selected]="isSelected" [class.acc-card--open]="isOpen">
+
+                <!-- Шапка -->
+                <button class="acc-head" (click)="toggleResponse(r.id, r.master_id)">
+                  <div class="acc-head__left">
+                    <span class="acc-name">{{ r.profiles?.name ?? 'Мастер' }}</span>
+                    @if (stats?.reviews_count) {
+                      <span class="acc-rating">★ {{ stats.avg_rating }}
+                        <span class="acc-rating__count">({{ stats.reviews_count }})</span>
+                      </span>
+                    }
+                  </div>
+                  <div class="acc-head__right">
+                    <span class="acc-price">{{ formatPrice(r.proposed_price) }}</span>
+                    @if (isSelected) { <span class="selected-badge">Выбран</span> }
+                    <span class="acc-chevron" [class.acc-chevron--open]="isOpen">›</span>
+                  </div>
+                </button>
+
+                <!-- Тело -->
+                <div class="acc-body" [class.acc-body--open]="isOpen">
+                  <div class="acc-body__inner">
+
+                    <!-- Детали отклика -->
+                    <div class="acc-response-meta">
+                      @if (r.estimated_days) {
+                        <div class="acc-meta">
+                          <span class="acc-meta__label">Срок</span>
+                          <span>{{ r.estimated_days }} дн.</span>
+                        </div>
+                      }
+                      @if (r.comment) {
+                        <div class="acc-comment">{{ r.comment }}</div>
+                      } @else {
+                        <p class="acc-no-comment">Мастер не оставил комментарий</p>
+                      }
+                      @if (order()!.status === 'new') {
+                        <button class="btn-primary btn-sm acc-select-btn"
+                                [disabled]="actionLoading() === r.id"
+                                (click)="selectMaster(r); $event.stopPropagation()">
+                          {{ actionLoading() === r.id ? 'Выбираем...' : 'Выбрать этого мастера' }}
+                        </button>
+                      }
+                    </div>
+
+                    <!-- ── Чат ─────────────────────────────────────── -->
+                    <div class="chat-section">
+                      <div class="chat-label">Переписка с мастером</div>
+
+                      <div class="chat-messages" [id]="'chat-' + r.master_id">
+                        @if (msgs.length === 0) {
+                          <p class="chat-empty">Напишите мастеру — уточните детали перед тем как принять решение</p>
+                        }
+                        @for (msg of msgs; track msg.id) {
+                          @let isMine = msg.sender_id === currentUserId;
+                          <div class="chat-msg" [class.chat-msg--mine]="isMine">
+                            <div class="chat-bubble">{{ msg.content }}</div>
+                            <span class="chat-time">{{ formatTime(msg.created_at) }}</span>
+                          </div>
+                        }
+                      </div>
+
+                      <div class="chat-input-row">
+                        <input class="chat-input"
+                               type="text"
+                               placeholder="Сообщение..."
+                               [value]="chatDraft()[r.master_id] ?? ''"
+                               (input)="setChatDraft(r.master_id, $any($event.target).value)"
+                               (keydown.enter)="sendMessage(r.master_id)" />
+                        <button class="chat-send"
+                                [disabled]="!chatDraft()[r.master_id]?.trim() || chatSending()"
+                                (click)="sendMessage(r.master_id)">
+                          ↑
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
-                @if (r.estimated_days) {
-                  <div class="response-card__days">Срок: {{ r.estimated_days }} дн.</div>
-                }
-                @if (r.comment) {
-                  <div class="response-card__comment">{{ r.comment }}</div>
-                }
-                @if (order()!.status === 'new') {
-                  <button class="btn-primary btn-sm response-card__btn"
-                          [disabled]="actionLoading() === r.id"
-                          (click)="selectMaster(r)">
-                    {{ actionLoading() === r.id ? 'Выбираем...' : 'Выбрать мастера' }}
-                  </button>
-                } @else if (order()!.selected_master_id === r.master_id) {
-                  <span class="selected-badge">Выбран</span>
-                }
+
               </div>
             }
           </div>
@@ -101,18 +172,53 @@
         </div>
       }
 
+      @if (order()!.status === 'completed') {
+        @if (!order()!.rating) {
+          <div class="form-section rating-section">
+            <h2 class="section-title">Оцените мастера</h2>
+            <p class="section-hint">Поделитесь опытом — это помогает другим клиентам выбрать исполнителя.</p>
+            <div class="stars-row">
+              @for (n of starRange; track n) {
+                <button class="star-btn"
+                        [class.star-btn--active]="starActive(n)"
+                        (click)="ratingSelected.set(n)"
+                        (mouseenter)="ratingHovered.set(n)"
+                        (mouseleave)="ratingHovered.set(0)">★</button>
+              }
+            </div>
+            @if (ratingSelected()) {
+              <textarea class="field-input rating-textarea" rows="3"
+                        placeholder="Комментарий (необязательно)"
+                        (input)="reviewText.set($any($event.target).value)"></textarea>
+              <button class="btn-primary"
+                      [disabled]="actionLoading() === 'rating'"
+                      (click)="submitRating()">
+                {{ actionLoading() === 'rating' ? 'Сохраняем...' : 'Отправить оценку' }}
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="form-section">
+            <h2 class="section-title">Ваша оценка</h2>
+            <div class="rating-done">
+              <span class="rating-done__stars">{{ starsDisplay(order()!.rating!) }}</span>
+              @if (order()!.review_text) {
+                <p class="rating-done__text">{{ order()!.review_text }}</p>
+              }
+            </div>
+          </div>
+        }
+      }
+
     </div>
   }
 </div>
 
 <style>
-.detail-rows { display: flex; flex-direction: column; gap: 0; }
+.detail-rows { display: flex; flex-direction: column; }
 .detail-row {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid #F0EEEA;
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
 }
 .detail-row:last-child { border-bottom: none; }
 .detail-row--column { flex-direction: column; gap: 4px; }
@@ -120,61 +226,191 @@
 .detail-value { font-size: 14px; color: var(--color-text); }
 .photos-grid { display: flex; flex-wrap: wrap; gap: 10px; }
 .photo-thumb {
-  display: block;
-  width: 120px;
-  height: 120px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
+  display: block; width: 120px; height: 120px;
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--color-border);
 }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .responses-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 8px;
-  vertical-align: middle;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--color-primary); color: #fff;
+  font-size: 12px; font-weight: 600; margin-left: 8px; vertical-align: middle;
 }
-.responses-list { display: flex; flex-direction: column; gap: 12px; }
-.response-card {
+
+/* ── Аккордеон ─────────────────────────────────────────────────────── */
+.accordion { display: flex; flex-direction: column; gap: 8px; }
+
+.acc-card {
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-card);
-  padding: 16px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.acc-card--selected { border-color: var(--color-primary); background: #FFF8F8; }
+.acc-card--open:not(.acc-card--selected) { border-color: #C8C2BA; }
+
+.acc-head {
+  width: 100%; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px;
+  padding: 14px 16px; background: none; border: none;
+  cursor: pointer; text-align: left;
+}
+.acc-head:hover { background: rgba(0,0,0,0.02); }
+.acc-head__left { display: flex; flex-direction: column; gap: 2px; }
+.acc-head__right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.acc-name { font-weight: 600; font-size: 15px; color: var(--color-text); }
+.acc-rating { font-size: 12px; color: #E5A000; font-weight: 600; }
+.acc-rating__count { font-weight: 400; color: var(--color-text-secondary); }
+.acc-price { font-weight: 700; font-size: 15px; color: var(--color-primary); }
+.selected-badge {
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--color-primary); color: #fff;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.acc-chevron {
+  font-size: 20px; color: var(--color-text-secondary);
+  transition: transform 0.2s; display: inline-block; line-height: 1;
+}
+.acc-chevron--open { transform: rotate(90deg); }
+
+.acc-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.acc-body--open { max-height: 800px; }
+
+.acc-body__inner {
+  border-top: 1px solid #F0EEEA;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+/* Детали отклика */
+.acc-response-meta {
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  border-bottom: 1px solid #F0EEEA;
+}
+.acc-meta { display: flex; gap: 8px; font-size: 13px; }
+.acc-meta__label { color: var(--color-text-secondary); min-width: 40px; }
+.acc-comment { font-size: 14px; color: var(--color-text); line-height: 1.5; }
+.acc-no-comment { font-size: 13px; color: var(--color-text-secondary); margin: 0; font-style: italic; }
+.acc-select-btn { align-self: flex-start; }
+
+/* ── Чат ───────────────────────────────────────────────────────────── */
+.chat-section { display: flex; flex-direction: column; }
+
+.chat-label {
+  padding: 10px 16px 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--color-text-secondary); text-transform: uppercase;
+}
+
+.chat-messages {
+  min-height: 80px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 0 16px 8px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  scroll-behavior: smooth;
 }
-.response-card--selected {
-  border-color: var(--color-primary);
-  background: #FFF8F8;
+
+.chat-empty {
+  font-size: 13px; color: var(--color-text-secondary);
+  font-style: italic; margin: 8px 0; text-align: center;
+  line-height: 1.5;
 }
-.response-card__head {
+
+.chat-msg {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 80%;
 }
-.response-card__name { font-weight: 600; font-size: 15px; }
-.response-card__price { font-weight: 700; font-size: 16px; color: var(--color-primary); }
-.response-card__days { font-size: 13px; color: var(--color-text-secondary); }
-.response-card__comment { font-size: 14px; color: var(--color-text); }
-.response-card__btn { align-self: flex-start; margin-top: 4px; }
-.selected-badge {
-  align-self: flex-start;
-  margin-top: 4px;
-  padding: 4px 12px;
-  border-radius: 20px;
+.chat-msg--mine { align-self: flex-end; align-items: flex-end; }
+
+.chat-bubble {
+  background: #F2F0EC;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  font-size: 14px;
+  color: var(--color-text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+.chat-msg--mine .chat-bubble {
   background: var(--color-primary);
   color: #fff;
-  font-size: 12px;
-  font-weight: 600;
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 4px;
 }
+
+.chat-time {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  padding: 0 4px;
+}
+
+.chat-input-row {
+  display: flex; gap: 8px;
+  padding: 8px 16px 14px;
+  border-top: 1px solid #F0EEEA;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #fff;
+}
+.chat-input:focus { border-color: var(--color-primary); }
+
+.chat-send {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  border: none; cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.15s;
+}
+.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Завершение / рейтинг ─────────────────────────────────────────── */
 .complete-btn { width: 100%; }
 .hint-text { color: var(--color-text-secondary); }
+.rating-section { display: flex; flex-direction: column; gap: 12px; }
+.stars-row { display: flex; gap: 4px; }
+.star-btn {
+  background: none; border: none; font-size: 32px;
+  color: #DDD; cursor: pointer; padding: 0 2px; line-height: 1;
+  transition: color 0.1s, transform 0.1s;
+}
+.star-btn--active { color: #E5A000; }
+.star-btn:hover { transform: scale(1.15); }
+.rating-textarea { width: 100%; resize: vertical; margin-top: 4px; }
+.rating-done { display: flex; flex-direction: column; gap: 6px; }
+.rating-done__stars { font-size: 24px; color: #E5A000; letter-spacing: 2px; }
+.rating-done__text { font-size: 14px; color: var(--color-text); margin: 0; }
+
+.btn-delete {
+  padding: 6px 14px;
+  border: 1.5px solid #E53935;
+  border-radius: var(--radius-btn, 8px);
+  background: none;
+  color: #E53935;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.btn-delete:hover { background: #E53935; color: #fff; }
+.btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
