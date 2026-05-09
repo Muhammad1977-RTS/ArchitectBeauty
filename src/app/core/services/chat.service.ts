@@ -82,6 +82,24 @@ export class ChatService {
       .subscribe();
   }
 
+  async getUnreadOrderIdsForClient(clientId: string): Promise<Set<string>> {
+    const { data } = await this.db
+      .from('messages')
+      .select('order_id')
+      .eq('client_read', false)
+      .neq('sender_id', clientId);
+    return new Set((data ?? []).map((m: any) => m.order_id as string));
+  }
+
+  async markAsReadClient(orderId: string, clientId: string): Promise<void> {
+    await this.db
+      .from('messages')
+      .update({ client_read: true })
+      .eq('order_id', orderId)
+      .neq('sender_id', clientId)
+      .eq('client_read', false);
+  }
+
   unsubscribe(channel: RealtimeChannel) {
     this.db.removeChannel(channel);
   }

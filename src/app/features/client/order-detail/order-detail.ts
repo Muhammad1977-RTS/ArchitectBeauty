@@ -59,6 +59,10 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     this.order.set(order);
     this.responses.set(responses);
 
+    if (order) {
+      this.chatService.markAsReadClient(order.id, this.currentUserId);
+    }
+
     if (responses.length) {
       const stats = await this.orderService.getMasterStats(responses.map(r => r.master_id));
       const map: Record<string, MasterStats> = {};

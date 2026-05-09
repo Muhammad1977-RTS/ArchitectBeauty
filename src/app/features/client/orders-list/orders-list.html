@@ -30,7 +30,16 @@
           <a [routerLink]="['/client/orders', order.id]" class="order-card__link">
             <div class="order-card__head">
               <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
-              <span class="status-badge status-{{ order.status }}">{{ statusLabel(order.status) }}</span>
+              <div class="order-card__badges">
+                @if (hasUnread(order.id)) {
+                  <span class="msg-badge" title="Новое сообщение от мастера">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/>
+                    </svg>
+                  </span>
+                }
+                <span class="status-badge status-{{ order.status }}">{{ statusLabel(order.status) }}</span>
+              </div>
             </div>
             <div class="order-card__meta">
               <span>{{ order.area_sqm }} м²</span>
@@ -43,7 +52,18 @@
                   [disabled]="deleting() === order.id"
                   (click)="deleteOrder(order, $event)"
                   title="Удалить заявку">
-            {{ deleting() === order.id ? '...' : '×' }}
+            @if (deleting() === order.id) {
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="opacity:.5">
+                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="10 6" stroke-linecap="round"/>
+              </svg>
+            } @else {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14H6L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4h6v2"/>
+              </svg>
+            }
           </button>
         </div>
       }
@@ -138,4 +158,12 @@
 }
 .empty-icon { font-size: 40px; }
 .empty-text { font-size: 16px; color: var(--color-text-secondary); margin: 0; }
+
+.order-card__badges { display: flex; align-items: center; gap: 8px; }
+
+.msg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #E53935; color: #fff;
+}
 </style>

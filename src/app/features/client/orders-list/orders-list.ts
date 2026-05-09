@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { ChatService } from '../../../core/services/chat.service';
 import { OrderService } from '../../../core/services/order.service';
 import { Order, OrderStatus } from '../../../core/models/types';
 
@@ -14,11 +15,13 @@ type Filter = OrderStatus | 'all';
 export class ClientOrdersListComponent implements OnInit {
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
+  private chatService = inject(ChatService);
 
   readonly loading = signal(true);
   readonly orders = signal<Order[]>([]);
   readonly filter = signal<Filter>('all');
   readonly deleting = signal<string | null>(null);
+  readonly unreadOrderIds = signal<Set<string>>(new Set());
 
   readonly filtered = computed(() => {
     const f = this.filter();
@@ -36,8 +39,17 @@ export class ClientOrdersListComponent implements OnInit {
   async ngOnInit() {
     const user = this.auth.user();
     if (!user) return;
-    this.orders.set(await this.orderService.getClientOrders(user.id));
+    const [orders, unread] = await Promise.all([
+      this.orderService.getClientOrders(user.id),
+      this.chatService.getUnreadOrderIdsForClient(user.id),
+    ]);
+    this.orders.set(orders);
+    this.unreadOrderIds.set(unread);
     this.loading.set(false);
+  }
+
+  hasUnread(orderId: string): boolean {
+    return this.unreadOrderIds().has(orderId);
   }
 
   async deleteOrder(order: Order, event: MouseEvent) {
