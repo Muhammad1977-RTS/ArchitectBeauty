@@ -69,6 +69,21 @@ export class ChatService {
       .subscribe();
   }
 
+  subscribeToClientInbox(clientId: string, onNew: (orderId: string) => void): RealtimeChannel {
+    return this.db
+      .channel(`client-inbox:${clientId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        payload => {
+          if (payload.new['sender_id'] !== clientId) {
+            onNew(payload.new['order_id'] as string);
+          }
+        }
+      )
+      .subscribe();
+  }
+
   subscribeToInbox(masterId: string, onNew: () => void): RealtimeChannel {
     return this.db
       .channel(`inbox:${masterId}`)
@@ -83,11 +98,28 @@ export class ChatService {
   }
 
   async getUnreadCountsForClient(clientId: string): Promise<Map<string, number>> {
-    const { data } = await this.db
+    const { data, error } = await this.db
       .from('messages')
       .select('order_id')
       .eq('client_read', false)
       .neq('sender_id', clientId);
+    if (error) console.error('[chat] getUnreadCountsForClient:', error);
+    const counts = new Map<string, number>();
+    for (const m of data ?? []) {
+      const id = m.order_id as string;
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  async getUnreadCountsForMaster(masterId: string): Promise<Map<string, number>> {
+    const { data, error } = await this.db
+      .from('messages')
+      .select('order_id')
+      .eq('master_id', masterId)
+      .neq('sender_id', masterId)
+      .eq('is_read', false);
+    if (error) console.error('[chat] getUnreadCountsForMaster:', error);
     const counts = new Map<string, number>();
     for (const m of data ?? []) {
       const id = m.order_id as string;

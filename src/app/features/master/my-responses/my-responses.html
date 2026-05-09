@@ -14,10 +14,19 @@
   } @else {
     <div class="responses-list">
       @for (r of responses(); track r.id) {
-        <div class="response-card card" [class.response-card--selected]="isSelected(r)">
+        <a [routerLink]="['/master/orders', r.order_id]"
+           class="response-card card"
+           [class.response-card--selected]="isSelected(r)">
           <div class="response-card__head">
             <span class="response-card__type">{{ r.orders?.work_types?.name ?? '—' }}</span>
-            <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
+            <div class="response-card__right">
+              @if (unreadCount(r.order_id) > 0) {
+                <span class="msg-badge" title="Новых сообщений от клиента: {{ unreadCount(r.order_id) }}">
+                  {{ unreadCount(r.order_id) > 9 ? '9+' : unreadCount(r.order_id) }}
+                </span>
+              }
+              <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
+            </div>
           </div>
           <div class="response-card__meta">
             <span>{{ r.orders?.area_sqm }} м²</span>
@@ -39,7 +48,7 @@
             <div class="response-card__comment">{{ r.comment }}</div>
           }
           <div class="response-card__date">Отклик от {{ formatDate(r.created_at) }}</div>
-        </div>
+        </a>
       }
     </div>
   }
@@ -52,6 +61,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  text-decoration: none;
+  color: inherit;
 }
 .response-card--selected { border: 1.5px solid var(--color-primary); background: #FFF8F8; }
 .response-card__head {
@@ -59,8 +70,16 @@
   align-items: center;
   justify-content: space-between;
 }
+.response-card__right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .response-card__type { font-weight: 600; font-size: 15px; }
 .response-card__price { font-weight: 700; font-size: 16px; color: var(--color-primary); }
+
+.msg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 5px;
+  border-radius: 11px; background: #E53935; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 1;
+}
 .response-card__meta {
   display: flex;
   align-items: center;

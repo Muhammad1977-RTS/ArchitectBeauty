@@ -16,7 +16,14 @@
         <a [routerLink]="['/master/orders', order.id]" class="order-card card">
           <div class="order-card__head">
             <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
-            <span class="order-card__area">{{ order.area_sqm }} м²</span>
+            <div class="order-card__right">
+              @if (unreadCount(order.id) > 0) {
+                <span class="msg-badge" title="Новых сообщений: {{ unreadCount(order.id) }}">
+                  {{ unreadCount(order.id) > 9 ? '9+' : unreadCount(order.id) }}
+                </span>
+              }
+              <span class="order-card__area">{{ order.area_sqm }} м²</span>
+            </div>
           </div>
           <div class="order-card__meta">
             <span>{{ order.address }}</span>
@@ -46,10 +53,17 @@
   margin-bottom: 8px;
 }
 .order-card__type { font-weight: 600; font-size: 15px; }
+.order-card__right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .order-card__area {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-primary);
+}
+.msg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 5px;
+  border-radius: 11px; background: #E53935; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 1;
 }
 .order-card__meta {
   font-size: 14px;
