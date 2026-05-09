@@ -8,12 +8,13 @@ export class ChatService {
   private db = inject(SupabaseService).client;
 
   async loadMessages(orderId: string, masterId: string): Promise<Message[]> {
-    const { data } = await this.db
+    const { data, error } = await this.db
       .from('messages')
-      .select('*, profiles!sender_id(name)')
+      .select('*')
       .eq('order_id', orderId)
       .eq('master_id', masterId)
       .order('created_at', { ascending: true });
+    if (error) console.error('[chat] loadMessages:', error);
     return (data as Message[]) ?? [];
   }
 
@@ -21,6 +22,7 @@ export class ChatService {
     const { error } = await this.db
       .from('messages')
       .insert({ order_id: orderId, master_id: masterId, sender_id: senderId, content });
+    if (error) console.error('[chat] send:', error);
     return !error;
   }
 
