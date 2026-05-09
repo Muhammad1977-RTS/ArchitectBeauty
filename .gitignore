@@ -43,5 +43,9 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-echo "supabase/.temp/" >> .gitignore
+# Supabase
+supabase/.temp/
+
+# Claude Code
+.claude/
 
