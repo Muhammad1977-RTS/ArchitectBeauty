@@ -1,21 +1,24 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
+import { ChatService } from '../../../core/services/chat.service';
 import { OrderService } from '../../../core/services/order.service';
 import { ResponseService } from '../../../core/services/response.service';
-import { Order, Response } from '../../../core/models/types';
+import { Order, Response, Message } from '../../../core/models/types';
 
 @Component({
   selector: 'app-master-order-detail',
   imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './order-detail.html',
 })
-export class MasterOrderDetailComponent implements OnInit {
+export class MasterOrderDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
   private responseService = inject(ResponseService);
+  private chatService = inject(ChatService);
   private fb = inject(FormBuilder);
 
   readonly loading = signal(true);
@@ -23,6 +26,13 @@ export class MasterOrderDetailComponent implements OnInit {
   readonly order = signal<Order | null>(null);
   readonly myResponse = signal<Response | null>(null);
   readonly error = signal<string | null>(null);
+
+  readonly chatMessages = signal<Message[]>([]);
+  readonly chatDraft = signal('');
+  readonly chatSending = signal(false);
+
+  currentUserId = '';
+  private channel: RealtimeChannel | null = null;
 
   form = this.fb.group({
     proposed_price: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -34,6 +44,8 @@ export class MasterOrderDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     const user = this.auth.user();
     if (!id || !user) { this.loading.set(false); return; }
+
+    this.currentUserId = user.id;
 
     const [order, existing] = await Promise.all([
       this.orderService.getOrderById(id),
@@ -50,7 +62,57 @@ export class MasterOrderDetailComponent implements OnInit {
       }
     }
 
+    if (order) {
+      const msgs = await this.chatService.loadMessages(order.id, user.id);
+      this.chatMessages.set(msgs);
+      await this.chatService.markAsRead(order.id, user.id);
+
+      this.channel = this.chatService.subscribe(order.id, user.id, msg => {
+        this.chatMessages.update(list => {
+          if (list.some(x => x.id === msg.id)) return list;
+          return [...list, msg];
+        });
+        this.scrollChat();
+        if (msg.sender_id !== this.currentUserId) {
+          this.chatService.markAsRead(order.id, user.id);
+        }
+      });
+    }
+
     this.loading.set(false);
+  }
+
+  ngOnDestroy() {
+    if (this.channel) this.chatService.unsubscribe(this.channel);
+  }
+
+  async sendMessage() {
+    const order = this.order();
+    const content = this.chatDraft().trim();
+    if (!order || !content || this.chatSending()) return;
+
+    const tempMsg: Message = {
+      id: crypto.randomUUID(),
+      order_id: order.id,
+      master_id: this.currentUserId,
+      sender_id: this.currentUserId,
+      content,
+      created_at: new Date().toISOString(),
+    };
+    this.chatMessages.update(list => [...list, tempMsg]);
+    this.chatDraft.set('');
+    this.scrollChat();
+
+    this.chatSending.set(true);
+    await this.chatService.send(order.id, this.currentUserId, this.currentUserId, content);
+    this.chatSending.set(false);
+  }
+
+  private scrollChat() {
+    setTimeout(() => {
+      const el = document.getElementById('master-chat');
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 30);
   }
 
   async submit() {
@@ -84,6 +146,10 @@ export class MasterOrderDetailComponent implements OnInit {
     return new Date(iso).toLocaleDateString('ru-RU', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
+  }
+
+  formatTime(iso: string): string {
+    return new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
 
   formatPrice(price: number): string {

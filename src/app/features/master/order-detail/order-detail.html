@@ -51,6 +51,7 @@
         </div>
       }
 
+      <!-- Отклик -->
       <div class="form-section">
         @if (myResponse()) {
           <h2 class="section-title">Ваш отклик отправлен</h2>
@@ -111,6 +112,41 @@
         }
       </div>
 
+      <!-- ── Чат с клиентом ─────────────────────────────────────────── -->
+      <div class="form-section chat-form-section">
+        <h2 class="section-title">Переписка с клиентом</h2>
+        <p class="section-hint" style="margin-bottom:12px">
+          Уточните детали, материалы или сроки — до того как клиент примет решение.
+        </p>
+
+        <div class="chat-messages" id="master-chat">
+          @if (chatMessages().length === 0) {
+            <p class="chat-empty">Напишите клиенту первым — уточните детали заявки</p>
+          }
+          @for (msg of chatMessages(); track msg.id) {
+            @let isMine = msg.sender_id === currentUserId;
+            <div class="chat-msg" [class.chat-msg--mine]="isMine">
+              <div class="chat-bubble">{{ msg.content }}</div>
+              <span class="chat-time">{{ formatTime(msg.created_at) }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="chat-input-row">
+          <input class="chat-input"
+                 type="text"
+                 placeholder="Сообщение клиенту..."
+                 [value]="chatDraft()"
+                 (input)="chatDraft.set($any($event.target).value)"
+                 (keydown.enter)="sendMessage()" />
+          <button class="chat-send"
+                  [disabled]="!chatDraft().trim() || chatSending()"
+                  (click)="sendMessage()">
+            ↑
+          </button>
+        </div>
+      </div>
+
     </div>
   }
 </div>
@@ -118,11 +154,8 @@
 <style>
 .detail-rows { display: flex; flex-direction: column; gap: 0; }
 .detail-row {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid #F0EEEA;
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
 }
 .detail-row:last-child { border-bottom: none; }
 .detail-row--column { flex-direction: column; gap: 4px; }
@@ -130,24 +163,80 @@
 .detail-value { font-size: 14px; color: var(--color-text); }
 .photos-grid { display: flex; flex-wrap: wrap; gap: 10px; }
 .photo-thumb {
-  display: block;
-  width: 120px;
-  height: 120px;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
+  display: block; width: 120px; height: 120px;
+  border-radius: 10px; overflow: hidden; border: 1px solid var(--color-border);
 }
 .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .field-hint { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; display: block; }
 .response-sent { display: flex; flex-direction: column; gap: 0; }
 .response-sent__row {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid #F0EEEA;
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
 }
 .response-sent__row:last-child { border-bottom: none; }
 .response-sent__row--column { flex-direction: column; gap: 4px; }
 .hint-text { color: var(--color-text-secondary); }
+
+/* ── Чат ───────────────────────────────────────────────────────────── */
+.chat-form-section { padding-bottom: 0; }
+
+.chat-messages {
+  min-height: 100px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0 12px;
+  scroll-behavior: smooth;
+}
+
+.chat-empty {
+  font-size: 13px; color: var(--color-text-secondary);
+  font-style: italic; margin: 8px 0; text-align: center; line-height: 1.5;
+}
+
+.chat-msg {
+  display: flex; flex-direction: column;
+  align-items: flex-start; gap: 2px; max-width: 80%;
+}
+.chat-msg--mine { align-self: flex-end; align-items: flex-end; }
+
+.chat-bubble {
+  background: #F2F0EC;
+  padding: 8px 12px;
+  border-radius: 14px; border-bottom-left-radius: 4px;
+  font-size: 14px; color: var(--color-text);
+  line-height: 1.4; word-break: break-word;
+}
+.chat-msg--mine .chat-bubble {
+  background: var(--color-primary); color: #fff;
+  border-bottom-left-radius: 14px; border-bottom-right-radius: 4px;
+}
+
+.chat-time { font-size: 11px; color: var(--color-text-secondary); padding: 0 4px; }
+
+.chat-input-row {
+  display: flex; gap: 8px;
+  padding: 12px 0 4px;
+  border-top: 1px solid #F0EEEA;
+  margin-top: 4px;
+}
+
+.chat-input {
+  flex: 1; padding: 8px 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px; font-size: 14px;
+  outline: none; transition: border-color 0.15s; background: #fff;
+}
+.chat-input:focus { border-color: var(--color-primary); }
+
+.chat-send {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 50%; background: var(--color-primary);
+  color: #fff; border: none; cursor: pointer;
+  font-size: 16px; display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.15s;
+}
+.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
