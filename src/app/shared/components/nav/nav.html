@@ -11,7 +11,12 @@
       }
       @if (role() === 'master') {
         <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
-        <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+        <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link nav-link--with-badge">
+          Мои отклики
+          @if (unreadCount() > 0) {
+            <span class="nav-badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+          }
+        </a>
       }
     </div>
     <div class="nav-right">
@@ -25,3 +30,26 @@
     </div>
   }
 </nav>
+
+<style>
+.nav-link--with-badge { position: relative; }
+
+.nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: #E53935;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+}
+</style>

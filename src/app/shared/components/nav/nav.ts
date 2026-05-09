@@ -1,6 +1,8 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal, effect, OnDestroy } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
+import { ChatService } from '../../../core/services/chat.service';
 import { ProfileService } from '../../../core/services/profile.service';
 import { UserRole } from '../../../core/models/types';
 
@@ -9,20 +11,47 @@ import { UserRole } from '../../../core/models/types';
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './nav.html',
 })
-export class NavComponent {
+export class NavComponent implements OnDestroy {
   readonly auth = inject(AuthService);
   private profileService = inject(ProfileService);
+  private chatService = inject(ChatService);
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly role = signal<UserRole | null>(null);
+  readonly unreadCount = signal(0);
+
+  private inboxChannel: RealtimeChannel | null = null;
 
   constructor() {
     effect(async () => {
       const user = this.auth.user();
-      if (!user) { this.role.set(null); return; }
+      if (!user) {
+        this.role.set(null);
+        this.unreadCount.set(0);
+        if (this.inboxChannel) {
+          this.chatService.unsubscribe(this.inboxChannel);
+          this.inboxChannel = null;
+        }
+        return;
+      }
       const profile = await this.profileService.getProfile(user.id);
       this.role.set(profile?.role ?? null);
+
+      if (profile?.role === 'master') {
+        const count = await this.chatService.getUnreadCount(user.id);
+        this.unreadCount.set(count);
+
+        if (!this.inboxChannel) {
+          this.inboxChannel = this.chatService.subscribeToInbox(user.id, () => {
+            this.unreadCount.update(n => n + 1);
+          });
+        }
+      }
     }, { allowSignalWrites: true });
+  }
+
+  ngOnDestroy() {
+    if (this.inboxChannel) this.chatService.unsubscribe(this.inboxChannel);
   }
 
   async logout() {
