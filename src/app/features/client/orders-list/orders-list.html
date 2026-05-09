@@ -31,6 +31,11 @@
             <div class="order-card__head">
               <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
               <div class="order-card__badges">
+                @if (newResponseCount(order.id) > 0) {
+                  <span class="response-badge" title="Новых откликов: {{ newResponseCount(order.id) }}">
+                    {{ newResponseCount(order.id) > 9 ? '9+' : newResponseCount(order.id) }} отклик{{ newResponseCount(order.id) === 1 ? '' : newResponseCount(order.id) < 5 ? 'а' : 'ов' }}
+                  </span>
+                }
                 @if (unreadCount(order.id) > 0) {
                   <span class="msg-badge" title="Новых сообщений от мастера: {{ unreadCount(order.id) }}">
                     {{ unreadCount(order.id) > 9 ? '9+' : unreadCount(order.id) }}
@@ -164,5 +169,12 @@
   min-width: 22px; height: 22px; padding: 0 5px;
   border-radius: 11px; background: #E53935; color: #fff;
   font-size: 12px; font-weight: 700; line-height: 1;
+}
+
+.response-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 22px; padding: 0 8px;
+  border-radius: 11px; background: #F57C00; color: #fff;
+  font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
 }
 </style>

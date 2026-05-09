@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
@@ -43,6 +43,12 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
   readonly chatDraft = signal<Record<string, string | undefined>>({});
   readonly chatSending = signal(false);
 
+  readonly selectedResponse = computed(() => {
+    const order = this.order();
+    if (!order?.selected_master_id) return null;
+    return this.responses().find(r => r.master_id === order.selected_master_id) ?? null;
+  });
+
   currentUserId = '';
   private readonly loadedChats = new Set<string>();
   private readonly channels: RealtimeChannel[] = [];
@@ -61,6 +67,7 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
 
     if (order) {
       this.chatService.markAsReadClient(order.id, this.currentUserId);
+      this.responseService.markResponsesSeenForOrder(order.id);
     }
 
     if (responses.length) {
@@ -102,9 +109,9 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     this.chatMessages.update(m => ({ ...m, [masterId]: msgs }));
 
     const ch = this.chatService.subscribe(orderId, masterId, msg => {
-      // Не дублируем оптимистичное сообщение — оно уже без profiles
       this.chatMessages.update(m => {
         const list = m[masterId] ?? [];
+        if (msg.sender_id === this.currentUserId) return m; // already added optimistically
         if (list.some(x => x.id === msg.id)) return m;
         return { ...m, [masterId]: [...list, msg] };
       });

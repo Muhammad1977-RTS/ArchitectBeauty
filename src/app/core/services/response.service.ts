@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
 import { Response } from '../models/types';
 
@@ -48,6 +49,54 @@ export class ResponseService {
       .eq('master_id', masterId)
       .maybeSingle();
     return data as Response | null;
+  }
+
+  async getNewResponseCountsForClient(clientId: string): Promise<Map<string, number>> {
+    // Fetch client's order IDs explicitly so we don't rely on RLS alone
+    const { data: orders, error: ordersErr } = await this.db
+      .from('orders')
+      .select('id')
+      .eq('client_id', clientId);
+    if (ordersErr) { console.error('[responses] getNewResponseCountsForClient/orders:', ordersErr); return new Map(); }
+    if (!orders?.length) return new Map();
+
+    const orderIds = orders.map((o: { id: string }) => o.id);
+
+    const { data, error } = await this.db
+      .from('responses')
+      .select('order_id')
+      .in('order_id', orderIds)
+      .eq('seen_by_client', false);
+    if (error) console.error('[responses] getNewResponseCountsForClient/responses:', error);
+
+    const counts = new Map<string, number>();
+    for (const r of data ?? []) {
+      counts.set(r.order_id, (counts.get(r.order_id) ?? 0) + 1);
+    }
+    return counts;
+  }
+
+  async markResponsesSeenForOrder(orderId: string): Promise<void> {
+    await this.db
+      .from('responses')
+      .update({ seen_by_client: true })
+      .eq('order_id', orderId)
+      .eq('seen_by_client', false);
+  }
+
+  subscribeToNewResponses(onNew: (orderId: string) => void): RealtimeChannel {
+    return this.db
+      .channel('responses:new')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'responses' },
+        payload => onNew(payload.new['order_id'] as string)
+      )
+      .subscribe();
+  }
+
+  unsubscribeFromResponses(channel: RealtimeChannel) {
+    this.db.removeChannel(channel);
   }
 
   async getMasterRateForWorkType(masterId: string, workTypeId: string): Promise<number | null> {

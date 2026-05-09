@@ -1,0 +1,2 @@
+ALTER TABLE responses REPLICA IDENTITY FULL;
+ALTER PUBLICATION supabase_realtime ADD TABLE responses;
