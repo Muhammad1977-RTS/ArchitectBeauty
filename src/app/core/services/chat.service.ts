@@ -82,13 +82,18 @@ export class ChatService {
       .subscribe();
   }
 
-  async getUnreadOrderIdsForClient(clientId: string): Promise<Set<string>> {
+  async getUnreadCountsForClient(clientId: string): Promise<Map<string, number>> {
     const { data } = await this.db
       .from('messages')
       .select('order_id')
       .eq('client_read', false)
       .neq('sender_id', clientId);
-    return new Set((data ?? []).map((m: any) => m.order_id as string));
+    const counts = new Map<string, number>();
+    for (const m of data ?? []) {
+      const id = m.order_id as string;
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    return counts;
   }
 
   async markAsReadClient(orderId: string, clientId: string): Promise<void> {

@@ -21,7 +21,7 @@ export class ClientOrdersListComponent implements OnInit {
   readonly orders = signal<Order[]>([]);
   readonly filter = signal<Filter>('all');
   readonly deleting = signal<string | null>(null);
-  readonly unreadOrderIds = signal<Set<string>>(new Set());
+  readonly unreadCounts = signal<Map<string, number>>(new Map());
 
   readonly filtered = computed(() => {
     const f = this.filter();
@@ -41,15 +41,15 @@ export class ClientOrdersListComponent implements OnInit {
     if (!user) return;
     const [orders, unread] = await Promise.all([
       this.orderService.getClientOrders(user.id),
-      this.chatService.getUnreadOrderIdsForClient(user.id),
+      this.chatService.getUnreadCountsForClient(user.id),
     ]);
     this.orders.set(orders);
-    this.unreadOrderIds.set(unread);
+    this.unreadCounts.set(unread);
     this.loading.set(false);
   }
 
-  hasUnread(orderId: string): boolean {
-    return this.unreadOrderIds().has(orderId);
+  unreadCount(orderId: string): number {
+    return this.unreadCounts().get(orderId) ?? 0;
   }
 
   async deleteOrder(order: Order, event: MouseEvent) {
