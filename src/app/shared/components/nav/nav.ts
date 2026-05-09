@@ -14,11 +14,10 @@ import { UserRole } from '../../../core/models/types';
 export class NavComponent implements OnDestroy {
   readonly auth = inject(AuthService);
   private profileService = inject(ProfileService);
-  private chatService = inject(ChatService);
+  readonly chatService = inject(ChatService);
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly role = signal<UserRole | null>(null);
-  readonly unreadCount = signal(0);
 
   private inboxChannel: RealtimeChannel | null = null;
 
@@ -27,7 +26,7 @@ export class NavComponent implements OnDestroy {
       const user = this.auth.user();
       if (!user) {
         this.role.set(null);
-        this.unreadCount.set(0);
+        this.chatService.unreadCount.set(0);
         if (this.inboxChannel) {
           this.chatService.unsubscribe(this.inboxChannel);
           this.inboxChannel = null;
@@ -38,12 +37,11 @@ export class NavComponent implements OnDestroy {
       this.role.set(profile?.role ?? null);
 
       if (profile?.role === 'master') {
-        const count = await this.chatService.getUnreadCount(user.id);
-        this.unreadCount.set(count);
+        await this.chatService.refreshUnreadCount(user.id);
 
         if (!this.inboxChannel) {
           this.inboxChannel = this.chatService.subscribeToInbox(user.id, () => {
-            this.unreadCount.update(n => n + 1);
+            this.chatService.unreadCount.update(n => n + 1);
           });
         }
       }

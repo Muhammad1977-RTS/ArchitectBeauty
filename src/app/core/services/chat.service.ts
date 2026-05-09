@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { SupabaseService } from './supabase.service';
 import { Message } from '../models/types';
@@ -6,6 +6,8 @@ import { Message } from '../models/types';
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private db = inject(SupabaseService).client;
+
+  readonly unreadCount = signal(0);
 
   async loadMessages(orderId: string, masterId: string): Promise<Message[]> {
     const { data, error } = await this.db
@@ -36,6 +38,11 @@ export class ChatService {
     return count ?? 0;
   }
 
+  async refreshUnreadCount(masterId: string): Promise<void> {
+    const count = await this.getUnreadCount(masterId);
+    this.unreadCount.set(count);
+  }
+
   async markAsRead(orderId: string, masterId: string): Promise<void> {
     await this.db
       .from('messages')
@@ -44,6 +51,7 @@ export class ChatService {
       .eq('master_id', masterId)
       .neq('sender_id', masterId)
       .eq('is_read', false);
+    await this.refreshUnreadCount(masterId);
   }
 
   subscribe(orderId: string, masterId: string, onMessage: (msg: Message) => void): RealtimeChannel {
