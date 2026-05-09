@@ -26,18 +26,26 @@
   } @else {
     <div class="orders-grid">
       @for (order of filtered(); track order.id) {
-        <a [routerLink]="['/client/orders', order.id]" class="order-card card">
-          <div class="order-card__head">
-            <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
-            <span class="status-badge status-{{ order.status }}">{{ statusLabel(order.status) }}</span>
-          </div>
-          <div class="order-card__meta">
-            <span>{{ order.area_sqm }} м²</span>
-            <span class="dot">·</span>
-            <span>{{ order.address }}</span>
-          </div>
-          <div class="order-card__date">{{ formatDate(order.created_at) }}</div>
-        </a>
+        <div class="order-card card" [class.order-card--deleting]="deleting() === order.id">
+          <a [routerLink]="['/client/orders', order.id]" class="order-card__link">
+            <div class="order-card__head">
+              <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
+              <span class="status-badge status-{{ order.status }}">{{ statusLabel(order.status) }}</span>
+            </div>
+            <div class="order-card__meta">
+              <span>{{ order.area_sqm }} м²</span>
+              <span class="dot">·</span>
+              <span>{{ order.address }}</span>
+            </div>
+            <div class="order-card__date">{{ formatDate(order.created_at) }}</div>
+          </a>
+          <button class="order-card__delete"
+                  [disabled]="deleting() === order.id"
+                  (click)="deleteOrder(order, $event)"
+                  title="Удалить заявку">
+            {{ deleting() === order.id ? '...' : '×' }}
+          </button>
+        </div>
       }
     </div>
   }
@@ -64,8 +72,20 @@
 }
 .filter-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .filter-tab--active { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+
 .orders-grid { display: flex; flex-direction: column; gap: 12px; }
+
 .order-card {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+.order-card--deleting { opacity: 0.5; pointer-events: none; }
+
+.order-card__link {
+  flex: 1;
   display: block;
   text-decoration: none;
   color: inherit;
@@ -88,6 +108,25 @@
 }
 .dot { color: var(--color-border-strong); }
 .order-card__date { font-size: 12px; color: var(--color-text-secondary); }
+
+.order-card__delete {
+  flex-shrink: 0;
+  width: 44px;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.order-card__delete:hover { background: #FFF0F0; color: #E53935; }
+.order-card__delete:disabled { opacity: 0.4; cursor: not-allowed; }
+
 .hint-text { color: var(--color-text-secondary); }
 .empty-state {
   display: flex;
