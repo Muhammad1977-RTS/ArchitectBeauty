@@ -1,0 +1,262 @@
+<div class="onboarding-page">
+  <div class="onboarding-card">
+
+    <!-- Logo -->
+    <div class="ob-logo">
+      <svg width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M1 24L1 12Q14 1 27 12L27 24" stroke="#1E3A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="14" y1="7" x2="14" y2="14" stroke="#1E3A5F" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="14" cy="17" r="2.5" fill="#1E3A5F"/>
+        <line x1="1" y1="28" x2="27" y2="28" stroke="#C86A3A" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="ob-logo-name">Маст<span class="accent-e">е</span>ро</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="ob-progress">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="ob-step-dot" [class.ob-step-dot--done]="step() > i" [class.ob-step-dot--active]="step() === i"></div>
+      }
+    </div>
+    <p class="ob-step-label">Шаг {{ step() }} из {{ totalSteps() }}</p>
+
+    <!-- Step 1: Name + Phone -->
+    @if (step() === 1) {
+      <div class="ob-content">
+        <h1 class="ob-title">Как вас зовут?</h1>
+        <p class="ob-sub">Ваше имя будет видно {{ role() === 'master' ? 'клиентам' : 'мастерам' }} в переписке</p>
+
+        <form [formGroup]="stepOneForm" class="ob-form" (ngSubmit)="nextStep()">
+          <div class="form-field">
+            <label class="form-label" for="ob-name">Имя <span class="req">*</span></label>
+            <input
+              id="ob-name"
+              type="text"
+              class="form-input"
+              formControlName="name"
+              placeholder="Ваше имя"
+              autocomplete="given-name"
+            />
+            @if (stepOneForm.get('name')?.invalid && stepOneForm.get('name')?.touched) {
+              <span class="field-error">Введите имя (минимум 2 символа)</span>
+            }
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="ob-phone">Телефон</label>
+            <input
+              id="ob-phone"
+              type="tel"
+              class="form-input"
+              formControlName="phone"
+              placeholder="+7 (999) 123-45-67"
+              autocomplete="tel"
+            />
+          </div>
+
+          <button type="submit" class="btn-primary ob-btn">
+            Продолжить
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- Step 2: City / District -->
+    @if (step() === 2) {
+      <div class="ob-content">
+        <h1 class="ob-title">
+          {{ role() === 'master' ? 'Где вы работаете?' : 'Где находится объект?' }}
+        </h1>
+        <p class="ob-sub">
+          {{ role() === 'master'
+            ? 'Укажите район или город — так клиенты в вашей зоне быстрее вас найдут'
+            : 'Это поможет подобрать мастеров из вашего района' }}
+        </p>
+
+        <form [formGroup]="stepTwoForm" class="ob-form" (ngSubmit)="nextStep()">
+          <div class="form-field">
+            <label class="form-label" for="ob-city">Город / район</label>
+            <input
+              id="ob-city"
+              type="text"
+              class="form-input"
+              formControlName="city_district"
+              placeholder="Грозный, Октябрьский район"
+              autocomplete="address-level2"
+            />
+          </div>
+
+          <div class="ob-actions">
+            <button type="button" class="btn-secondary ob-back-btn" (click)="prevStep()">
+              Назад
+            </button>
+            <button type="submit" class="btn-primary ob-btn" [disabled]="saving()">
+              @if (saving()) { Сохранение... } @else {
+                Продолжить
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Step 3: Done -->
+    @if (step() === 3) {
+      <div class="ob-content ob-done">
+        <div class="ob-done-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2D7A5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h1 class="ob-title">Всё готово, {{ stepOneForm.value.name }}!</h1>
+
+        @if (role() === 'client') {
+          <p class="ob-sub">Создайте первую заявку — мастера из вашего района откликнутся в ближайшее время.</p>
+          <div class="ob-done-actions">
+            <button class="btn-primary ob-btn" (click)="goCreateOrder()">
+              Создать первую заявку
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+            <button class="btn-secondary" (click)="finish()">Перейти к заявкам</button>
+          </div>
+        }
+
+        @if (role() === 'master') {
+          <p class="ob-sub">Начните просматривать заявки от клиентов в вашем районе. Откликайтесь на подходящие — и вы начнёте получать заказы.</p>
+          <div class="ob-done-actions">
+            <button class="btn-primary ob-btn" (click)="finish()">
+              Найти первый заказ
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+          <p class="ob-tip">Совет: заполните ставки за м² в профиле — это ускорит работу с откликами</p>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+<style>
+.onboarding-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--color-bg);
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 40px 36px;
+}
+
+.ob-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  text-decoration: none;
+}
+.ob-logo-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--color-primary);
+}
+
+.ob-progress {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.ob-step-dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-border);
+  transition: background .2s;
+}
+.ob-step-dot--active { background: var(--color-primary); }
+.ob-step-dot--done { background: var(--color-success); }
+
+.ob-step-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0 0 28px;
+}
+
+.ob-content { display: flex; flex-direction: column; }
+
+.ob-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin: 0 0 10px;
+  color: var(--color-text);
+}
+
+.ob-sub {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 0 0 28px;
+}
+
+.ob-form { display: flex; flex-direction: column; gap: 18px; }
+
+.ob-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.ob-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.ob-back-btn { flex-shrink: 0; }
+
+/* Done step */
+.ob-done { align-items: center; text-align: center; }
+
+.ob-done-icon {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E8F5EF;
+  border-radius: 50%;
+  margin-bottom: 20px;
+}
+
+.ob-done-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.ob-tip {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  padding: 12px 16px;
+  background: var(--color-bg);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .onboarding-card { padding: 28px 20px; }
+}
+</style>

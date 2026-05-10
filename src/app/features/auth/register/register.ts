@@ -36,6 +36,6 @@ export class RegisterComponent {
       return;
     }
     const ok = await this.auth.signUp(email!, password!, this.selectedRole()!);
-    if (ok) await this.router.navigate(['/profile']);
+    if (ok) await this.router.navigate(['/onboarding']);
   }
 }
