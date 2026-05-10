@@ -5,8 +5,14 @@ import { roleGuard } from './core/guards/role.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/auth/login',
-    pathMatch: 'full',
+    loadComponent: () =>
+      import('./features/home/home').then(m => m.HomeComponent),
+  },
+  {
+    path: 'onboarding',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/onboarding/onboarding').then(m => m.OnboardingComponent),
   },
   {
     path: 'auth/login',
@@ -70,5 +76,5 @@ export const routes: Routes = [
       { path: '', redirectTo: 'orders', pathMatch: 'full' },
     ],
   },
-  { path: '**', redirectTo: '/auth/login' },
+  { path: '**', redirectTo: '/' },
 ];
