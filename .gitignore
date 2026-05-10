@@ -48,3 +48,6 @@ supabase/.temp/
 # Claude Code
 .claude/
 
+# Lazyweb design research artifacts
+.lazyweb/
+
