@@ -69,6 +69,7 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
 
       this.channel = this.chatService.subscribe(order.id, user.id, msg => {
         this.chatMessages.update(list => {
+          if (msg.sender_id === this.currentUserId) return list;
           if (list.some(x => x.id === msg.id)) return list;
           return [...list, msg];
         });

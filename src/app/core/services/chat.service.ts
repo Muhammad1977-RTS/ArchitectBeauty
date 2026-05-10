@@ -89,9 +89,11 @@ export class ChatService {
       .channel(`inbox:${masterId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `master_id=eq.${masterId}` },
+        { event: 'INSERT', schema: 'public', table: 'messages' },
         payload => {
-          if (payload.new['sender_id'] !== masterId) onNew();
+          if (payload.new['master_id'] === masterId && payload.new['sender_id'] !== masterId) {
+            onNew();
+          }
         }
       )
       .subscribe();
