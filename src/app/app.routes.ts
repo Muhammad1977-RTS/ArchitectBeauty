@@ -91,6 +91,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/work-types/admin-work-types').then(m => m.AdminWorkTypesComponent),
       },
+      {
+        path: 'complaints',
+        loadComponent: () =>
+          import('./features/admin/complaints/admin-complaints').then(m => m.AdminComplaintsComponent),
+      },
       { path: '', redirectTo: 'users', pathMatch: 'full' },
     ],
   },
