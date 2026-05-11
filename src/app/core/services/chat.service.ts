@@ -6,6 +6,7 @@ import { Message } from '../models/types';
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private db = inject(SupabaseService).client;
+  private readonly activeChannels = new Map<string, RealtimeChannel>();
 
   readonly unreadCount = signal(0);
 
@@ -21,11 +22,18 @@ export class ChatService {
   }
 
   async send(orderId: string, masterId: string, senderId: string, content: string): Promise<boolean> {
-    const { error } = await this.db
+    const { data, error } = await this.db
       .from('messages')
-      .insert({ order_id: orderId, master_id: masterId, sender_id: senderId, content });
-    if (error) console.error('[chat] send:', error);
-    return !error;
+      .insert({ order_id: orderId, master_id: masterId, sender_id: senderId, content })
+      .select()
+      .single();
+    if (error) { console.error('[chat] send:', error); return false; }
+
+    // Broadcast for instant delivery — bypasses postgres_changes latency/RLS issues
+    const channel = this.activeChannels.get(`chat:${orderId}:${masterId}`);
+    channel?.send({ type: 'broadcast', event: 'new_message', payload: data });
+
+    return true;
   }
 
   async getUnreadCount(masterId: string): Promise<number> {
@@ -55,8 +63,12 @@ export class ChatService {
   }
 
   subscribe(orderId: string, masterId: string, onMessage: (msg: Message) => void): RealtimeChannel {
-    return this.db
-      .channel(`chat:${orderId}:${masterId}`)
+    const key = `chat:${orderId}:${masterId}`;
+    const channel = this.db
+      .channel(key)
+      .on('broadcast', { event: 'new_message' }, ({ payload }) => {
+        onMessage(payload as Message);
+      })
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${orderId}` },
@@ -67,6 +79,8 @@ export class ChatService {
         }
       )
       .subscribe();
+    this.activeChannels.set(key, channel);
+    return channel;
   }
 
   subscribeToClientInbox(clientId: string, onNew: (orderId: string) => void): RealtimeChannel {
@@ -140,6 +154,9 @@ export class ChatService {
   }
 
   unsubscribe(channel: RealtimeChannel) {
+    for (const [key, ch] of this.activeChannels) {
+      if (ch === channel) { this.activeChannels.delete(key); break; }
+    }
     this.db.removeChannel(channel);
   }
 }
