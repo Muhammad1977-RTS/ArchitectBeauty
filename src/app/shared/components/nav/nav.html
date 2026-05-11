@@ -16,11 +16,8 @@
       }
       @if (role() === 'master') {
         <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
-        <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link nav-link--with-badge">
+        <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link">
           Мои отклики
-          @if (chatService.unreadCount() > 0) {
-            <span class="nav-badge">{{ chatService.unreadCount() > 9 ? '9+' : chatService.unreadCount() }}</span>
-          }
         </a>
       }
     </div>
