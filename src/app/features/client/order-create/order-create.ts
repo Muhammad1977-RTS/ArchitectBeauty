@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -26,15 +26,32 @@ export class OrderCreateComponent implements OnInit {
   readonly previews = signal<string[]>([]);
   private selectedFiles: File[] = [];
 
+  readonly selectedWorkTypeSlug = signal('');
+  readonly isOther = computed(() => this.selectedWorkTypeSlug() === 'other');
+
   form = this.fb.group({
     work_type_id: ['', Validators.required],
+    work_type_custom: [''],
     area_sqm: [null as number | null, [Validators.required, Validators.min(1)]],
     address: ['', Validators.required],
     description: [''],
   });
 
   async ngOnInit() {
-    this.workTypes.set(await this.profileService.getWorkTypes());
+    const types = await this.profileService.getWorkTypes();
+    // "Другое" всегда в конце списка
+    const other = types.find(w => w.slug === 'other');
+    const rest = types.filter(w => w.slug !== 'other');
+    this.workTypes.set(other ? [...rest, other] : rest);
+  }
+
+  onWorkTypeChange(event: Event) {
+    const id = (event.target as HTMLSelectElement).value;
+    const wt = this.workTypes().find(w => w.id === id);
+    this.selectedWorkTypeSlug.set(wt?.slug ?? '');
+    if (wt?.slug !== 'other') {
+      this.form.patchValue({ work_type_custom: '' });
+    }
   }
 
   onPhotos(event: Event) {
@@ -61,6 +78,12 @@ export class OrderCreateComponent implements OnInit {
   async submit() {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
+
+    if (this.isOther() && !this.form.value.work_type_custom?.trim()) {
+      this.error.set('Опишите, какой вид работы вам нужен.');
+      return;
+    }
+
     const user = this.auth.user();
     if (!user) return;
 
@@ -83,13 +106,16 @@ export class OrderCreateComponent implements OnInit {
       return;
     }
 
-    const { work_type_id, area_sqm, address, description } = this.form.value;
+    const { work_type_id, work_type_custom, area_sqm, address, description } = this.form.value;
+    const fullDescription = this.isOther() && work_type_custom?.trim()
+      ? `Вид работы: ${work_type_custom.trim()}${description?.trim() ? '\n\n' + description.trim() : ''}`
+      : (description || '');
     const order = await this.orderService.createOrder({
       client_id: user.id,
       work_type_id: work_type_id!,
       area_sqm: area_sqm!,
       address: address!,
-      description: description || '',
+      description: fullDescription,
       photo_urls: photoUrls,
     });
 

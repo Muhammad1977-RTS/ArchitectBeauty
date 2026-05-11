@@ -15,7 +15,7 @@
         <h2 class="section-title">Тип работы</h2>
         <div class="form-field">
           <label class="form-label">Вид работы <span class="req">*</span></label>
-          <select formControlName="work_type_id" class="form-input">
+          <select formControlName="work_type_id" class="form-input" (change)="onWorkTypeChange($event)">
             <option value="">— Выберите —</option>
             @for (wt of workTypes(); track wt.id) {
               <option [value]="wt.id">{{ wt.name }}</option>
@@ -23,6 +23,19 @@
           </select>
           @if (form.get('work_type_id')?.touched && form.get('work_type_id')?.invalid) {
             <span class="field-error">Выберите вид работы</span>
+          }
+
+          @if (isOther()) {
+            <div class="form-field" style="margin-top: 12px">
+              <label class="form-label">Опишите вид работы <span class="req">*</span></label>
+              <input
+                formControlName="work_type_custom"
+                type="text"
+                class="form-input"
+                placeholder="Например: монтаж гипсокартона, демонтаж перегородки..."
+                autocomplete="off"
+              />
+            </div>
           }
         </div>
 
