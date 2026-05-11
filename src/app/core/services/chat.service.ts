@@ -30,8 +30,8 @@ export class ChatService {
     if (error) { console.error('[chat] send:', error); return false; }
 
     // Broadcast for instant delivery — bypasses postgres_changes latency/RLS issues
-    const channel = this.activeChannels.get(`chat:${orderId}:${masterId}`);
-    channel?.send({ type: 'broadcast', event: 'new_message', payload: data });
+    const chatChannel = this.activeChannels.get(`chat:${orderId}:${masterId}`);
+    chatChannel?.send({ type: 'broadcast', event: 'new_message', payload: data });
 
     return true;
   }
@@ -83,6 +83,21 @@ export class ChatService {
     return channel;
   }
 
+  subscribeToInbox(masterId: string, onNew: (orderId: string) => void): RealtimeChannel {
+    return this.db
+      .channel(`master-inbox:${masterId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `master_id=eq.${masterId}` },
+        payload => {
+          if (payload.new['sender_id'] !== masterId) {
+            onNew(payload.new['order_id'] as string);
+          }
+        }
+      )
+      .subscribe();
+  }
+
   subscribeToClientInbox(clientId: string, onNew: (orderId: string) => void): RealtimeChannel {
     return this.db
       .channel(`client-inbox:${clientId}`)
@@ -98,18 +113,14 @@ export class ChatService {
       .subscribe();
   }
 
-  subscribeToInbox(masterId: string, onNew: () => void): RealtimeChannel {
+  subscribeForBadge(orderId: string, masterId: string, onClientMessage: () => void): RealtimeChannel {
     return this.db
-      .channel(`inbox:${masterId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        payload => {
-          if (payload.new['master_id'] === masterId && payload.new['sender_id'] !== masterId) {
-            onNew();
-          }
+      .channel(`chat:${orderId}:${masterId}`)
+      .on('broadcast', { event: 'new_message' }, ({ payload }) => {
+        if ((payload as Message).sender_id !== masterId) {
+          onClientMessage();
         }
-      )
+      })
       .subscribe();
   }
 
