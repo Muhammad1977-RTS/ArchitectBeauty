@@ -29,7 +29,8 @@ export class AdminUsersComponent implements OnInit {
 
   private async load() {
     this.loading.set(true);
-    const role = this.filter() === 'all' ? undefined : this.filter();
+    const f = this.filter();
+    const role = f === 'all' ? undefined : f;
     this.users.set(await this.adminService.getUsers(role));
     this.loading.set(false);
   }
