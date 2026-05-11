@@ -15,13 +15,15 @@ export class NavComponent {
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly role = signal<UserRole | null>(null);
+  readonly isAdmin = signal(false);
 
   constructor() {
     effect(async () => {
       const user = this.auth.user();
-      if (!user) { this.role.set(null); return; }
+      if (!user) { this.role.set(null); this.isAdmin.set(false); return; }
       const profile = await this.profileService.getProfile(user.id);
       this.role.set(profile?.role ?? null);
+      this.isAdmin.set(profile?.is_admin ?? false);
     }, { allowSignalWrites: true });
   }
 
