@@ -74,6 +74,11 @@
             : 'Это поможет подобрать мастеров из вашего района' }}
         </p>
 
+        <button type="button" class="ob-back-link" (click)="prevStep()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Назад
+        </button>
+
         <form [formGroup]="stepTwoForm" class="ob-form" (ngSubmit)="nextStep()">
           <div class="form-field">
             <label class="form-label" for="ob-city">Город / район</label>
@@ -87,17 +92,12 @@
             />
           </div>
 
-          <div class="ob-actions">
-            <button type="button" class="btn-secondary ob-back-btn" (click)="prevStep()">
-              Назад
-            </button>
-            <button type="submit" class="btn-primary ob-btn" [disabled]="saving()">
-              @if (saving()) { Сохранение... } @else {
-                Продолжить
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              }
-            </button>
-          </div>
+          <button type="submit" class="btn-primary ob-btn" [disabled]="saving()">
+            @if (saving()) { Сохранение... } @else {
+              Продолжить
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            }
+          </button>
         </form>
       </div>
     }
@@ -105,6 +105,10 @@
     <!-- Step 3: Done -->
     @if (step() === 3) {
       <div class="ob-content ob-done">
+        <button type="button" class="ob-back-link" (click)="prevStep()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Назад
+        </button>
         <div class="ob-done-icon">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2D7A5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
@@ -215,12 +219,22 @@
   justify-content: center;
 }
 
-.ob-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
+
+.ob-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  align-self: flex-start;
+  transition: color .15s;
 }
-.ob-back-btn { flex-shrink: 0; }
+.ob-back-link:hover { color: var(--color-primary); }
 
 /* Done step */
 .ob-done { align-items: center; text-align: center; }
