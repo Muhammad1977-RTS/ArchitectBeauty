@@ -154,7 +154,6 @@
         <!-- Статус master_selected / completed: только выбранный мастер -->
         @let selR = selectedResponse();
         @if (selR) {
-          @let stats = masterStats()[selR.master_id];
           @let msgs = chatMessages()[selR.master_id] ?? [];
 
           <div class="form-section">
@@ -164,11 +163,6 @@
               <div class="selected-master-head">
                 <div>
                   <div class="acc-name">{{ selR.profiles?.name ?? 'Мастер' }}</div>
-                  @if (stats?.reviews_count) {
-                    <span class="acc-rating">★ {{ stats.avg_rating }}
-                      <span class="acc-rating__count">({{ stats.reviews_count }})</span>
-                    </span>
-                  }
                 </div>
                 <div style="text-align:right; flex-shrink:0">
                   <div class="acc-price">{{ formatPrice(selR.proposed_price) }}</div>
