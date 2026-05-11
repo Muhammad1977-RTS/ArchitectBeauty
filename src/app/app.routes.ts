@@ -86,6 +86,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/users/admin-users').then(m => m.AdminUsersComponent),
       },
+      {
+        path: 'work-types',
+        loadComponent: () =>
+          import('./features/admin/work-types/admin-work-types').then(m => m.AdminWorkTypesComponent),
+      },
       { path: '', redirectTo: 'users', pathMatch: 'full' },
     ],
   },

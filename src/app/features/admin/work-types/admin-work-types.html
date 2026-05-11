@@ -1,0 +1,124 @@
+<div class="main-content">
+  <div class="page-shell">
+
+    <div class="page-header">
+      <a routerLink="/admin/users" class="btn-secondary btn-sm">← Пользователи</a>
+      <h1 class="page-title">Виды работ</h1>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-title">Добавить вид работы</h2>
+      @if (error()) {
+        <div class="form-error-box" style="margin-bottom:12px">{{ error() }}</div>
+      }
+      <div class="add-row">
+        <input
+          class="form-input"
+          type="text"
+          placeholder="Например: Монтаж гипсокартона"
+          [(ngModel)]="newName"
+          (keydown.enter)="add()"
+        />
+        <button class="btn-primary" [disabled]="saving() || !newName.trim()" (click)="add()">
+          {{ saving() ? 'Добавляем...' : 'Добавить' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2 class="section-title">
+        Список
+        @if (!loading()) {
+          <span class="count-badge">{{ workTypes().length }}</span>
+        }
+      </h2>
+
+      @if (loading()) {
+        <p class="hint-text">Загружаем...</p>
+      } @else if (workTypes().length === 0) {
+        <p class="hint-text">Виды работ не найдены.</p>
+      } @else {
+        <div class="wt-list">
+          @for (wt of workTypes(); track wt.id) {
+            <div class="wt-row">
+              <div class="wt-info">
+                <span class="wt-name">{{ wt.name }}</span>
+                <span class="wt-slug">{{ wt.slug }}</span>
+              </div>
+              <button class="btn-delete btn-sm"
+                      [disabled]="deletingId() === wt.id"
+                      (click)="deleteWorkType(wt)">
+                {{ deletingId() === wt.id ? '...' : 'Удалить' }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
+
+<style>
+.add-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.add-row .form-input { flex: 1; }
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.wt-list {
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.wt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #F0EEEA;
+}
+.wt-row:last-child { border-bottom: none; }
+.wt-row:hover { background: #FAFAF8; }
+
+.wt-info { display: flex; flex-direction: column; gap: 2px; }
+.wt-name { font-size: 14px; font-weight: 500; color: var(--color-text); }
+.wt-slug { font-size: 12px; color: var(--color-text-secondary); font-family: monospace; }
+
+.btn-delete {
+  padding: 5px 12px;
+  border: 1.5px solid #E53935;
+  border-radius: var(--radius-btn, 8px);
+  background: none;
+  color: #E53935;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-delete:hover { background: #E53935; color: #fff; }
+.btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
+.hint-text { color: var(--color-text-secondary); }
+</style>
