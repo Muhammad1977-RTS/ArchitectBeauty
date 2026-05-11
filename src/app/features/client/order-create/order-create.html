@@ -40,11 +40,16 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label">Площадь, м² <span class="req">*</span></label>
-          <input formControlName="area_sqm" type="number" min="1" step="0.5"
-                 class="form-input" placeholder="например, 45" />
+          <label class="form-label">
+            {{ isUnitBased() ? 'Количество единиц' : 'Площадь, м²' }}
+            <span class="req">*</span>
+          </label>
+          <input formControlName="area_sqm" type="number" min="1"
+                 [step]="isUnitBased() ? 1 : 0.5"
+                 class="form-input"
+                 [placeholder]="isUnitBased() ? 'например, 3 (шкаф, кровать, стол...)' : 'например, 45'" />
           @if (form.get('area_sqm')?.touched && form.get('area_sqm')?.invalid) {
-            <span class="field-error">Укажите площадь больше 0</span>
+            <span class="field-error">{{ isUnitBased() ? 'Укажите количество предметов' : 'Укажите площадь больше 0' }}</span>
           }
         </div>
       </div>

@@ -28,6 +28,7 @@ export class OrderCreateComponent implements OnInit {
 
   readonly selectedWorkTypeSlug = signal('');
   readonly isOther = computed(() => this.selectedWorkTypeSlug() === 'other');
+  readonly isUnitBased = computed(() => this.selectedWorkTypeSlug() === 'furniture_assembly');
 
   form = this.fb.group({
     work_type_id: ['', Validators.required],
@@ -41,7 +42,7 @@ export class OrderCreateComponent implements OnInit {
     const types = await this.profileService.getWorkTypes();
     // "Другое" всегда в конце списка
     const other = types.find(w => w.slug === 'other');
-    const rest = types.filter(w => w.slug !== 'other');
+    const rest = types.filter(w => w.slug !== 'other').sort((a, b) => a.name.localeCompare(b.name, 'ru'));
     this.workTypes.set(other ? [...rest, other] : rest);
   }
 
