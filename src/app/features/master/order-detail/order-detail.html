@@ -112,6 +112,31 @@
         }
       </div>
 
+      <!-- ── Жалоба на клиента ──────────────────────────────────────── -->
+      <div class="form-section" style="padding-top:0">
+        @if (!complaintSent()) {
+          @if (complaintOpen()) {
+            <div class="complaint-form">
+              <textarea class="form-input complaint-textarea" rows="3"
+                        placeholder="Опишите причину жалобы..."
+                        (input)="complaintText.set($any($event.target).value)"></textarea>
+              <div class="complaint-actions">
+                <button class="btn-primary btn-sm"
+                        [disabled]="!complaintText().trim() || complaintLoading()"
+                        (click)="submitComplaint()">
+                  {{ complaintLoading() ? 'Отправляем...' : 'Отправить' }}
+                </button>
+                <button class="btn-secondary btn-sm" (click)="complaintOpen.set(false)">Отмена</button>
+              </div>
+            </div>
+          } @else {
+            <button class="complaint-link" (click)="complaintOpen.set(true)">Пожаловаться на клиента</button>
+          }
+        } @else {
+          <span class="complaint-sent">Жалоба отправлена</span>
+        }
+      </div>
+
       <!-- ── Чат с клиентом ─────────────────────────────────────────── -->
       <div class="form-section chat-form-section">
         <h2 class="section-title">Переписка с клиентом</h2>
@@ -239,4 +264,16 @@
   transition: opacity 0.15s;
 }
 .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.complaint-link {
+  background: none; border: none; padding: 0;
+  font-size: 12px; color: var(--color-text-secondary);
+  cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px; transition: color .15s;
+}
+.complaint-link:hover { color: #E53935; }
+.complaint-sent { font-size: 12px; color: #4CAF50; }
+.complaint-form { display: flex; flex-direction: column; gap: 8px; }
+.complaint-textarea { width: 100%; resize: vertical; font-size: 13px; }
+.complaint-actions { display: flex; gap: 8px; }
 </style>

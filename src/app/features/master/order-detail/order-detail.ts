@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
+import { ComplaintService } from '../../../core/services/complaint.service';
 import { OrderService } from '../../../core/services/order.service';
 import { ResponseService } from '../../../core/services/response.service';
 import { Order, Response, Message } from '../../../core/models/types';
@@ -19,6 +20,7 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
   private responseService = inject(ResponseService);
   private chatService = inject(ChatService);
+  private complaintService = inject(ComplaintService);
   private fb = inject(FormBuilder);
 
   readonly loading = signal(true);
@@ -30,6 +32,11 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
   readonly chatMessages = signal<Message[]>([]);
   readonly chatDraft = signal('');
   readonly chatSending = signal(false);
+
+  readonly complaintOpen = signal(false);
+  readonly complaintText = signal('');
+  readonly complaintLoading = signal(false);
+  readonly complaintSent = signal(false);
 
   currentUserId = '';
   private channel: RealtimeChannel | null = null;
@@ -141,6 +148,18 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
     } else {
       this.error.set('Не удалось отправить отклик. Попробуйте снова.');
     }
+  }
+
+  async submitComplaint() {
+    const order = this.order();
+    const reason = this.complaintText().trim();
+    if (!order || !reason) return;
+    const clientName = order.profiles?.name ?? 'Клиент';
+    const clientId = order.client_id;
+    this.complaintLoading.set(true);
+    const ok = await this.complaintService.submit(this.currentUserId, clientId, clientName, reason, order.id);
+    this.complaintLoading.set(false);
+    if (ok) { this.complaintSent.set(true); this.complaintOpen.set(false); }
   }
 
   formatDate(iso: string): string {

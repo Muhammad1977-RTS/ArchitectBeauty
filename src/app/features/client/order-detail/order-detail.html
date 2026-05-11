@@ -201,6 +201,30 @@
                 </div>
               </div>
             </div>
+
+            <div class="complaint-row">
+              @if (!complaintSent()) {
+                @if (complaintOpen()) {
+                  <div class="complaint-form">
+                    <textarea class="form-input complaint-textarea" rows="3"
+                              placeholder="Опишите причину жалобы..."
+                              (input)="complaintText.set($any($event.target).value)"></textarea>
+                    <div class="complaint-actions">
+                      <button class="btn-primary btn-sm"
+                              [disabled]="!complaintText().trim() || complaintLoading()"
+                              (click)="submitComplaint(selR.master_id, selR.profiles?.name ?? 'Мастер')">
+                        {{ complaintLoading() ? 'Отправляем...' : 'Отправить' }}
+                      </button>
+                      <button class="btn-secondary btn-sm" (click)="complaintOpen.set(false)">Отмена</button>
+                    </div>
+                  </div>
+                } @else {
+                  <button class="complaint-link" (click)="complaintOpen.set(true)">Пожаловаться на мастера</button>
+                }
+              } @else {
+                <span class="complaint-sent">Жалоба отправлена</span>
+              }
+            </div>
           </div>
         }
 
@@ -441,6 +465,23 @@
 .rating-done { display: flex; flex-direction: column; gap: 6px; }
 .rating-done__stars { font-size: 24px; color: #E5A000; letter-spacing: 2px; }
 .rating-done__text { font-size: 14px; color: var(--color-text); margin: 0; }
+
+.complaint-row {
+  padding: 10px 16px;
+  border-top: 1px solid #F0EEEA;
+}
+.complaint-link {
+  background: none; border: none; padding: 0;
+  font-size: 12px; color: var(--color-text-secondary);
+  cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color .15s;
+}
+.complaint-link:hover { color: #E53935; }
+.complaint-sent { font-size: 12px; color: #4CAF50; }
+.complaint-form { display: flex; flex-direction: column; gap: 8px; }
+.complaint-textarea { width: 100%; resize: vertical; font-size: 13px; }
+.complaint-actions { display: flex; gap: 8px; }
 
 .selected-master-card {
   border: 1.5px solid var(--color-primary);

@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
+import { ComplaintService } from '../../../core/services/complaint.service';
 import { OrderService } from '../../../core/services/order.service';
 import { ResponseService } from '../../../core/services/response.service';
 import { Order, OrderStatus, Response, MasterStats, Message } from '../../../core/models/types';
@@ -19,6 +20,7 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
   private orderService = inject(OrderService);
   private responseService = inject(ResponseService);
   private chatService = inject(ChatService);
+  private complaintService = inject(ComplaintService);
 
   readonly loading = signal(true);
   readonly order = signal<Order | null>(null);
@@ -48,6 +50,12 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     if (!order?.selected_master_id) return null;
     return this.responses().find(r => r.master_id === order.selected_master_id) ?? null;
   });
+
+  // Жалоба
+  readonly complaintOpen = signal(false);
+  readonly complaintText = signal('');
+  readonly complaintLoading = signal(false);
+  readonly complaintSent = signal(false);
 
   currentUserId = '';
   private readonly loadedChats = new Set<string>();
@@ -199,6 +207,16 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     const ok = await this.orderService.rateOrder(order.id, rating, this.reviewText());
     if (ok) this.order.update(o => o ? { ...o, rating, review_text: this.reviewText() || null } : o);
     this.actionLoading.set(null);
+  }
+
+  async submitComplaint(masterId: string, masterName: string) {
+    const order = this.order();
+    const reason = this.complaintText().trim();
+    if (!order || !reason) return;
+    this.complaintLoading.set(true);
+    const ok = await this.complaintService.submit(this.currentUserId, masterId, masterName, reason, order.id);
+    this.complaintLoading.set(false);
+    if (ok) { this.complaintSent.set(true); this.complaintOpen.set(false); }
   }
 
   starActive(n: number): boolean {
