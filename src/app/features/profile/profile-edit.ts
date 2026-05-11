@@ -88,14 +88,8 @@ export class ProfileEditComponent implements OnInit {
     }
 
     this.saving.set(false);
-    this.saved.set(true);
-    setTimeout(() => this.saved.set(false), 2500);
-
-    const profile = await this.profileService.getProfile(user.id);
-    if (profile?.name) {
-      await this.router.navigate(
-        profile.role === 'master' ? ['/master/orders'] : ['/client/orders']
-      );
-    }
+    await this.router.navigate(
+      this.role() === 'master' ? ['/master/orders'] : ['/client/orders']
+    );
   }
 }
