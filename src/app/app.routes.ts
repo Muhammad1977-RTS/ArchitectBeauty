@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -74,6 +75,18 @@ export const routes: Routes = [
           import('./features/master/my-responses/my-responses').then(m => m.MasterMyResponsesComponent),
       },
       { path: '', redirectTo: 'orders', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    children: [
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin/users/admin-users').then(m => m.AdminUsersComponent),
+      },
+      { path: '', redirectTo: 'users', pathMatch: 'full' },
     ],
   },
   { path: '**', redirectTo: '/' },

@@ -14,6 +14,7 @@ export interface Profile {
   name: string;
   phone: string | null;
   city_district: string | null;
+  is_admin: boolean;
   created_at: string;
 }
 
