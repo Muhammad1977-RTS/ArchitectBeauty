@@ -47,6 +47,12 @@ Thumbs.db
 # Supabase
 supabase/.temp/
 
+# Playwright auth state (contains session tokens — never commit)
+tests/.auth/
+
+# Test credentials
+.env.test
+
 # Claude Code
 .claude/
 
