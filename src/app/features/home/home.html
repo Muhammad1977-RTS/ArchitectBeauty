@@ -33,17 +33,45 @@
           Прямой чат с мастером
         </span>
       </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">1 200+</span>
+          <span class="stat-label">мастеров</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <span class="stat-num">4.8 ★</span>
+          <span class="stat-label">средний рейтинг</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <span class="stat-num">0 ₽</span>
+          <span class="stat-label">комиссия для клиентов</span>
+        </div>
+      </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
-      <div class="hero-logo-mark">
-        <svg width="120" height="120" viewBox="0 0 30 30" fill="none">
-          <path d="M1 26L1 13Q15 1 29 13L29 26" stroke="#1E3A5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.15"/>
-          <path d="M3 26L3 14Q15 3 27 14L27 26" stroke="#1E3A5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
-          <path d="M5 26L5 15Q15 5 25 15L25 26" stroke="#1E3A5F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="15" y1="10" x2="15" y2="17" stroke="#1E3A5F" stroke-width="1.5" stroke-linecap="round"/>
-          <circle cx="15" cy="20" r="2.5" fill="#1E3A5F"/>
-          <line x1="5" y1="29" x2="25" y2="29" stroke="#C86A3A" stroke-width="2" stroke-linecap="round"/>
-        </svg>
+      <div class="hero-mock-card">
+        <div class="hmc-head">
+          <div class="hmc-avatar">АМ</div>
+          <div class="hmc-info">
+            <div class="hmc-name">Аслан Мусаев</div>
+            <div class="hmc-meta">Грозный · Октябрьский р-н</div>
+            <div class="hmc-stars">★★★★★ <span>5.0</span> (18 работ)</div>
+          </div>
+        </div>
+        <div class="hmc-divider"></div>
+        <div class="hmc-services">
+          <div class="hmc-service-row">
+            <span>Укладка плитки</span>
+            <span class="hmc-price">1 500 ₽/м²</span>
+          </div>
+          <div class="hmc-service-row">
+            <span>Поклейка обоев</span>
+            <span class="hmc-price">800 ₽/м²</span>
+          </div>
+        </div>
+        <div class="hmc-badge">✓ Отклик отправлен</div>
       </div>
     </div>
   </section>
@@ -99,10 +127,10 @@
       <h2 class="cta-title">Готовы начать?</h2>
       <p class="cta-sub">Регистрация занимает меньше минуты. Первая заявка — бесплатно.</p>
       <div class="cta-buttons">
-        <a routerLink="/auth/register" class="btn-primary">
+        <a routerLink="/auth/register" class="btn-accent">
           Создать заявку
         </a>
-        <a routerLink="/auth/login" class="btn-secondary">
+        <a routerLink="/auth/login" class="btn-cta-outline">
           Уже есть аккаунт
         </a>
       </div>
@@ -177,14 +205,99 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 260px;
-  height: 260px;
-  background: linear-gradient(135deg, #EAF0F8 0%, #F5E8DF 100%);
-  border-radius: 32px;
+  width: 280px;
 }
 
-.hero-logo-mark {
-  opacity: 0.9;
+/* Mock master card in hero */
+.hero-mock-card {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-hover);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.hmc-head { display: flex; align-items: flex-start; gap: 12px; }
+.hmc-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #1E3A5F, #2d5693);
+  color: #fff; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hmc-info { flex: 1; }
+.hmc-name { font-weight: 700; font-size: 15px; color: var(--color-text); }
+.hmc-meta { font-size: 12px; color: var(--color-text-secondary); margin: 2px 0; }
+.hmc-stars { font-size: 12px; color: var(--color-text-secondary); }
+.hmc-stars span { font-weight: 600; color: var(--color-text); }
+.hmc-divider { height: 1px; background: var(--color-border); margin: 0 -4px; }
+.hmc-services { display: flex; flex-direction: column; gap: 6px; }
+.hmc-service-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--color-text);
+}
+.hmc-price { font-weight: 600; color: var(--color-primary); font-size: 13px; }
+.hmc-badge {
+  font-size: 12px; font-weight: 600; color: var(--color-success);
+  background: #E8F5EF; border-radius: 20px;
+  padding: 5px 12px; text-align: center;
+}
+
+/* Stats bar */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 28px;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+.stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.stat-sep {
+  width: 1px;
+  height: 32px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* CTA outline button for dark background */
+.btn-cta-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 24px;
+  background: transparent;
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: var(--radius-btn);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s, border-color .15s;
+  &:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.8); }
 }
 
 /* ─── Section shared ─── */
@@ -299,8 +412,7 @@
 /* ─── CTA section ─── */
 .cta-section {
   padding: 64px 0 80px;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
+  background: var(--color-primary);
 }
 
 .cta-inner { text-align: center; }
@@ -310,11 +422,12 @@
   font-weight: 700;
   letter-spacing: -0.4px;
   margin: 0 0 12px;
+  color: #fff;
 }
 
 .cta-sub {
   font-size: 16px;
-  color: var(--color-text-secondary);
+  color: rgba(255,255,255,0.75);
   margin: 0 0 32px;
 }
 
@@ -334,6 +447,7 @@
   }
   .hero-title { font-size: 34px; }
   .hero-visual { display: none; }
+  .hero-stats { gap: 0; }
   .section-inner { padding: 0 24px; }
   .steps-grid {
     flex-direction: column;
