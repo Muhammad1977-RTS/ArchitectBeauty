@@ -19,6 +19,7 @@ export class MasterMyResponsesComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly responses = signal<Response[]>([]);
   readonly unreadCounts = signal<Map<string, number>>(new Map());
+  readonly filter = signal<'all' | 'active' | 'selected' | 'completed'>('all');
 
   private channels: RealtimeChannel[] = [];
 
@@ -75,5 +76,14 @@ export class MasterMyResponsesComponent implements OnInit, OnDestroy {
 
   isSelected(r: Response): boolean {
     return r.orders?.status === 'master_selected' && r.orders?.selected_master_id === r.master_id;
+  }
+
+  filtered(): Response[] {
+    const f = this.filter();
+    if (f === 'all') return this.responses();
+    if (f === 'active') return this.responses().filter(r => r.orders?.status === 'new');
+    if (f === 'selected') return this.responses().filter(r => this.isSelected(r));
+    if (f === 'completed') return this.responses().filter(r => r.orders?.status === 'completed');
+    return this.responses();
   }
 }

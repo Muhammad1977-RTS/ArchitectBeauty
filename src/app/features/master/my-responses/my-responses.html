@@ -3,6 +3,15 @@
     <h1 class="page-title">Мои отклики</h1>
   </div>
 
+  <div class="filter-tabs">
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'all'" (click)="filter.set('all')">
+      Все <span class="tab-count">{{ responses().length }}</span>
+    </button>
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'active'" (click)="filter.set('active')">Активные</button>
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'selected'" (click)="filter.set('selected')">Выбраны</button>
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'completed'" (click)="filter.set('completed')">Завершены</button>
+  </div>
+
   @if (loading()) {
     <p class="hint-text">Загружаем отклики...</p>
   } @else if (responses().length === 0) {
@@ -11,9 +20,14 @@
       <p class="empty-text">Вы ещё не откликались на заявки</p>
       <a routerLink="/master/orders" class="btn-primary btn-sm">Смотреть заявки</a>
     </div>
+  } @else if (filtered().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <p class="empty-text">Нет откликов в этой категории</p>
+    </div>
   } @else {
     <div class="responses-list">
-      @for (r of responses(); track r.id) {
+      @for (r of filtered(); track r.id) {
         <a [routerLink]="['/master/orders', r.order_id]"
            class="response-card card"
            [class.response-card--selected]="isSelected(r)">
@@ -55,6 +69,32 @@
 </div>
 
 <style>
+.filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 7px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: none; font: inherit;
+  font-size: 13px; font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.filter-tab--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.tab-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 9px; background: rgba(255,255,255,0.25);
+  font-size: 11px; font-weight: 700;
+}
+.filter-tab:not(.filter-tab--active) .tab-count {
+  background: var(--color-border); color: var(--color-text-secondary);
+}
+
 .responses-list { display: flex; flex-direction: column; gap: 12px; }
 .response-card {
   padding: 18px 20px;
