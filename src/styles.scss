@@ -57,6 +57,13 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; }
 
+:focus-visible {
+  outline: 2.5px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
 body {
   font-family: var(--font);
   font-size: 15px;
@@ -190,10 +197,16 @@ body {
   border-radius: var(--radius-card);
   background: var(--color-surface);
   cursor: pointer;
-  transition: border-color .15s, box-shadow .15s;
+  transition: border-color .15s, box-shadow .15s, background .1s;
   &:hover {
     border-color: var(--color-primary);
     box-shadow: var(--shadow-hover);
+    background: #EAF0F8;
+  }
+  &:active {
+    border-color: var(--color-primary);
+    background: #D6E4F5;
+    transform: scale(0.98);
   }
 }
 .role-icon-svg { color: var(--color-accent); }
@@ -376,7 +389,7 @@ body {
 }
 
 /* ─── Page layout ─── */
-.page-shell { max-width: 720px; }
+.page-shell { max-width: 720px; margin: 0 auto; }
 
 .page-header {
   display: flex;
@@ -399,6 +412,8 @@ body {
   padding: 24px;
   margin-bottom: 20px;
 }
+
+.form-section--actions { padding: 16px 24px; }
 
 .section-title {
   font-size: 17px;
