@@ -2,6 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  tsconfig: './tests/tsconfig.json',
   timeout: 30_000,
   retries: 0,
   globalSetup: './tests/global-setup.ts',
