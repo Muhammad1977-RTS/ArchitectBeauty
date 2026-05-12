@@ -1,5 +1,7 @@
 import { Component, inject, signal, effect } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService } from '../../../core/services/profile.service';
 import { UserRole } from '../../../core/models/types';
@@ -12,10 +14,20 @@ import { UserRole } from '../../../core/models/types';
 export class NavComponent {
   readonly auth = inject(AuthService);
   private profileService = inject(ProfileService);
+  private router = inject(Router);
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly role = signal<UserRole | null>(null);
   readonly isAdmin = signal(false);
+
+  readonly isAuthPage = toSignal(
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map((e: NavigationEnd) => e.urlAfterRedirects.startsWith('/auth') || e.urlAfterRedirects.startsWith('/onboarding')),
+      startWith(this.router.url.startsWith('/auth') || this.router.url.startsWith('/onboarding')),
+    ),
+    { initialValue: false }
+  );
 
   constructor() {
     effect(async () => {

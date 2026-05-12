@@ -9,7 +9,7 @@
     <span class="nav-brand-name">Маст<span class="accent-e">е</span>ро</span>
   </a>
 
-  @if (isAuthenticated()) {
+  @if (isAuthenticated() && !isAuthPage()) {
     <div class="nav-links">
       @if (role() === 'client') {
         <a routerLink="/client/orders" routerLinkActive="nav-link--active" class="nav-link">Мои заявки</a>
@@ -28,7 +28,7 @@
       <a routerLink="/profile" routerLinkActive="nav-link--active" class="nav-link">Профиль</a>
       <button class="nav-logout" (click)="logout()">Выйти</button>
     </div>
-  } @else {
+  } @else if (!isAuthenticated() && !isAuthPage()) {
     <div class="nav-right">
       <a routerLink="/auth/login" class="nav-link">Войти</a>
       <a routerLink="/auth/register" class="btn-primary btn-sm">Регистрация</a>
