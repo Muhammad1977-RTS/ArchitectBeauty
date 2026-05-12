@@ -1,12 +1,12 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
 import { WorkType } from '../../../core/models/types';
 
 @Component({
   selector: 'app-admin-work-types',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, RouterLinkActive, FormsModule],
   templateUrl: './admin-work-types.html',
 })
 export class AdminWorkTypesComponent implements OnInit {

@@ -2,8 +2,12 @@
   <div class="page-shell">
 
     <div class="page-header">
-      <a routerLink="/admin/users" class="btn-secondary btn-sm">← Пользователи</a>
-      <h1 class="page-title">Виды работ</h1>
+      <h1 class="page-title">Администрирование</h1>
+    </div>
+    <div class="admin-nav">
+      <a routerLink="/admin/users" routerLinkActive="admin-nav__tab--active" class="admin-nav__tab">Пользователи</a>
+      <a routerLink="/admin/work-types" routerLinkActive="admin-nav__tab--active" class="admin-nav__tab">Виды работ</a>
+      <a routerLink="/admin/complaints" routerLinkActive="admin-nav__tab--active" class="admin-nav__tab">Жалобы</a>
     </div>
 
     <div class="form-section">
@@ -60,6 +64,21 @@
 </div>
 
 <style>
+.admin-nav {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  border-bottom: 2px solid var(--color-border); padding-bottom: 0;
+}
+.admin-nav__tab {
+  padding: 8px 16px; border-radius: 8px 8px 0 0;
+  font-size: 14px; font-weight: 500; color: var(--color-text-secondary);
+  text-decoration: none; transition: color .15s; margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
+  &:hover { color: var(--color-text); }
+}
+.admin-nav__tab--active {
+  color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600;
+}
+
 .add-row {
   display: flex;
   gap: 10px;

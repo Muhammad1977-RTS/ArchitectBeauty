@@ -2,8 +2,12 @@
   <div class="page-shell">
 
     <div class="page-header">
-      <a routerLink="/admin/users" class="btn-secondary btn-sm">← Пользователи</a>
-      <h1 class="page-title">Жалобы</h1>
+      <h1 class="page-title">Администрирование</h1>
+    </div>
+    <div class="admin-nav">
+      <a routerLink="/admin/users" routerLinkActive="admin-nav__tab--active" class="admin-nav__tab">Пользователи</a>
+      <a routerLink="/admin/work-types" routerLinkActive="admin-nav__tab--active" class="admin-nav__tab">Виды работ</a>
+      <a routerLink="/admin/complaints" routerLinkActive="admin-nav__tab--active" class="admin-nav__tab">Жалобы</a>
     </div>
 
     <div class="filter-tabs">
@@ -16,7 +20,11 @@
     @if (loading()) {
       <p class="hint-text">Загружаем...</p>
     } @else if (filtered().length === 0) {
-      <p class="hint-text">Жалоб нет.</p>
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <p class="empty-title">Всё чисто</p>
+        <p class="empty-desc">Жалоб в этой категории нет</p>
+      </div>
     } @else {
       <div class="complaints-list">
         @for (c of filtered(); track c.id) {
@@ -55,6 +63,21 @@
 </div>
 
 <style>
+.admin-nav {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  border-bottom: 2px solid var(--color-border); padding-bottom: 0;
+}
+.admin-nav__tab {
+  padding: 8px 16px; border-radius: 8px 8px 0 0;
+  font-size: 14px; font-weight: 500; color: var(--color-text-secondary);
+  text-decoration: none; transition: color .15s; margin-bottom: -2px;
+  border-bottom: 2px solid transparent;
+  &:hover { color: var(--color-text); }
+}
+.admin-nav__tab--active {
+  color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600;
+}
+
 .filter-tabs {
   display: flex; gap: 8px; margin-bottom: 20px;
 }
@@ -119,4 +142,11 @@
 .btn-delete:hover { background: #E53935; color: #fff; }
 .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
 .hint-text { color: var(--color-text-secondary); }
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; padding: 48px 20px; text-align: center;
+}
+.empty-icon { font-size: 36px; }
+.empty-title { font-size: 16px; font-weight: 600; margin: 0; color: var(--color-text); }
+.empty-desc { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
 </style>

@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
 import { ComplaintService, Complaint } from '../../../core/services/complaint.service';
 
@@ -7,7 +7,7 @@ type StatusFilter = 'all' | 'pending' | 'reviewed' | 'dismissed';
 
 @Component({
   selector: 'app-admin-complaints',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './admin-complaints.html',
 })
 export class AdminComplaintsComponent implements OnInit {

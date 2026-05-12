@@ -1,5 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
 import { Profile } from '../../../core/models/types';
 
@@ -7,7 +7,7 @@ type RoleFilter = 'all' | 'client' | 'master';
 
 @Component({
   selector: 'app-admin-users',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './admin-users.html',
 })
 export class AdminUsersComponent implements OnInit {
