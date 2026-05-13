@@ -25,6 +25,14 @@ export class ProfilesService {
     });
   }
 
+  async upsertCarrierProfile(id: string, data: { vehicleType?: string; pricePerKm?: number; minPrice?: number; maxWeightKg?: number }) {
+    return this.prisma.carrierProfile.upsert({
+      where: { carrierId: id },
+      create: { carrierId: id, vehicleType: (data.vehicleType ?? 'van') as any, pricePerKm: data.pricePerKm, minPrice: data.minPrice, maxWeightKg: data.maxWeightKg },
+      update: { vehicleType: data.vehicleType as any, pricePerKm: data.pricePerKm, minPrice: data.minPrice, maxWeightKg: data.maxWeightKg },
+    });
+  }
+
   async getMasters(workTypeId?: string) {
     return this.prisma.profile.findMany({
       where: {

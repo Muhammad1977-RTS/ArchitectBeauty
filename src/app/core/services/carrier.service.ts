@@ -126,7 +126,17 @@ export class CarrierService {
     }
   }
 
-  async saveCarrierProfile(_profile: CarrierProfile): Promise<boolean> {
-    return false;
+  async saveCarrierProfile(profile: CarrierProfile): Promise<boolean> {
+    try {
+      await this.api.patch('/profiles/me/carrier-profile', {
+        vehicleType: profile.vehicle_type,
+        pricePerKm: profile.price_per_km,
+        minPrice: profile.min_price,
+        maxWeightKg: profile.max_weight_kg,
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

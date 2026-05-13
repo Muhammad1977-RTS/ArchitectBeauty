@@ -1,12 +1,20 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { CurrentUser } from '../common/current-user.decorator';
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class UpdateProfileDto {
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() phone?: string;
   @IsOptional() @IsString() cityDistrict?: string;
+}
+
+class UpdateCarrierProfileDto {
+  @IsOptional() @IsString() vehicleType?: string;
+  @IsOptional() @Type(() => Number) @IsNumber() pricePerKm?: number;
+  @IsOptional() @Type(() => Number) @IsNumber() minPrice?: number;
+  @IsOptional() @Type(() => Number) @IsNumber() maxWeightKg?: number;
 }
 
 @Controller('profiles')
@@ -26,6 +34,11 @@ export class ProfilesController {
   @Get('masters')
   getMasters(@Query('workTypeId') workTypeId?: string) {
     return this.svc.getMasters(workTypeId);
+  }
+
+  @Patch('me/carrier-profile')
+  updateCarrierProfile(@CurrentUser() user: any, @Body() dto: UpdateCarrierProfileDto) {
+    return this.svc.upsertCarrierProfile(user.id, dto);
   }
 
   @Get(':id')

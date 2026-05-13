@@ -14,6 +14,7 @@ import { StoreModule } from './store/store.module';
 import { ProductsModule } from './products/products.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { AdminModule } from './admin/admin.module';
+import { MasterRatesModule } from './master-rates/master-rates.module';
 import { JwtAuthGuard } from './common/jwt.guard';
 
 @Module({
@@ -32,6 +33,7 @@ import { JwtAuthGuard } from './common/jwt.guard';
     ProductsModule,
     ComplaintsModule,
     AdminModule,
+    MasterRatesModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
