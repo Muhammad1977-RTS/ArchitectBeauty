@@ -155,4 +155,10 @@
 .btn-delete:hover { background: #E53935; color: #fff; }
 .btn-delete:disabled { opacity: 0.4; cursor: not-allowed; }
 .hint-text { color: var(--color-text-secondary); }
+
+@media (max-width: 700px) {
+  .users-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .users-table__head,
+  .users-table__row { min-width: 560px; }
+}
 </style>
