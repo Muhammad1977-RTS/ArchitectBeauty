@@ -1,59 +1,83 @@
-# ArchitectBeauty
+# Мастеро
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.9.
+Строительный маркетплейс: клиенты ↔ мастера, перевозчики, магазины.
 
-## Development server
+**Стек:** Angular 17+ · NestJS · Prisma · PostgreSQL · JWT
 
-To start a local development server, run:
+---
+
+## Быстрый старт
+
+### 1. Настроить базу данных
+
+Отредактируй `backend/.env`:
+
+```
+DATABASE_URL="postgresql://postgres:password@localhost:5432/mastero"
+JWT_SECRET="замени-на-длинную-случайную-строку"
+JWT_EXPIRES_IN="7d"
+```
+
+Для Supabase (Session pooler):
+```
+DATABASE_URL="postgresql://postgres.[project-ref]:[password]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+```
+
+### 2. Применить схему базы данных
 
 ```bash
+cd backend
+npm install
+npx prisma db push      # создать таблицы (dev)
+# или
+npx prisma migrate dev  # если нужна история миграций
+```
+
+### 3. Запустить NestJS backend
+
+```bash
+cd backend
+npm run start:dev
+# Слушает на http://localhost:3001/api
+```
+
+### 4. Запустить Angular frontend
+
+```bash
+# в корне проекта
+npm install
 ng serve
+# Открыть http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Структура
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+/                  Angular frontend
+/backend           NestJS API (порт 3001)
+  /prisma          Схема базы данных
+  /src
+    /auth          POST /api/auth/register, /api/auth/login
+    /profiles      GET/PATCH /api/profiles/me, GET /api/profiles/:id
+    /master-rates  POST/DELETE /api/master-rates
+    /work-types    GET/POST/DELETE /api/work-types
+    /orders        CRUD /api/orders
+    /responses     CRUD /api/responses
+    /messages      CRUD /api/messages
+    /transport-orders
+    /transport-responses
+    /store         /api/store (профиль магазина)
+    /products      CRUD /api/products
+    /complaints    CRUD /api/complaints
+    /admin         /api/admin/users, /api/admin/complaints
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
+## Следующие шаги
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+1. **Протестировать** — запустить оба сервера, пройти: регистрация → онбординг → заявка → отклик → чат → завершение
+2. **Flutter** — мобильное приложение поверх того же NestJS API
+3. **ЮKassa** — онлайн-оплата (веб + Flutter)
