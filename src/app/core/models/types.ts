@@ -1,4 +1,4 @@
-export type UserRole = 'client' | 'master';
+export type UserRole = 'client' | 'master' | 'carrier';
 
 export type OrderStatus = 'new' | 'master_selected' | 'completed';
 
@@ -58,6 +58,50 @@ export interface Message {
   content: string;
   created_at: string;
   profiles?: { name: string };
+}
+
+export type VehicleType = 'car' | 'minivan' | 'gazelle' | 'truck';
+
+export type TransportOrderStatus = 'new' | 'carrier_selected' | 'completed' | 'cancelled';
+
+export interface CarrierProfile {
+  carrier_id: string;
+  vehicle_type: VehicleType;
+  price_per_km: number | null;
+  min_price: number | null;
+  max_weight_kg: number | null;
+}
+
+export interface TransportOrder {
+  id: string;
+  client_id: string;
+  from_address: string;
+  to_address: string;
+  cargo_description: string;
+  cargo_weight_kg: number | null;
+  cargo_volume_m3: number | null;
+  transport_date: string | null;
+  budget: number | null;
+  status: TransportOrderStatus;
+  selected_carrier_id: string | null;
+  rating: number | null;
+  review_text: string | null;
+  created_at: string;
+  updated_at: string;
+  profiles?: Profile;
+}
+
+export interface TransportResponse {
+  id: string;
+  order_id: string;
+  carrier_id: string;
+  proposed_price: number;
+  comment: string | null;
+  vehicle_type: VehicleType | null;
+  status: 'new' | 'selected' | 'rejected';
+  created_at: string;
+  profiles?: Profile;
+  transport_orders?: Pick<TransportOrder, 'id' | 'from_address' | 'to_address' | 'status' | 'selected_carrier_id'>;
 }
 
 export interface ResponseOrder {

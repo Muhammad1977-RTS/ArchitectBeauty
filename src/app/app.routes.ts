@@ -51,6 +51,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/client/order-detail/order-detail').then(m => m.ClientOrderDetailComponent),
       },
+      {
+        path: 'transport-orders',
+        loadComponent: () =>
+          import('./features/client/transport-orders-list/transport-orders-list').then(m => m.ClientTransportOrdersListComponent),
+      },
+      {
+        path: 'transport-orders/new',
+        loadComponent: () =>
+          import('./features/client/transport-order-create/transport-order-create').then(m => m.TransportOrderCreateComponent),
+      },
+      {
+        path: 'transport-orders/:id',
+        loadComponent: () =>
+          import('./features/client/transport-order-detail/transport-order-detail').then(m => m.ClientTransportOrderDetailComponent),
+      },
       { path: '', redirectTo: 'orders', pathMatch: 'full' },
     ],
   },
@@ -73,6 +88,29 @@ export const routes: Routes = [
         path: 'responses',
         loadComponent: () =>
           import('./features/master/my-responses/my-responses').then(m => m.MasterMyResponsesComponent),
+      },
+      { path: '', redirectTo: 'orders', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'carrier',
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'carrier' },
+    children: [
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/carrier/orders-browse/orders-browse').then(m => m.CarrierOrdersBrowseComponent),
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import('./features/carrier/order-detail/order-detail').then(m => m.CarrierOrderDetailComponent),
+      },
+      {
+        path: 'responses',
+        loadComponent: () =>
+          import('./features/carrier/my-responses/my-responses').then(m => m.CarrierMyResponsesComponent),
       },
       { path: '', redirectTo: 'orders', pathMatch: 'full' },
     ],

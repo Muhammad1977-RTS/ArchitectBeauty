@@ -1,0 +1,157 @@
+<div class="main-content">
+  <div class="page-header">
+    <a routerLink="/client/transport-orders" class="back-link">← Мои перевозки</a>
+  </div>
+
+  <div class="card">
+    <h1 class="card-title">Новая заявка на перевозку</h1>
+
+    @if (error()) {
+      <div class="form-error-box">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="create-form">
+      <div class="form-section">
+        <h3 class="form-section-title">Маршрут</h3>
+
+        <div class="form-field">
+          <label class="form-label" for="from_address">Откуда *</label>
+          <input
+            id="from_address"
+            type="text"
+            class="form-input"
+            formControlName="from_address"
+            placeholder="Адрес погрузки"
+          />
+          @if (form.get('from_address')?.invalid && form.get('from_address')?.touched) {
+            <span class="field-error">Укажите адрес погрузки</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="to_address">Куда *</label>
+          <input
+            id="to_address"
+            type="text"
+            class="form-input"
+            formControlName="to_address"
+            placeholder="Адрес доставки"
+          />
+          @if (form.get('to_address')?.invalid && form.get('to_address')?.touched) {
+            <span class="field-error">Укажите адрес доставки</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="form-section-title">Груз</h3>
+
+        <div class="form-field">
+          <label class="form-label" for="cargo_description">Описание груза *</label>
+          <textarea
+            id="cargo_description"
+            class="form-input"
+            formControlName="cargo_description"
+            rows="3"
+            placeholder="Что нужно перевезти? Например: строительные материалы, мебель..."
+          ></textarea>
+          @if (form.get('cargo_description')?.invalid && form.get('cargo_description')?.touched) {
+            <span class="field-error">Опишите груз</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="cargo_weight_kg">Вес, кг</label>
+            <input
+              id="cargo_weight_kg"
+              type="number"
+              class="form-input"
+              formControlName="cargo_weight_kg"
+              placeholder="Примерный вес"
+              min="0"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="cargo_volume_m3">Объём, м³</label>
+            <input
+              id="cargo_volume_m3"
+              type="number"
+              class="form-input"
+              formControlName="cargo_volume_m3"
+              placeholder="Примерный объём"
+              min="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="form-section-title">Детали</h3>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="transport_date">Желаемая дата</label>
+            <input
+              id="transport_date"
+              type="date"
+              class="form-input"
+              formControlName="transport_date"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="budget">Бюджет, ₽</label>
+            <input
+              id="budget"
+              type="number"
+              class="form-input"
+              formControlName="budget"
+              placeholder="Не обязательно"
+              min="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+        @if (loading()) { Создаём... } @else { Разместить заявку }
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+.back-link {
+  display: inline-block;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+.back-link:hover { color: var(--color-primary); }
+
+.card-title { font-size: 22px; font-weight: 700; margin: 0 0 24px; }
+
+.create-form { display: flex; flex-direction: column; gap: 0; }
+.form-section { margin-bottom: 24px; }
+.form-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border, #e8e8e8);
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>

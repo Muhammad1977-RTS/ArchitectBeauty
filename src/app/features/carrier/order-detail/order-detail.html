@@ -1,0 +1,211 @@
+<div class="main-content">
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявку...</p>
+  } @else if (!order()) {
+    <p class="hint-text">Заявка не найдена.</p>
+  } @else {
+    <div class="page-header">
+      <a routerLink="/carrier/orders" class="back-link">← Все заявки</a>
+    </div>
+
+    <div class="card order-detail">
+      <div class="order-detail__section">
+        <div class="order-detail__route">
+          <div class="route-point route-point--from">
+            <span class="route-label">Откуда</span>
+            <span class="route-address">{{ order()!.from_address }}</span>
+          </div>
+          <div class="route-arrow">↓</div>
+          <div class="route-point route-point--to">
+            <span class="route-label">Куда</span>
+            <span class="route-address">{{ order()!.to_address }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="order-detail__section">
+        <h3 class="section-label">Груз</h3>
+        <p class="section-value">{{ order()!.cargo_description }}</p>
+      </div>
+
+      <div class="order-detail__props">
+        @if (order()!.cargo_weight_kg) {
+          <div class="prop">
+            <span class="prop-label">Вес</span>
+            <span class="prop-value">{{ order()!.cargo_weight_kg }} кг</span>
+          </div>
+        }
+        @if (order()!.cargo_volume_m3) {
+          <div class="prop">
+            <span class="prop-label">Объём</span>
+            <span class="prop-value">{{ order()!.cargo_volume_m3 }} м³</span>
+          </div>
+        }
+        @if (order()!.transport_date) {
+          <div class="prop">
+            <span class="prop-label">Дата</span>
+            <span class="prop-value">{{ formatDate(order()!.transport_date!) }}</span>
+          </div>
+        }
+        @if (order()!.budget) {
+          <div class="prop">
+            <span class="prop-label">Бюджет</span>
+            <span class="prop-value">до {{ formatPrice(order()!.budget!) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="order-detail__footer">
+        <span class="order-date">{{ formatDate(order()!.created_at) }}</span>
+      </div>
+    </div>
+
+    <!-- Мой отклик -->
+    @if (myResponse()) {
+      <div class="card response-sent">
+        <div class="response-sent__icon">✓</div>
+        <div class="response-sent__body">
+          <p class="response-sent__title">Отклик отправлен</p>
+          <p class="response-sent__price">{{ formatPrice(myResponse()!.proposed_price) }}</p>
+          @if (myResponse()!.vehicle_type) {
+            <p class="response-sent__meta">{{ vehicleLabel(myResponse()!.vehicle_type) }}</p>
+          }
+          @if (myResponse()!.comment) {
+            <p class="response-sent__comment">{{ myResponse()!.comment }}</p>
+          }
+          @if (myResponse()!.status === 'selected') {
+            <div class="response-badge response-badge--selected">Вас выбрали!</div>
+          }
+          @if (myResponse()!.status === 'rejected') {
+            <div class="response-badge response-badge--rejected">Не выбрали</div>
+          }
+        </div>
+      </div>
+    } @else if (order()!.status === 'new') {
+      <div class="card">
+        <h2 class="card-title">Ваш отклик</h2>
+
+        @if (error()) {
+          <div class="form-error-box">{{ error() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="response-form">
+          <div class="form-field">
+            <label class="form-label" for="proposed_price">Ваша цена, ₽ *</label>
+            <input
+              id="proposed_price"
+              type="number"
+              class="form-input"
+              formControlName="proposed_price"
+              placeholder="Укажите стоимость"
+              min="1"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="vehicle_type">Тип транспорта</label>
+            <select id="vehicle_type" class="form-input" formControlName="vehicle_type">
+              <option value="">— не указан —</option>
+              @for (vt of vehicleTypes; track vt.value) {
+                <option [value]="vt.value">{{ vt.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="comment">Комментарий</label>
+            <textarea
+              id="comment"
+              class="form-input"
+              formControlName="comment"
+              rows="3"
+              placeholder="Дополнительная информация..."
+            ></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting()">
+            @if (submitting()) { Отправляем... } @else { Откликнуться }
+          </button>
+        </form>
+      </div>
+    } @else {
+      <p class="hint-text">Заявка уже не принимает отклики.</p>
+    }
+  }
+</div>
+
+<style>
+.back-link {
+  display: inline-block;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  margin-bottom: 16px;
+}
+.back-link:hover { color: var(--color-primary); }
+
+.order-detail { padding: 24px; margin-bottom: 16px; }
+.order-detail__section { margin-bottom: 20px; }
+.order-detail__route { display: flex; flex-direction: column; gap: 4px; }
+.route-point { display: flex; flex-direction: column; gap: 2px; }
+.route-arrow { font-size: 18px; color: var(--color-text-secondary); margin: 2px 0; }
+.route-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.route-address { font-size: 16px; font-weight: 600; }
+
+.section-label { font-size: 12px; color: var(--color-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 4px; }
+.section-value { font-size: 15px; margin: 0; }
+
+.order-detail__props {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border, #e8e8e8);
+  margin-bottom: 16px;
+}
+.prop { display: flex; flex-direction: column; gap: 2px; }
+.prop-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.prop-value { font-size: 14px; font-weight: 600; }
+
+.order-detail__footer { }
+.order-date { font-size: 12px; color: var(--color-text-secondary); }
+
+.card-title { font-size: 18px; font-weight: 700; margin: 0 0 20px; }
+
+.response-sent {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.response-sent__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e6f4ea;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.response-sent__title { font-size: 14px; color: var(--color-text-secondary); margin: 0 0 4px; }
+.response-sent__price { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+.response-sent__meta { font-size: 14px; color: var(--color-text-secondary); margin: 0 0 4px; }
+.response-sent__comment { font-size: 14px; margin: 0 0 8px; }
+.response-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.response-badge--selected { background: #e6f4ea; color: #2e7d32; }
+.response-badge--rejected { background: #fce8e6; color: #c62828; }
+
+.response-form { display: flex; flex-direction: column; gap: 16px; }
+.hint-text { color: var(--color-text-secondary); }
+</style>

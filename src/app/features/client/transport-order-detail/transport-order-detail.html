@@ -1,0 +1,268 @@
+<div class="main-content">
+  @if (loading()) {
+    <p class="hint-text">Загружаем заявку...</p>
+  } @else if (!order()) {
+    <p class="hint-text">Заявка не найдена.</p>
+  } @else {
+    <div class="page-header">
+      <a routerLink="/client/transport-orders" class="back-link">← Мои перевозки</a>
+      <span class="status-badge status-{{ order()!.status }}">{{ statusLabel(order()!.status) }}</span>
+    </div>
+
+    <!-- Детали заявки -->
+    <div class="card order-detail">
+      <div class="order-detail__route">
+        <div class="route-point">
+          <span class="route-label">Откуда</span>
+          <span class="route-address">{{ order()!.from_address }}</span>
+        </div>
+        <div class="route-arrow">↓</div>
+        <div class="route-point">
+          <span class="route-label">Куда</span>
+          <span class="route-address">{{ order()!.to_address }}</span>
+        </div>
+      </div>
+
+      <div class="order-detail__cargo">
+        <span class="prop-label">Груз</span>
+        <p class="cargo-desc">{{ order()!.cargo_description }}</p>
+      </div>
+
+      <div class="order-detail__props">
+        @if (order()!.cargo_weight_kg) {
+          <div class="prop">
+            <span class="prop-label">Вес</span>
+            <span class="prop-value">{{ order()!.cargo_weight_kg }} кг</span>
+          </div>
+        }
+        @if (order()!.cargo_volume_m3) {
+          <div class="prop">
+            <span class="prop-label">Объём</span>
+            <span class="prop-value">{{ order()!.cargo_volume_m3 }} м³</span>
+          </div>
+        }
+        @if (order()!.transport_date) {
+          <div class="prop">
+            <span class="prop-label">Дата</span>
+            <span class="prop-value">{{ formatDate(order()!.transport_date!) }}</span>
+          </div>
+        }
+        @if (order()!.budget) {
+          <div class="prop">
+            <span class="prop-label">Бюджет</span>
+            <span class="prop-value">до {{ formatPrice(order()!.budget!) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="order-detail__date">{{ formatDate(order()!.created_at) }}</div>
+    </div>
+
+    <!-- Завершить + рейтинг -->
+    @if (order()!.status === 'carrier_selected' && !order()!.rating) {
+      <div class="card">
+        <h2 class="card-section-title">Завершить заявку</h2>
+        <p class="hint-text" style="margin-bottom: 16px;">Оцените работу перевозчика и отметьте заявку завершённой.</p>
+        <div class="stars-row">
+          @for (n of starRange; track n) {
+            <button
+              type="button"
+              class="star-btn"
+              [class.star-btn--active]="starActive(n)"
+              (mouseenter)="ratingHovered.set(n)"
+              (mouseleave)="ratingHovered.set(0)"
+              (click)="ratingSelected.set(n)">★</button>
+          }
+        </div>
+        <textarea
+          class="form-input"
+          style="margin-top: 12px;"
+          rows="2"
+          placeholder="Отзыв (необязательно)"
+          [value]="reviewText()"
+          (input)="reviewText.set($any($event.target).value)">
+        </textarea>
+        <button
+          class="btn-primary"
+          style="margin-top: 12px;"
+          [disabled]="!ratingSelected() || actionLoading() === 'complete'"
+          (click)="complete()">
+          @if (actionLoading() === 'complete') { Сохраняем... } @else { Завершить заявку }
+        </button>
+      </div>
+    }
+
+    @if (order()!.status === 'completed' && order()!.rating) {
+      <div class="card rating-card">
+        <div class="rating-stars">{{ '★'.repeat(order()!.rating!) }}{{ '☆'.repeat(5 - order()!.rating!) }}</div>
+        @if (order()!.review_text) {
+          <p class="rating-review">{{ order()!.review_text }}</p>
+        }
+      </div>
+    }
+
+    <!-- Отклики перевозчиков -->
+    <div class="responses-section">
+      <h2 class="section-title">
+        Отклики перевозчиков
+        @if (responses().length > 0) {
+          <span class="count-badge">{{ responses().length }}</span>
+        }
+      </h2>
+
+      @if (responses().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <p class="empty-text">Перевозчики ещё не откликнулись</p>
+        </div>
+      } @else {
+        <div class="responses-list">
+          @for (r of responses(); track r.id) {
+            <div class="response-card card" [class.response-card--selected]="r.status === 'selected'">
+              <div class="response-card__head">
+                <div class="response-card__carrier">
+                  <span class="carrier-name">{{ r.profiles?.name ?? 'Перевозчик' }}</span>
+                  @if (r.vehicle_type) {
+                    <span class="vehicle-tag">{{ vehicleLabel(r.vehicle_type) }}</span>
+                  }
+                </div>
+                <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
+              </div>
+
+              @if (r.comment) {
+                <p class="response-card__comment">{{ r.comment }}</p>
+              }
+
+              <div class="response-card__footer">
+                <span class="response-date">{{ formatDate(r.created_at) }}</span>
+
+                @if (r.status === 'selected') {
+                  <span class="selected-badge">Выбран</span>
+                }
+
+                @if (order()!.status === 'new') {
+                  <button
+                    class="btn-primary btn-sm"
+                    [disabled]="actionLoading() === r.id"
+                    (click)="selectCarrier(r)">
+                    @if (actionLoading() === r.id) { Выбираем... } @else { Выбрать }
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<style>
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.back-link {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--color-primary); }
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f0f0f0;
+  color: var(--color-text-secondary);
+}
+.status-badge.status-new { background: #e3f2fd; color: #1565c0; }
+.status-badge.status-carrier_selected { background: #fff3e0; color: #e65100; }
+.status-badge.status-completed { background: #e8f5e9; color: #2e7d32; }
+
+.order-detail { padding: 24px; margin-bottom: 16px; }
+.order-detail__route { display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; }
+.route-point { display: flex; flex-direction: column; gap: 2px; }
+.route-arrow { font-size: 18px; color: var(--color-text-secondary); margin: 2px 0; }
+.route-label { font-size: 11px; color: var(--color-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.route-address { font-size: 16px; font-weight: 600; }
+
+.order-detail__cargo { margin-bottom: 16px; }
+.prop-label { font-size: 11px; color: var(--color-text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.cargo-desc { font-size: 15px; margin: 0; }
+
+.order-detail__props { display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; border-top: 1px solid var(--color-border, #e8e8e8); margin-bottom: 12px; }
+.prop { display: flex; flex-direction: column; gap: 2px; }
+.prop-value { font-size: 14px; font-weight: 600; }
+.order-detail__date { font-size: 12px; color: var(--color-text-secondary); }
+
+.card-section-title { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+.stars-row { display: flex; gap: 4px; }
+.star-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 28px; color: #ddd; padding: 2px;
+  transition: color .1s;
+}
+.star-btn--active { color: #f59e0b; }
+
+.rating-card { padding: 20px 24px; margin-bottom: 16px; }
+.rating-stars { font-size: 20px; color: #f59e0b; margin-bottom: 6px; }
+.rating-review { font-size: 15px; margin: 0; color: var(--color-text-secondary); }
+
+.responses-section { margin-top: 4px; }
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.count-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 5px;
+  border-radius: 11px; background: var(--color-primary); color: #fff;
+  font-size: 12px; font-weight: 700;
+}
+
+.responses-list { display: flex; flex-direction: column; gap: 12px; }
+.response-card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.response-card--selected { border: 1.5px solid var(--color-primary); }
+.response-card__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.response-card__carrier { display: flex; flex-direction: column; gap: 4px; }
+.carrier-name { font-weight: 600; font-size: 15px; }
+.vehicle-tag {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--color-bg-secondary, #f4f4f4);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.response-card__price { font-size: 18px; font-weight: 700; color: var(--color-primary); flex-shrink: 0; }
+.response-card__comment { font-size: 14px; margin: 0; color: var(--color-text); }
+.response-card__footer { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.response-date { font-size: 12px; color: var(--color-text-secondary); }
+.selected-badge {
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--color-primary); color: #fff;
+  font-size: 12px; font-weight: 600;
+}
+
+.hint-text { color: var(--color-text-secondary); }
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 12px; padding: 40px 20px; text-align: center;
+}
+.empty-icon { font-size: 36px; }
+.empty-text { font-size: 15px; color: var(--color-text-secondary); margin: 0; }
+</style>

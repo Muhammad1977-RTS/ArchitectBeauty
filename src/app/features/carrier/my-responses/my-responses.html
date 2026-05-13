@@ -1,0 +1,129 @@
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">Мои отклики</h1>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'all'" (click)="filter.set('all')">
+      Все <span class="tab-count">{{ responses().length }}</span>
+    </button>
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'active'" (click)="filter.set('active')">Активные</button>
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'selected'" (click)="filter.set('selected')">Выбраны</button>
+    <button class="filter-tab" [class.filter-tab--active]="filter() === 'completed'" (click)="filter.set('completed')">Завершены</button>
+  </div>
+
+  @if (loading()) {
+    <p class="hint-text">Загружаем отклики...</p>
+  } @else if (responses().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">📨</div>
+      <p class="empty-text">Вы ещё не откликались на заявки</p>
+      <a routerLink="/carrier/orders" class="btn-primary btn-sm">Смотреть заявки</a>
+    </div>
+  } @else if (filtered().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <p class="empty-text">Нет откликов в этой категории</p>
+    </div>
+  } @else {
+    <div class="responses-list">
+      @for (r of filtered(); track r.id) {
+        <a [routerLink]="['/carrier/orders', r.order_id]"
+           class="response-card card"
+           [class.response-card--selected]="isSelected(r)">
+          <div class="response-card__head">
+            <div class="response-card__route">
+              {{ r.transport_orders?.from_address ?? '—' }} → {{ r.transport_orders?.to_address ?? '—' }}
+            </div>
+            <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
+          </div>
+          <div class="response-card__footer">
+            <span class="status-label">{{ statusLabel(r) }}</span>
+            @if (isSelected(r)) {
+              <span class="selected-badge">Вас выбрали!</span>
+            }
+          </div>
+          @if (r.comment) {
+            <div class="response-card__comment">{{ r.comment }}</div>
+          }
+          <div class="response-card__date">Отклик от {{ formatDate(r.created_at) }}</div>
+        </a>
+      }
+    </div>
+  }
+</div>
+
+<style>
+.filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-tab {
+  padding: 7px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: none; font: inherit;
+  font-size: 13px; font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.filter-tab--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.tab-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 9px; background: rgba(255,255,255,0.25);
+  font-size: 11px; font-weight: 700;
+}
+.filter-tab:not(.filter-tab--active) .tab-count {
+  background: var(--color-border); color: var(--color-text-secondary);
+}
+
+.responses-list { display: flex; flex-direction: column; gap: 12px; }
+.response-card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-decoration: none;
+  color: inherit;
+}
+.response-card--selected { border: 1.5px solid var(--color-primary); }
+.response-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.response-card__route { font-weight: 600; font-size: 15px; line-height: 1.4; }
+.response-card__price { font-weight: 700; font-size: 16px; color: var(--color-primary); flex-shrink: 0; }
+.response-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.status-label { font-size: 13px; color: var(--color-text-secondary); }
+.response-card__comment { font-size: 14px; }
+.response-card__date { font-size: 12px; color: var(--color-text-secondary); }
+.selected-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+.hint-text { color: var(--color-text-secondary); }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.empty-icon { font-size: 40px; }
+.empty-text { font-size: 16px; color: var(--color-text-secondary); margin: 0; }
+</style>
