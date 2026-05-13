@@ -6,7 +6,7 @@
 
 **Запуск:** Чеченская Республика. Архитектура рассчитана на расширение по регионам РФ.
 
-**Стек:** Angular · Supabase Auth + PostgreSQL · Supabase Storage · Supabase Realtime
+**Стек:** Angular · NestJS (Prisma + PostgreSQL) · JWT Auth · REST API
 
 **Дизайн-система:** [DESIGN.md](DESIGN.md) — единственный источник истины по UI.
 
@@ -445,8 +445,9 @@ supabase
 
 - [x] Роль перевозчика ✅
 - [x] Роль строительного магазина ✅
-- [ ] Responsive UI на Angular (веб открывается нормально на телефоне)
-- [ ] Миграция с Supabase на NestJS — единый API для веба и мобилки
+- [x] Responsive UI на Angular ✅
+- [x] Миграция с Supabase на NestJS — единый API для веба и мобилки ✅
+- [ ] Сквозное тестирование: запустить NestJS + Angular, пройти полный цикл (регистрация → заявка → отклик → чат → завершение)
 - [ ] Flutter-приложение (Google Play + App Store) — поверх NestJS API
 - [ ] Онлайн-оплата (ЮKassa) — после NestJS, интегрируется и в веб и в Flutter
 
