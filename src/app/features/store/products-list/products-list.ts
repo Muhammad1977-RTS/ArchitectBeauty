@@ -1,12 +1,13 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { StoreService } from '../../../core/services/store.service';
 import { Product } from '../../../core/models/types';
 
 @Component({
   selector: 'app-store-products-list',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './products-list.html',
 })
 export class StoreProductsListComponent implements OnInit {

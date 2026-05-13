@@ -1,11 +1,12 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DecimalPipe } from '@angular/common';
 import { StoreService } from '../../../core/services/store.service';
 import { Product, StoreProfile } from '../../../core/models/types';
 
 @Component({
   selector: 'app-shop-detail',
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './shop-detail.html',
 })
 export class ShopDetailComponent implements OnInit {
