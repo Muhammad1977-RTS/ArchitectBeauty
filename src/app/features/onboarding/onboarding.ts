@@ -35,8 +35,7 @@ export class OnboardingComponent implements OnInit {
     const user = this.auth.user();
     if (!user) { await this.router.navigate(['/auth/login']); return; }
 
-    const role = user.user_metadata?.['role'] as UserRole | undefined;
-    this.role.set(role ?? 'client');
+    this.role.set((this.auth.appUser()?.role as UserRole) ?? 'client');
 
     const existing = await this.profile.getProfile(user.id);
     if (existing?.name) {

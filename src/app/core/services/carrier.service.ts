@@ -1,43 +1,33 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
-import {
-  TransportOrder,
-  TransportResponse,
-  CarrierProfile,
-  VehicleType,
-} from '../models/types';
+import { ApiService } from './api.service';
+import { TransportOrder, TransportResponse, CarrierProfile, VehicleType } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class CarrierService {
-  private supabase = inject(SupabaseService).client;
-
-  // ── Транспортные заявки ──────────────────────────────────────────────
+  private api = inject(ApiService);
 
   async getOpenTransportOrders(): Promise<TransportOrder[]> {
-    const { data } = await this.supabase
-      .from('transport_orders')
-      .select('*, profiles(id, name, phone, city_district, role, is_admin, created_at)')
-      .eq('status', 'new')
-      .order('created_at', { ascending: false });
-    return (data as TransportOrder[]) ?? [];
+    try {
+      return await this.api.get<TransportOrder[]>('/transport-orders');
+    } catch {
+      return [];
+    }
   }
 
   async getTransportOrderById(id: string): Promise<TransportOrder | null> {
-    const { data } = await this.supabase
-      .from('transport_orders')
-      .select('*, profiles(id, name, phone, city_district, role, is_admin, created_at)')
-      .eq('id', id)
-      .single();
-    return (data as TransportOrder) ?? null;
+    try {
+      return await this.api.get<TransportOrder>(`/transport-orders/${id}`);
+    } catch {
+      return null;
+    }
   }
 
-  async getClientTransportOrders(clientId: string): Promise<TransportOrder[]> {
-    const { data } = await this.supabase
-      .from('transport_orders')
-      .select('*')
-      .eq('client_id', clientId)
-      .order('created_at', { ascending: false });
-    return (data as TransportOrder[]) ?? [];
+  async getClientTransportOrders(_clientId: string): Promise<TransportOrder[]> {
+    try {
+      return await this.api.get<TransportOrder[]>('/transport-orders/my');
+    } catch {
+      return [];
+    }
   }
 
   async createTransportOrder(payload: {
@@ -50,81 +40,62 @@ export class CarrierService {
     transport_date?: string | null;
     budget?: number | null;
   }): Promise<TransportOrder | null> {
-    const { data } = await this.supabase
-      .from('transport_orders')
-      .insert(payload)
-      .select()
-      .single();
-    return (data as TransportOrder) ?? null;
+    try {
+      return await this.api.post<TransportOrder>('/transport-orders', {
+        fromAddress: payload.from_address,
+        toAddress: payload.to_address,
+        cargoDescription: payload.cargo_description,
+        cargoWeightKg: payload.cargo_weight_kg,
+        cargoVolumeM3: payload.cargo_volume_m3,
+        transportDate: payload.transport_date,
+        budget: payload.budget,
+      });
+    } catch {
+      return null;
+    }
   }
 
   async selectCarrier(orderId: string, carrierId: string): Promise<boolean> {
-    const { error } = await this.supabase
-      .from('transport_orders')
-      .update({ status: 'carrier_selected', selected_carrier_id: carrierId })
-      .eq('id', orderId);
-    if (error) return false;
-
-    await this.supabase
-      .from('transport_responses')
-      .update({ status: 'selected' })
-      .eq('order_id', orderId)
-      .eq('carrier_id', carrierId);
-
-    await this.supabase
-      .from('transport_responses')
-      .update({ status: 'rejected' })
-      .eq('order_id', orderId)
-      .neq('carrier_id', carrierId);
-
-    return true;
+    try {
+      await this.api.patch(`/transport-orders/${orderId}/select-carrier`, { carrierId });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  async completeTransportOrder(
-    orderId: string,
-    rating: number,
-    reviewText: string,
-  ): Promise<boolean> {
-    const { error } = await this.supabase
-      .from('transport_orders')
-      .update({ status: 'completed', rating, review_text: reviewText })
-      .eq('id', orderId);
-    return !error;
+  async completeTransportOrder(orderId: string, rating: number, reviewText: string): Promise<boolean> {
+    try {
+      await this.api.patch(`/transport-orders/${orderId}/complete`, { rating, reviewText });
+      return true;
+    } catch {
+      return false;
+    }
   }
-
-  // ── Отклики перевозчиков ─────────────────────────────────────────────
 
   async getResponsesForOrder(orderId: string): Promise<TransportResponse[]> {
-    const { data } = await this.supabase
-      .from('transport_responses')
-      .select('*, profiles(id, name, phone, city_district, role, is_admin, created_at)')
-      .eq('order_id', orderId)
-      .order('created_at', { ascending: true });
-    return (data as TransportResponse[]) ?? [];
+    try {
+      return await this.api.get<TransportResponse[]>(`/transport-responses/by-order/${orderId}`);
+    } catch {
+      return [];
+    }
   }
 
-  async getMyResponseForOrder(
-    orderId: string,
-    carrierId: string,
-  ): Promise<TransportResponse | null> {
-    const { data } = await this.supabase
-      .from('transport_responses')
-      .select('*')
-      .eq('order_id', orderId)
-      .eq('carrier_id', carrierId)
-      .maybeSingle();
-    return (data as TransportResponse) ?? null;
+  async getMyResponseForOrder(orderId: string, carrierId: string): Promise<TransportResponse | null> {
+    try {
+      const all = await this.api.get<TransportResponse[]>('/transport-responses/my');
+      return all.find((r: any) => r.order_id === orderId) ?? null;
+    } catch {
+      return null;
+    }
   }
 
-  async getMyResponses(carrierId: string): Promise<TransportResponse[]> {
-    const { data } = await this.supabase
-      .from('transport_responses')
-      .select(
-        '*, transport_orders(id, from_address, to_address, status, selected_carrier_id)',
-      )
-      .eq('carrier_id', carrierId)
-      .order('created_at', { ascending: false });
-    return (data as TransportResponse[]) ?? [];
+  async getMyResponses(_carrierId: string): Promise<TransportResponse[]> {
+    try {
+      return await this.api.get<TransportResponse[]>('/transport-responses/my');
+    } catch {
+      return [];
+    }
   }
 
   async createResponse(payload: {
@@ -134,29 +105,28 @@ export class CarrierService {
     comment?: string;
     vehicle_type?: VehicleType;
   }): Promise<TransportResponse | null> {
-    const { data } = await this.supabase
-      .from('transport_responses')
-      .insert(payload)
-      .select()
-      .single();
-    return (data as TransportResponse) ?? null;
+    try {
+      return await this.api.post<TransportResponse>('/transport-responses', {
+        orderId: payload.order_id,
+        proposedPrice: payload.proposed_price,
+        comment: payload.comment,
+        vehicleType: payload.vehicle_type,
+      });
+    } catch {
+      return null;
+    }
   }
 
-  // ── Профиль перевозчика (ставки) ─────────────────────────────────────
-
-  async getCarrierProfile(carrierId: string): Promise<CarrierProfile | null> {
-    const { data } = await this.supabase
-      .from('carrier_profiles')
-      .select('*')
-      .eq('carrier_id', carrierId)
-      .maybeSingle();
-    return (data as CarrierProfile) ?? null;
+  async getCarrierProfile(_carrierId: string): Promise<CarrierProfile | null> {
+    try {
+      const profile = await this.api.get<any>('/profiles/me');
+      return profile?.carrier_profile ?? null;
+    } catch {
+      return null;
+    }
   }
 
-  async saveCarrierProfile(profile: CarrierProfile): Promise<boolean> {
-    const { error } = await this.supabase
-      .from('carrier_profiles')
-      .upsert({ ...profile, updated_at: new Date().toISOString() });
-    return !error;
+  async saveCarrierProfile(_profile: CarrierProfile): Promise<boolean> {
+    return false;
   }
 }

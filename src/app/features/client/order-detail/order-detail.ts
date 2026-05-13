@@ -1,6 +1,5 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { ComplaintService } from '../../../core/services/complaint.service';
@@ -13,7 +12,7 @@ import { Order, OrderStatus, Response, MasterStats, Message } from '../../../cor
   imports: [RouterLink],
   templateUrl: './order-detail.html',
 })
-export class ClientOrderDetailComponent implements OnInit, OnDestroy {
+export class ClientOrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private auth = inject(AuthService);
@@ -59,7 +58,6 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
 
   currentUserId = '';
   private readonly loadedChats = new Set<string>();
-  private readonly channels: RealtimeChannel[] = [];
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -96,10 +94,6 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     this.loading.set(false);
   }
 
-  ngOnDestroy() {
-    for (const ch of this.channels) this.chatService.unsubscribe(ch);
-  }
-
   async toggleResponse(responseId: string, masterId: string) {
     const isOpening = this.expandedResponseId() !== responseId;
     this.expandedResponseId.update(cur => cur === responseId ? null : responseId);
@@ -116,16 +110,6 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     const msgs = await this.chatService.loadMessages(orderId, masterId);
     this.chatMessages.update(m => ({ ...m, [masterId]: msgs }));
 
-    const ch = this.chatService.subscribe(orderId, masterId, msg => {
-      this.chatMessages.update(m => {
-        const list = m[masterId] ?? [];
-        if (msg.sender_id === this.currentUserId) return m; // already added optimistically
-        if (list.some(x => x.id === msg.id)) return m;
-        return { ...m, [masterId]: [...list, msg] };
-      });
-      this.scrollChat(masterId);
-    });
-    this.channels.push(ch);
   }
 
   setChatDraft(masterId: string, text: string) {

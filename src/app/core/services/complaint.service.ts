@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
 
 export interface Complaint {
   id: string;
@@ -15,48 +15,47 @@ export interface Complaint {
 
 @Injectable({ providedIn: 'root' })
 export class ComplaintService {
-  private db = inject(SupabaseService).client;
+  private api = inject(ApiService);
 
   async submit(
     reporterId: string,
     reportedUserId: string,
-    reportedUserName: string,
+    _reportedUserName: string,
     reason: string,
-    orderId: string,
+    _orderId: string,
   ): Promise<boolean> {
-    const { error } = await this.db.from('complaints').insert({
-      reporter_id: reporterId,
-      reported_user_id: reportedUserId,
-      reported_user_name: reportedUserName,
-      reason,
-      order_id: orderId,
-    });
-    if (error) console.error('[complaint] submit:', error);
-    return !error;
+    try {
+      await this.api.post('/complaints', { reportedUserId, reason });
+      return true;
+    } catch (e) {
+      console.error('[complaint] submit:', e);
+      return false;
+    }
   }
 
   async getAll(): Promise<Complaint[]> {
-    const { data, error } = await this.db
-      .from('complaints')
-      .select('*, reporter:profiles!reporter_id(name)')
-      .order('created_at', { ascending: false });
-    if (error) console.error('[complaint] getAll:', error);
-    return (data as Complaint[]) ?? [];
+    try {
+      return await this.api.get<Complaint[]>('/complaints');
+    } catch {
+      return [];
+    }
   }
 
   async dismiss(id: string): Promise<boolean> {
-    const { error } = await this.db
-      .from('complaints')
-      .update({ status: 'dismissed' })
-      .eq('id', id);
-    return !error;
+    try {
+      await this.api.patch(`/complaints/${id}/status`, { status: 'dismissed' });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async markReviewed(id: string): Promise<boolean> {
-    const { error } = await this.db
-      .from('complaints')
-      .update({ status: 'reviewed' })
-      .eq('id', id);
-    return !error;
+    try {
+      await this.api.patch(`/complaints/${id}/status`, { status: 'reviewed' });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

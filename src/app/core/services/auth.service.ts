@@ -1,44 +1,64 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
-import { Session, User } from '@supabase/supabase-js';
-import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
 import { UserRole } from '../models/types';
+
+export interface AppUser {
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  phone: string | null;
+  cityDistrict: string | null;
+  isAdmin: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private db = inject(SupabaseService).client;
+  private api = inject(ApiService);
   private router = inject(Router);
 
-  readonly session = signal<Session | null>(null);
+  readonly appUser = signal<AppUser | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
-  readonly user = computed<User | null>(() => this.session()?.user ?? null);
-  readonly isAuthenticated = computed(() => !!this.session());
+  readonly user = computed(() => this.appUser());
+  readonly isAuthenticated = computed(() => !!this.appUser());
 
   constructor() {
-    this.db.auth.getSession().then(({ data }) => {
-      this.session.set(data.session);
-    });
-    this.db.auth.onAuthStateChange((_, session) => {
-      this.session.set(session);
-    });
+    this.restoreSession();
   }
 
-  async signUp(email: string, password: string, role: UserRole): Promise<boolean> {
+  private restoreSession() {
+    const token = localStorage.getItem('jwt');
+    const userJson = localStorage.getItem('app_user');
+    if (token && userJson) {
+      try {
+        this.appUser.set(JSON.parse(userJson));
+      } catch {
+        this.clearStorage();
+      }
+    }
+  }
+
+  private clearStorage() {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('app_user');
+  }
+
+  async signUp(email: string, password: string, role: UserRole, name = ''): Promise<boolean> {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const { error } = await this.db.auth.signUp({
-        email,
-        password,
-        options: { data: { role } },
+      const res = await this.api.post<{ token: string; user: AppUser }>('/auth/register', {
+        email, password, role, name,
       });
-      if (error) throw error;
+      localStorage.setItem('jwt', res.token);
+      localStorage.setItem('app_user', JSON.stringify(res.user));
+      this.appUser.set(res.user);
       return true;
     } catch (e: any) {
-      console.error('[signUp error]', e);
-      this.error.set(this.mapError(e.message));
+      this.error.set(this.mapError(e));
       return false;
     } finally {
       this.loading.set(false);
@@ -49,11 +69,15 @@ export class AuthService {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const { error } = await this.db.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const res = await this.api.post<{ token: string; user: AppUser }>('/auth/login', {
+        email, password,
+      });
+      localStorage.setItem('jwt', res.token);
+      localStorage.setItem('app_user', JSON.stringify(res.user));
+      this.appUser.set(res.user);
       return true;
     } catch (e: any) {
-      this.error.set(this.mapError(e.message));
+      this.error.set(this.mapError(e));
       return false;
     } finally {
       this.loading.set(false);
@@ -61,30 +85,16 @@ export class AuthService {
   }
 
   async signOut(): Promise<void> {
-    await this.db.auth.signOut();
+    this.clearStorage();
+    this.appUser.set(null);
     await this.router.navigate(['/auth/login']);
   }
 
-  async resetPassword(email: string): Promise<boolean> {
-    this.loading.set(true);
-    this.error.set(null);
-    try {
-      const { error } = await this.db.auth.resetPasswordForEmail(email);
-      if (error) throw error;
-      return true;
-    } catch (e: any) {
-      this.error.set(this.mapError(e.message));
-      return false;
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  private mapError(msg: string): string {
-    if (msg.includes('Invalid login credentials')) return 'Неверный email или пароль';
-    if (msg.includes('User already registered')) return 'Пользователь с таким email уже существует';
-    if (msg.includes('Password should be at least')) return 'Пароль должен содержать минимум 6 символов';
-    if (msg.includes('Unable to validate email')) return 'Неверный формат email';
+  private mapError(e: any): string {
+    const msg: string = e?.error?.message ?? e?.message ?? '';
+    if (msg.includes('already registered') || msg.includes('Conflict')) return 'Пользователь с таким email уже существует';
+    if (msg.includes('Invalid credentials') || msg.includes('Unauthorized')) return 'Неверный email или пароль';
+    if (msg.includes('at least')) return 'Пароль должен содержать минимум 6 символов';
     return 'Произошла ошибка. Попробуйте снова.';
   }
 }

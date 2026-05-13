@@ -1,6 +1,5 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { OrderService } from '../../../core/services/order.service';
@@ -11,7 +10,7 @@ import { Order } from '../../../core/models/types';
   imports: [RouterLink],
   templateUrl: './orders-browse.html',
 })
-export class MasterOrdersBrowseComponent implements OnInit, OnDestroy {
+export class MasterOrdersBrowseComponent implements OnInit {
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
   private chatService = inject(ChatService);
@@ -19,8 +18,6 @@ export class MasterOrdersBrowseComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly orders = signal<Order[]>([]);
   readonly unreadCounts = signal<Map<string, number>>(new Map());
-
-  private inboxChannel: RealtimeChannel | null = null;
 
   async ngOnInit() {
     const user = this.auth.user();
@@ -31,18 +28,6 @@ export class MasterOrdersBrowseComponent implements OnInit, OnDestroy {
     this.orders.set(orders);
     this.unreadCounts.set(unread);
     this.loading.set(false);
-
-    if (user) {
-      this.inboxChannel = this.chatService.subscribeToInbox(user.id, () => {
-        this.chatService.getUnreadCountsForMaster(user.id).then(counts => {
-          this.unreadCounts.set(counts);
-        });
-      });
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.inboxChannel) this.chatService.unsubscribe(this.inboxChannel);
   }
 
   unreadCount(orderId: string): number {

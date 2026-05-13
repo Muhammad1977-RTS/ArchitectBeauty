@@ -1,10 +1,10 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
-import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
+import { signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
-import { ProfileService } from '../../../core/services/profile.service';
-import { UserRole } from '../../../core/models/types';
 
 @Component({
   selector: 'app-nav',
@@ -13,12 +13,11 @@ import { UserRole } from '../../../core/models/types';
 })
 export class NavComponent {
   readonly auth = inject(AuthService);
-  private profileService = inject(ProfileService);
   private router = inject(Router);
 
   readonly isAuthenticated = this.auth.isAuthenticated;
-  readonly role = signal<UserRole | null>(null);
-  readonly isAdmin = signal(false);
+  readonly role = computed(() => this.auth.appUser()?.role ?? null);
+  readonly isAdmin = computed(() => this.auth.appUser()?.isAdmin ?? false);
   readonly menuOpen = signal(false);
 
   readonly isAuthPage = toSignal(
@@ -31,14 +30,6 @@ export class NavComponent {
   );
 
   constructor() {
-    effect(async () => {
-      const user = this.auth.user();
-      if (!user) { this.role.set(null); this.isAdmin.set(false); return; }
-      const profile = await this.profileService.getProfile(user.id);
-      this.role.set(profile?.role ?? null);
-      this.isAdmin.set(profile?.is_admin ?? false);
-    }, { allowSignalWrites: true });
-
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       takeUntilDestroyed(),

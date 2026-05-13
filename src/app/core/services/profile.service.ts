@@ -1,69 +1,72 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
 import { Profile, MasterRate, WorkType } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
-  private db = inject(SupabaseService).client;
+  private api = inject(ApiService);
 
   async getProfile(userId: string): Promise<Profile | null> {
-    const { data, error } = await this.db
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    if (error) return null;
-    return data as Profile;
+    try {
+      return await this.api.get<Profile>('/profiles/me');
+    } catch {
+      return null;
+    }
   }
 
   async updateProfile(userId: string, updates: Partial<Pick<Profile, 'name' | 'phone' | 'city_district'>>): Promise<boolean> {
-    const { error } = await this.db
-      .from('profiles')
-      .update(updates)
-      .eq('id', userId);
-    return !error;
+    try {
+      await this.api.patch('/profiles/me', {
+        name: updates.name,
+        phone: updates.phone,
+        cityDistrict: updates.city_district,
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async getWorkTypes(): Promise<WorkType[]> {
-    const { data } = await this.db
-      .from('work_types')
-      .select('*')
-      .order('name');
-    return (data as WorkType[]) ?? [];
+    try {
+      return await this.api.get<WorkType[]>('/work-types');
+    } catch {
+      return [];
+    }
   }
 
   async getMasterRates(masterId: string): Promise<MasterRate[]> {
-    const { data } = await this.db
-      .from('master_rates')
-      .select('*, work_types(id, name, slug)')
-      .eq('master_id', masterId);
-    return (data as MasterRate[]) ?? [];
+    try {
+      const profile = await this.api.get<any>(`/profiles/${masterId}`);
+      return profile?.master_rates ?? [];
+    } catch {
+      return [];
+    }
   }
 
   async upsertMasterRate(masterId: string, workTypeId: string, ratePerSqm: number): Promise<boolean> {
-    const { error } = await this.db
-      .from('master_rates')
-      .upsert({ master_id: masterId, work_type_id: workTypeId, rate_per_sqm: ratePerSqm });
-    return !error;
+    try {
+      await this.api.post('/master-rates', { workTypeId, ratePerSqm });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async deleteMasterRate(masterId: string, workTypeId: string): Promise<boolean> {
-    const { error } = await this.db
-      .from('master_rates')
-      .delete()
-      .eq('master_id', masterId)
-      .eq('work_type_id', workTypeId);
-    return !error;
+    try {
+      await this.api.delete(`/master-rates/${workTypeId}`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async getMasterById(masterId: string): Promise<(Profile & { master_rates: MasterRate[] }) | null> {
-    const { data, error } = await this.db
-      .from('profiles')
-      .select('*, master_rates(*, work_types(id, name, slug))')
-      .eq('id', masterId)
-      .eq('role', 'master')
-      .single();
-    if (error) return null;
-    return data as any;
+    try {
+      return await this.api.get<any>(`/profiles/${masterId}`);
+    } catch {
+      return null;
+    }
   }
 }

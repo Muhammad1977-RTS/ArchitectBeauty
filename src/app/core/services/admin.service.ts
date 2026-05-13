@@ -1,49 +1,51 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
+import { ApiService } from './api.service';
 import { Profile, WorkType } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private db = inject(SupabaseService).client;
+  private api = inject(ApiService);
 
-  async getUsers(role?: 'client' | 'master'): Promise<Profile[]> {
-    let query = this.db
-      .from('profiles')
-      .select('*')
-      .eq('is_admin', false)
-      .order('created_at', { ascending: false });
-    if (role) query = query.eq('role', role);
-    const { data, error } = await query;
-    if (error) console.error('[admin] getUsers:', error);
-    return (data as Profile[]) ?? [];
+  async getUsers(_role?: 'client' | 'master'): Promise<Profile[]> {
+    try {
+      return await this.api.get<Profile[]>('/admin/users');
+    } catch {
+      return [];
+    }
   }
 
   async deleteUser(userId: string): Promise<boolean> {
-    const { error } = await this.db
-      .from('profiles')
-      .delete()
-      .eq('id', userId);
-    if (error) console.error('[admin] deleteUser:', error);
-    return !error;
+    try {
+      await this.api.delete(`/admin/users/${userId}`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async getWorkTypes(): Promise<WorkType[]> {
-    const { data } = await this.db
-      .from('work_types')
-      .select('*')
-      .order('name');
-    return (data as WorkType[]) ?? [];
+    try {
+      return await this.api.get<WorkType[]>('/work-types');
+    } catch {
+      return [];
+    }
   }
 
   async addWorkType(name: string, slug: string): Promise<boolean> {
-    const { error } = await this.db.from('work_types').insert({ name, slug });
-    if (error) console.error('[admin] addWorkType:', error);
-    return !error;
+    try {
+      await this.api.post('/work-types', { name, slug });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async deleteWorkType(id: string): Promise<boolean> {
-    const { error } = await this.db.from('work_types').delete().eq('id', id);
-    if (error) console.error('[admin] deleteWorkType:', error);
-    return !error;
+    try {
+      await this.api.delete(`/work-types/${id}`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

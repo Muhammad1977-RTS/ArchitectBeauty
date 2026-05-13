@@ -1,6 +1,5 @@
-import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { OrderService } from '../../../core/services/order.service';
@@ -14,7 +13,7 @@ type Filter = OrderStatus | 'all';
   imports: [RouterLink],
   templateUrl: './orders-list.html',
 })
-export class ClientOrdersListComponent implements OnInit, OnDestroy {
+export class ClientOrdersListComponent implements OnInit {
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
   private chatService = inject(ChatService);
@@ -26,9 +25,6 @@ export class ClientOrdersListComponent implements OnInit, OnDestroy {
   readonly deleting = signal<string | null>(null);
   readonly unreadCounts = signal<Map<string, number>>(new Map());
   readonly newResponseCounts = signal<Map<string, number>>(new Map());
-
-  private responseChannel: RealtimeChannel | null = null;
-  private messageChannel: RealtimeChannel | null = null;
 
   readonly filtered = computed(() => {
     const f = this.filter();
@@ -56,30 +52,6 @@ export class ClientOrdersListComponent implements OnInit, OnDestroy {
     this.newResponseCounts.set(newResponses);
     this.loading.set(false);
 
-    this.responseChannel = this.responseService.subscribeToNewResponses(orderId => {
-      if (this.orders().some(o => o.id === orderId)) {
-        this.newResponseCounts.update(m => {
-          const next = new Map(m);
-          next.set(orderId, (next.get(orderId) ?? 0) + 1);
-          return next;
-        });
-      }
-    });
-
-    this.messageChannel = this.chatService.subscribeToClientInbox(user.id, orderId => {
-      if (this.orders().some(o => o.id === orderId)) {
-        this.unreadCounts.update(m => {
-          const next = new Map(m);
-          next.set(orderId, (next.get(orderId) ?? 0) + 1);
-          return next;
-        });
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.responseChannel) this.responseService.unsubscribeFromResponses(this.responseChannel);
-    if (this.messageChannel) this.chatService.unsubscribe(this.messageChannel);
   }
 
   unreadCount(orderId: string): number {

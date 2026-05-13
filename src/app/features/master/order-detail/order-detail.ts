@@ -1,7 +1,6 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { RealtimeChannel } from '@supabase/supabase-js';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { ComplaintService } from '../../../core/services/complaint.service';
@@ -14,7 +13,7 @@ import { Order, Response, Message } from '../../../core/models/types';
   imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './order-detail.html',
 })
-export class MasterOrderDetailComponent implements OnInit, OnDestroy {
+export class MasterOrderDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
@@ -39,7 +38,6 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
   readonly complaintSent = signal(false);
 
   currentUserId = '';
-  private channel: RealtimeChannel | null = null;
 
   form = this.fb.group({
     proposed_price: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -74,24 +72,9 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
       this.chatMessages.set(msgs);
       await this.chatService.markAsRead(order.id, user.id);
 
-      this.channel = this.chatService.subscribe(order.id, user.id, msg => {
-        this.chatMessages.update(list => {
-          if (msg.sender_id === this.currentUserId) return list;
-          if (list.some(x => x.id === msg.id)) return list;
-          return [...list, msg];
-        });
-        this.scrollChat();
-        if (msg.sender_id !== this.currentUserId) {
-          this.chatService.markAsRead(order.id, user.id);
-        }
-      });
     }
 
     this.loading.set(false);
-  }
-
-  ngOnDestroy() {
-    if (this.channel) this.chatService.unsubscribe(this.channel);
   }
 
   async sendMessage() {

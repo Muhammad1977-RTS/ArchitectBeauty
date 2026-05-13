@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { SupabaseService } from './supabase.service';
-import { Order, OrderStatus, MasterStats } from '../models/types';
+import { ApiService } from './api.service';
+import { Order, OrderStatus } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
-  private db = inject(SupabaseService).client;
+  private api = inject(ApiService);
 
   async createOrder(data: {
     client_id: string;
@@ -14,72 +14,74 @@ export class OrderService {
     description: string;
     photo_urls: string[];
   }): Promise<Order | null> {
-    const { data: order, error } = await this.db
-      .from('orders')
-      .insert(data)
-      .select()
-      .single();
-    if (error) { console.error(error); return null; }
-    return order as Order;
+    try {
+      return await this.api.post<Order>('/orders', {
+        workTypeId: data.work_type_id,
+        areaSqm: data.area_sqm,
+        address: data.address,
+        description: data.description,
+        photoUrls: data.photo_urls,
+      });
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
   }
 
   async getClientOrders(clientId: string): Promise<Order[]> {
-    const { data } = await this.db
-      .from('orders')
-      .select('*, work_types(id, name, slug)')
-      .eq('client_id', clientId)
-      .order('created_at', { ascending: false });
-    return (data as Order[]) ?? [];
+    try {
+      return await this.api.get<Order[]>('/orders/my');
+    } catch {
+      return [];
+    }
   }
 
   async getOrderById(id: string): Promise<Order | null> {
-    const { data, error } = await this.db
-      .from('orders')
-      .select('*, work_types(id, name, slug)')
-      .eq('id', id)
-      .single();
-    if (error) return null;
-    return data as Order;
+    try {
+      return await this.api.get<Order>(`/orders/${id}`);
+    } catch {
+      return null;
+    }
   }
 
   async getOpenOrders(): Promise<Order[]> {
-    const { data } = await this.db
-      .from('orders')
-      .select('*, work_types(id, name, slug), profiles!client_id(name, city_district)')
-      .eq('status', 'new')
-      .order('created_at', { ascending: false });
-    return (data as Order[]) ?? [];
+    try {
+      return await this.api.get<Order[]>('/orders');
+    } catch {
+      return [];
+    }
   }
 
-  async updateOrderStatus(
-    id: string,
-    status: OrderStatus,
-    selectedMasterId?: string
-  ): Promise<boolean> {
-    const updates: Partial<Order> = { status };
-    if (selectedMasterId) updates.selected_master_id = selectedMasterId;
-    const { error } = await this.db.from('orders').update(updates).eq('id', id);
-    return !error;
+  async updateOrderStatus(id: string, status: OrderStatus, selectedMasterId?: string): Promise<boolean> {
+    try {
+      if (status === 'master_selected' && selectedMasterId) {
+        await this.api.patch(`/orders/${id}/select-master`, { masterId: selectedMasterId });
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async rateOrder(id: string, rating: number, reviewText?: string): Promise<boolean> {
-    const { error } = await this.db
-      .from('orders')
-      .update({ rating, review_text: reviewText || null })
-      .eq('id', id);
-    return !error;
+    try {
+      await this.api.patch(`/orders/${id}/complete`, { rating, reviewText });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  async getMasterStats(masterIds: string[]): Promise<MasterStats[]> {
-    const { data } = await this.db
-      .from('master_stats')
-      .select('*')
-      .in('master_id', masterIds);
-    return (data as MasterStats[]) ?? [];
+  async getMasterStats(_masterIds: string[]): Promise<any[]> {
+    return [];
   }
 
   async deleteOrder(id: string): Promise<boolean> {
-    const { error } = await this.db.from('orders').delete().eq('id', id);
-    return !error;
+    try {
+      await this.api.delete(`/orders/${id}`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

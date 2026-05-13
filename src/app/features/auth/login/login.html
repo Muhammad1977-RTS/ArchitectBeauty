@@ -10,98 +10,56 @@
       <h1 class="auth-title">Маст<span class="accent-e">е</span>ро</h1>
     </div>
 
-    @if (!showReset()) {
-      <h2 class="auth-heading">Войти</h2>
+    <h2 class="auth-heading">Войти</h2>
 
-      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
-        @if (error()) {
-          <div class="form-error-box">{{ error() }}</div>
-        }
-
-        <div class="form-field">
-          <label class="form-label" for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            class="form-input"
-            formControlName="email"
-            placeholder="you@example.com"
-            autocomplete="email"
-          />
-          @if (form.get('email')!.invalid && form.get('email')!.touched) {
-            <span class="field-error">Введите корректный email</span>
-          }
-        </div>
-
-        <div class="form-field">
-          <label class="form-label" for="password">Пароль</label>
-          <div class="password-wrap">
-            <input
-              id="password"
-              [type]="showPassword() ? 'text' : 'password'"
-              class="form-input"
-              formControlName="password"
-              placeholder="Ваш пароль"
-              autocomplete="current-password"
-            />
-            <button type="button" class="password-toggle" (click)="showPassword.set(!showPassword())" [attr.aria-label]="showPassword() ? 'Скрыть пароль' : 'Показать пароль'">
-              @if (showPassword()) {
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-              } @else {
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              }
-            </button>
-          </div>
-          @if (form.get('password')!.invalid && form.get('password')!.touched) {
-            <span class="field-error">Введите пароль</span>
-          }
-        </div>
-
-        <button
-          type="button"
-          class="forgot-link"
-          (click)="showReset.set(true)"
-        >Забыли пароль?</button>
-
-        <button type="submit" class="btn-primary" [disabled]="loading()">
-          @if (loading()) { Вход... } @else { Войти }
-        </button>
-      </form>
-
-    } @else {
-      <h2 class="auth-heading">Сброс пароля</h2>
-
-      @if (resetSent()) {
-        <div class="success-box">
-          Ссылка для сброса отправлена на вашу почту
-        </div>
-        <button class="auth-link block-link" (click)="showReset.set(false); resetSent.set(false)">
-          Вернуться к входу
-        </button>
-      } @else {
-        <form [formGroup]="resetForm" (ngSubmit)="sendReset()" class="auth-form">
-          @if (error()) {
-            <div class="form-error-box">{{ error() }}</div>
-          }
-          <div class="form-field">
-            <label class="form-label" for="reset-email">Email</label>
-            <input
-              id="reset-email"
-              type="email"
-              class="form-input"
-              formControlName="email"
-              placeholder="you@example.com"
-            />
-          </div>
-          <button type="submit" class="btn-primary" [disabled]="resetForm.invalid || loading()">
-            @if (loading()) { Отправка... } @else { Отправить ссылку }
-          </button>
-          <button type="button" class="auth-link block-link" (click)="showReset.set(false)">
-            Назад
-          </button>
-        </form>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+      @if (error()) {
+        <div class="form-error-box">{{ error() }}</div>
       }
-    }
+
+      <div class="form-field">
+        <label class="form-label" for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          class="form-input"
+          formControlName="email"
+          placeholder="you@example.com"
+          autocomplete="email"
+        />
+        @if (form.get('email')!.invalid && form.get('email')!.touched) {
+          <span class="field-error">Введите корректный email</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="password">Пароль</label>
+        <div class="password-wrap">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            class="form-input"
+            formControlName="password"
+            placeholder="Ваш пароль"
+            autocomplete="current-password"
+          />
+          <button type="button" class="password-toggle" (click)="showPassword.set(!showPassword())" [attr.aria-label]="showPassword() ? 'Скрыть пароль' : 'Показать пароль'">
+            @if (showPassword()) {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            } @else {
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            }
+          </button>
+        </div>
+        @if (form.get('password')!.invalid && form.get('password')!.touched) {
+          <span class="field-error">Введите пароль</span>
+        }
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        @if (loading()) { Вход... } @else { Войти }
+      </button>
+    </form>
 
     <p class="auth-footer">
       Нет аккаунта?
