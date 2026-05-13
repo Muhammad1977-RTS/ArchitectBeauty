@@ -445,9 +445,10 @@ supabase
 
 - [x] Роль перевозчика ✅
 - [x] Роль строительного магазина ✅
-- [ ] Мобильная версия (responsive UI) — до платёжки
-- [ ] Миграция с Supabase на NestJS — после мобилки, до платёжки (платёжка требует бэкенд для вебхуков)
-- [ ] Онлайн-оплата — после миграции на NestJS
+- [ ] Responsive UI на Angular (веб открывается нормально на телефоне)
+- [ ] Миграция с Supabase на NestJS — единый API для веба и мобилки
+- [ ] Flutter-приложение (Google Play + App Store) — поверх NestJS API
+- [ ] Онлайн-оплата (ЮKassa) — после NestJS, интегрируется и в веб и в Flutter
 
 ---
 
@@ -461,7 +462,7 @@ supabase
 | Онлайн-оплата | ⏳ после миграции на NestJS |
 | Email-уведомления | Supabase webhook → Edge Function → Resend |
 | Портфолио мастера | важно для доверия |
-| iOS / Android | PWA достаточно для MVP |
+| iOS / Android (Flutter) | 🔜 после NestJS миграции |
 
 ---
 
@@ -531,3 +532,38 @@ NestJS API
 - `SupabaseService` → базовый `HttpClient` сервис
 - `AuthService` — логин/регистрация через REST вместо supabase-js
 - Все методы в сервисах (`ProfileService`, `CarrierService` и т.д.) — запросы через `HttpClient`
+
+---
+
+## Мобильное приложение (Flutter)
+
+### Почему Flutter
+- Попадание в Google Play и App Store
+- Нативная плавность и скорость (рисует UI сам, без WebView)
+- Один код → iOS + Android
+- Подходит для маркетплейса: списки, карточки, формы, уведомления
+
+### Стек
+
+| Слой | Технология |
+|---|---|
+| Мобильный фреймворк | Flutter (Dart) |
+| Навигация | GoRouter |
+| Состояние | Riverpod |
+| HTTP клиент | Dio |
+| Бэкенд | NestJS REST API (тот же, что и для веба) |
+| Оплата | ЮKassa Flutter SDK |
+| Push-уведомления | Firebase Cloud Messaging (FCM) |
+
+### Архитектура
+
+```
+Angular (веб)  ──┐
+                  ├──► NestJS API ──► PostgreSQL
+Flutter (mobile)──┘
+```
+
+Оба клиента работают с одним бэкендом. Бизнес-логика не дублируется.
+
+### Когда делать
+После миграции на NestJS — Flutter-приложение строится поверх уже готового REST API.
