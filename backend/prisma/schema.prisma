@@ -152,21 +152,21 @@ model CarrierProfile {
 }
 
 model TransportOrder {
-  id               String    @id @default(uuid())
-  clientId         String    @map("client_id")
-  fromAddress      String    @map("from_address")
-  toAddress        String    @map("to_address")
-  cargoDescription String    @map("cargo_description")
-  cargoWeightKg    Decimal?  @map("cargo_weight_kg") @db.Decimal(10, 2)
-  cargoVolumeM3    Decimal?  @map("cargo_volume_m3") @db.Decimal(10, 2)
-  transportDate    DateTime? @map("transport_date") @db.Date
-  budget           Decimal?  @db.Decimal(10, 2)
-  status           String    @default("new")
-  selectedCarrierId String?  @map("selected_carrier_id")
-  rating           Int?
-  reviewText       String?   @map("review_text")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id                String    @id @default(uuid())
+  clientId          String    @map("client_id")
+  fromAddress       String    @map("from_address")
+  toAddress         String    @map("to_address")
+  cargoDescription  String    @map("cargo_description")
+  cargoWeightKg     Decimal?  @map("cargo_weight_kg") @db.Decimal(10, 2)
+  cargoVolumeM3     Decimal?  @map("cargo_volume_m3") @db.Decimal(10, 2)
+  transportDate     DateTime? @map("transport_date") @db.Date
+  budget            Decimal?  @db.Decimal(10, 2)
+  status            String    @default("new")
+  selectedCarrierId String?   @map("selected_carrier_id")
+  rating            Int?
+  reviewText        String?   @map("review_text")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   client          Profile             @relation("ClientTransportOrders", fields: [clientId], references: [id], onDelete: Cascade)
   selectedCarrier Profile?            @relation("SelectedCarrier", fields: [selectedCarrierId], references: [id])
