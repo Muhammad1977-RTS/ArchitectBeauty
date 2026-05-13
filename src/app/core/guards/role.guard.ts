@@ -27,6 +27,7 @@ export const roleGuard: CanActivateFn = async (route: ActivatedRouteSnapshot) =>
       master: '/master/orders',
       carrier: '/carrier/orders',
       client: '/client/orders',
+      store: '/store/products',
     };
     const redirectTo = redirectMap[profile?.role ?? ''] ?? '/client/orders';
     await router.navigate([redirectTo]);

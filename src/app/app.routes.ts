@@ -116,6 +116,50 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'store',
+    canActivate: [authGuard, roleGuard],
+    data: { role: 'store' },
+    children: [
+      {
+        path: 'products',
+        loadComponent: () =>
+          import('./features/store/products-list/products-list').then(m => m.StoreProductsListComponent),
+      },
+      {
+        path: 'products/new',
+        loadComponent: () =>
+          import('./features/store/product-form/product-form').then(m => m.ProductFormComponent),
+      },
+      {
+        path: 'products/:id/edit',
+        loadComponent: () =>
+          import('./features/store/product-form/product-form').then(m => m.ProductFormComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./features/store/store-profile/store-profile').then(m => m.StoreProfileComponent),
+      },
+      { path: '', redirectTo: 'products', pathMatch: 'full' },
+    ],
+  },
+  {
+    path: 'shops',
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/shops/shops-list/shops-list').then(m => m.ShopsListComponent),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./features/shops/shop-detail/shop-detail').then(m => m.ShopDetailComponent),
+      },
+    ],
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     children: [

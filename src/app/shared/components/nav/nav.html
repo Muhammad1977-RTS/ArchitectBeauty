@@ -23,6 +23,13 @@
         <a routerLink="/carrier/orders" routerLinkActive="nav-link--active" class="nav-link">Заявки</a>
         <a routerLink="/carrier/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
       }
+      @if (role() === 'store') {
+        <a routerLink="/store/products" routerLinkActive="nav-link--active" class="nav-link">Мои товары</a>
+        <a routerLink="/store/profile" routerLinkActive="nav-link--active" class="nav-link">Профиль магазина</a>
+      }
+      @if (role() !== 'store') {
+        <a routerLink="/shops" routerLinkActive="nav-link--active" class="nav-link">Магазины</a>
+      }
     </div>
     <div class="nav-right">
       @if (isAdmin()) {

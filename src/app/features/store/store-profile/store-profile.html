@@ -1,0 +1,46 @@
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">Профиль магазина</h1>
+    <a routerLink="/store/products" class="btn-secondary btn-sm">← Мои товары</a>
+  </div>
+
+  <div class="form-card">
+    @if (error()) {
+      <div class="form-error-box">{{ error() }}</div>
+    }
+    @if (saved()) {
+      <div class="form-success-box">Профиль сохранён</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="auth-form">
+      <div class="form-field">
+        <label class="form-label" for="store_name">Название магазина *</label>
+        <input id="store_name" type="text" class="form-input" formControlName="store_name" placeholder="Строитель Плюс" />
+        @if (form.get('store_name')?.invalid && form.get('store_name')?.touched) {
+          <span class="field-error">Введите название магазина</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="address">Адрес</label>
+        <input id="address" type="text" class="form-input" formControlName="address" placeholder="ул. Ленина, 12" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="description">Описание магазина</label>
+        <textarea id="description" class="form-input form-textarea" formControlName="description" placeholder="Кратко о магазине, ассортименте, графике работы" rows="4"></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || saving()">
+        {{ saving() ? 'Сохранение...' : 'Сохранить' }}
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.form-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 28px; max-width: 520px; }
+.form-textarea { resize: vertical; }
+.form-success-box { background: #E8F5E9; color: #2E7D32; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 14px; }
+</style>

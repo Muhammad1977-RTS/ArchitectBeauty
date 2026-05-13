@@ -1,4 +1,4 @@
-export type UserRole = 'client' | 'master' | 'carrier';
+export type UserRole = 'client' | 'master' | 'carrier' | 'store';
 
 export type OrderStatus = 'new' | 'master_selected' | 'completed';
 
@@ -102,6 +102,29 @@ export interface TransportResponse {
   created_at: string;
   profiles?: Profile;
   transport_orders?: Pick<TransportOrder, 'id' | 'from_address' | 'to_address' | 'status' | 'selected_carrier_id'>;
+}
+
+export type ProductUnit = 'шт' | 'м²' | 'кг' | 'л' | 'уп';
+
+export interface StoreProfile {
+  store_id: string;
+  store_name: string;
+  address: string | null;
+  description: string | null;
+  created_at: string;
+  profiles?: Profile;
+}
+
+export interface Product {
+  id: string;
+  store_id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  unit: ProductUnit;
+  category: string | null;
+  in_stock: boolean;
+  created_at: string;
 }
 
 export interface ResponseOrder {

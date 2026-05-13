@@ -92,6 +92,7 @@ export class ProfileEditComponent implements OnInit {
       master: ['/master/orders'],
       carrier: ['/carrier/orders'],
       client: ['/client/orders'],
+      store: ['/store/products'],
     };
     await this.router.navigate(redirectMap[this.role() ?? 'client'] ?? ['/client/orders']);
   }

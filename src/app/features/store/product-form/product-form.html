@@ -1,0 +1,76 @@
+<div class="main-content">
+  <div class="page-header">
+    <h1 class="page-title">{{ isEdit() ? 'Редактировать товар' : 'Новый товар' }}</h1>
+  </div>
+
+  @if (loading()) {
+    <p class="empty-hint">Загрузка...</p>
+  } @else {
+    <div class="form-card">
+      @if (error()) {
+        <div class="form-error-box">{{ error() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+        <div class="form-field">
+          <label class="form-label" for="name">Название товара *</label>
+          <input id="name" type="text" class="form-input" formControlName="name" placeholder="Плитка керамическая 60×60" />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <span class="field-error">Введите название</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="price">Цена *</label>
+            <input id="price" type="number" class="form-input" formControlName="price" placeholder="0" min="0" step="0.01" />
+            @if (form.get('price')?.invalid && form.get('price')?.touched) {
+              <span class="field-error">Введите цену</span>
+            }
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="unit">Единица</label>
+            <select id="unit" class="form-input" formControlName="unit">
+              @for (u of units; track u) {
+                <option [value]="u">{{ u }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="category">Категория</label>
+          <input id="category" type="text" class="form-input" formControlName="category" placeholder="Напр.: Плитка, Цемент, Инструменты" />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label" for="description">Описание</label>
+          <textarea id="description" class="form-input form-textarea" formControlName="description" placeholder="Дополнительная информация о товаре" rows="3"></textarea>
+        </div>
+
+        <div class="form-checkbox-row">
+          <input id="in_stock" type="checkbox" formControlName="in_stock" class="form-checkbox" />
+          <label for="in_stock" class="form-label form-label--inline">В наличии</label>
+        </div>
+
+        <div class="form-actions">
+          <a routerLink="/store/products" class="btn-secondary">Отмена</a>
+          <button type="submit" class="btn-primary" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Сохранение...' : (isEdit() ? 'Сохранить' : 'Добавить товар') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>
+
+<style>
+.form-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 28px; max-width: 560px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-textarea { resize: vertical; }
+.form-checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.form-checkbox { width: 18px; height: 18px; accent-color: var(--color-primary); cursor: pointer; }
+.form-label--inline { margin-bottom: 0; cursor: pointer; }
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
+.page-header { margin-bottom: 24px; }
+</style>

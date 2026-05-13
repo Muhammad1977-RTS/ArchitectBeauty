@@ -1,0 +1,105 @@
+<div class="main-content">
+  @if (loading()) {
+    <p class="empty-hint">Загрузка...</p>
+  } @else if (!store()) {
+    <p class="empty-hint">Магазин не найден.</p>
+  } @else {
+    <div class="shop-header">
+      <a routerLink="/shops" class="back-link">← Все магазины</a>
+      <h1 class="shop-title">{{ store()!.store_name }}</h1>
+      <div class="shop-meta">
+        @if (store()!.profiles?.['city_district']) {
+          <span class="shop-meta-item">{{ store()!.profiles?.['city_district'] }}</span>
+        }
+        @if (store()!.address) {
+          <span class="shop-meta-item">{{ store()!.address }}</span>
+        }
+        @if (store()!.profiles?.['phone']) {
+          <span class="shop-meta-item">{{ store()!.profiles?.['phone'] }}</span>
+        }
+      </div>
+      @if (store()!.description) {
+        <p class="shop-description">{{ store()!.description }}</p>
+      }
+    </div>
+
+    @if (products().length === 0) {
+      <p class="empty-hint">В этом магазине пока нет товаров.</p>
+    } @else {
+      @if (categories().length > 0) {
+        <div class="filter-tabs">
+          <button
+            class="filter-tab"
+            [class.filter-tab--active]="activeCategory() === null"
+            (click)="activeCategory.set(null)"
+          >Все</button>
+          @for (cat of categories(); track cat) {
+            <button
+              class="filter-tab"
+              [class.filter-tab--active]="activeCategory() === cat"
+              (click)="activeCategory.set(cat)"
+            >{{ cat }}</button>
+          }
+        </div>
+      }
+
+      <div class="products-grid">
+        @for (product of filtered(); track product.id) {
+          <div class="product-card" [class.product-card--out]="!product.in_stock">
+            <div class="product-card-body">
+              @if (product.category) {
+                <span class="product-cat-label">{{ product.category }}</span>
+              }
+              <h3 class="product-card-name">{{ product.name }}</h3>
+              @if (product.description) {
+                <p class="product-card-desc">{{ product.description }}</p>
+              }
+            </div>
+            <div class="product-card-footer">
+              <span class="product-card-price">{{ product.price | number:'1.0-0' }} ₽ / {{ product.unit }}</span>
+              <span class="product-stock-badge" [class.in]="product.in_stock" [class.out]="!product.in_stock">
+                {{ product.in_stock ? 'В наличии' : 'Нет' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+<style>
+.shop-header { margin-bottom: 28px; }
+.back-link { font-size: 13px; color: var(--color-text-secondary); text-decoration: none; display: inline-block; margin-bottom: 12px; }
+.back-link:hover { color: var(--color-primary); }
+.shop-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.shop-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.shop-meta-item { font-size: 13px; color: var(--color-text-secondary); background: var(--color-bg); padding: 4px 10px; border-radius: 20px; }
+.shop-description { font-size: 15px; color: var(--color-text); line-height: 1.6; max-width: 640px; }
+.filter-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.filter-tab { padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--color-border); background: var(--color-surface); font-size: 13px; font-weight: 500; cursor: pointer; color: var(--color-text-secondary); transition: all .15s; }
+.filter-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.filter-tab--active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.product-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow .15s;
+}
+.product-card:hover { box-shadow: var(--shadow-hover); }
+.product-card--out { opacity: 0.6; }
+.product-card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.product-cat-label { font-size: 11px; font-weight: 500; color: var(--color-accent); text-transform: uppercase; letter-spacing: .4px; }
+.product-card-name { font-size: 15px; font-weight: 600; line-height: 1.35; }
+.product-card-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; }
+.product-card-footer { padding: 12px 16px; border-top: 1px solid var(--color-border); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.product-card-price { font-size: 15px; font-weight: 700; color: var(--color-primary); }
+.product-stock-badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 12px; }
+.product-stock-badge.in { background: #E8F5E9; color: #2E7D32; }
+.product-stock-badge.out { background: #FFF3E0; color: #E65100; }
+.empty-hint { color: var(--color-text-secondary); font-size: 15px; }
+</style>
