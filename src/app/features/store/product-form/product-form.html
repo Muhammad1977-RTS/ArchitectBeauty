@@ -73,4 +73,10 @@
 .form-label--inline { margin-bottom: 0; cursor: pointer; }
 .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px; }
 .page-header { margin-bottom: 24px; }
+@media (max-width: 480px) {
+  .form-row { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column; }
+  .form-actions .btn-secondary,
+  .form-actions .btn-primary { width: 100%; text-align: center; }
+}
 </style>
