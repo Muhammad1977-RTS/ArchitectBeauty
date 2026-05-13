@@ -1,47 +1,83 @@
 <nav class="navbar">
-  <a routerLink="/" class="nav-brand">
-    <svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M1 22L1 11Q13 1 25 11L25 22" stroke="#1E3A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <line x1="13" y1="6" x2="13" y2="13" stroke="#1E3A5F" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="13" cy="16" r="2.5" fill="#1E3A5F"/>
-      <line x1="1" y1="26" x2="25" y2="26" stroke="#C86A3A" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>
-    <span class="nav-brand-name">Маст<span class="accent-e">е</span>ро</span>
-  </a>
+  <div class="navbar-row">
+    <a routerLink="/" class="nav-brand">
+      <svg width="26" height="28" viewBox="0 0 26 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M1 22L1 11Q13 1 25 11L25 22" stroke="#1E3A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="13" y1="6" x2="13" y2="13" stroke="#1E3A5F" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="13" cy="16" r="2.5" fill="#1E3A5F"/>
+        <line x1="1" y1="26" x2="25" y2="26" stroke="#C86A3A" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="nav-brand-name">Маст<span class="accent-e">е</span>ро</span>
+    </a>
 
-  @if (isAuthenticated() && !isAuthPage()) {
-    <div class="nav-links">
+    @if (isAuthenticated() && !isAuthPage()) {
+      <div class="nav-links">
+        @if (role() === 'client') {
+          <a routerLink="/client/orders" routerLinkActive="nav-link--active" class="nav-link">Ремонт</a>
+          <a routerLink="/client/transport-orders" routerLinkActive="nav-link--active" class="nav-link">Перевозки</a>
+        }
+        @if (role() === 'master') {
+          <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
+          <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+        }
+        @if (role() === 'carrier') {
+          <a routerLink="/carrier/orders" routerLinkActive="nav-link--active" class="nav-link">Заявки</a>
+          <a routerLink="/carrier/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+        }
+        @if (role() === 'store') {
+          <a routerLink="/store/products" routerLinkActive="nav-link--active" class="nav-link">Мои товары</a>
+          <a routerLink="/store/profile" routerLinkActive="nav-link--active" class="nav-link">Профиль магазина</a>
+        }
+        @if (role() !== 'store') {
+          <a routerLink="/shops" routerLinkActive="nav-link--active" class="nav-link">Магазины</a>
+        }
+      </div>
+      <div class="nav-right">
+        @if (isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="nav-link--active" class="nav-link nav-link--admin">Админ</a>
+        }
+        <a routerLink="/profile" routerLinkActive="nav-link--active" class="nav-link nav-link--desktop">Профиль</a>
+        <button class="nav-logout nav-logout--desktop" (click)="logout()">Выйти</button>
+        <button class="nav-hamburger" (click)="menuOpen.update(v => !v)"
+                [attr.aria-expanded]="menuOpen()" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    } @else if (!isAuthenticated() && !isAuthPage()) {
+      <div class="nav-right">
+        <a routerLink="/auth/login" class="nav-link">Войти</a>
+        <a routerLink="/auth/register" class="btn-primary btn-sm">Регистрация</a>
+      </div>
+    }
+  </div>
+
+  @if (menuOpen() && isAuthenticated() && !isAuthPage()) {
+    <div class="nav-mobile-menu">
       @if (role() === 'client') {
-        <a routerLink="/client/orders" routerLinkActive="nav-link--active" class="nav-link">Ремонт</a>
-        <a routerLink="/client/transport-orders" routerLinkActive="nav-link--active" class="nav-link">Перевозки</a>
+        <a routerLink="/client/orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Ремонт</a>
+        <a routerLink="/client/transport-orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Перевозки</a>
       }
       @if (role() === 'master') {
-        <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
-        <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+        <a routerLink="/master/orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Найти заказ</a>
+        <a routerLink="/master/responses" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Мои отклики</a>
       }
       @if (role() === 'carrier') {
-        <a routerLink="/carrier/orders" routerLinkActive="nav-link--active" class="nav-link">Заявки</a>
-        <a routerLink="/carrier/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+        <a routerLink="/carrier/orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Заявки</a>
+        <a routerLink="/carrier/responses" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Мои отклики</a>
       }
       @if (role() === 'store') {
-        <a routerLink="/store/products" routerLinkActive="nav-link--active" class="nav-link">Мои товары</a>
-        <a routerLink="/store/profile" routerLinkActive="nav-link--active" class="nav-link">Профиль магазина</a>
+        <a routerLink="/store/products" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Мои товары</a>
+        <a routerLink="/store/profile" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Профиль магазина</a>
       }
       @if (role() !== 'store') {
-        <a routerLink="/shops" routerLinkActive="nav-link--active" class="nav-link">Магазины</a>
+        <a routerLink="/shops" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Магазины</a>
       }
-    </div>
-    <div class="nav-right">
+      <div class="nav-mobile-divider"></div>
       @if (isAdmin()) {
-        <a routerLink="/admin" routerLinkActive="nav-link--active" class="nav-link nav-link--admin">Админ</a>
+        <a routerLink="/admin" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link nav-mobile-link--admin" (click)="closeMenu()">Админ</a>
       }
-      <a routerLink="/profile" routerLinkActive="nav-link--active" class="nav-link">Профиль</a>
-      <button class="nav-logout" (click)="logout()">Выйти</button>
-    </div>
-  } @else if (!isAuthenticated() && !isAuthPage()) {
-    <div class="nav-right">
-      <a routerLink="/auth/login" class="nav-link">Войти</a>
-      <a routerLink="/auth/register" class="btn-primary btn-sm">Регистрация</a>
+      <a routerLink="/profile" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Профиль</a>
+      <button class="nav-mobile-logout" (click)="logout(); closeMenu()">Выйти</button>
     </div>
   }
 </nav>

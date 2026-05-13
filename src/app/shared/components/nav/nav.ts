@@ -1,6 +1,6 @@
 import { Component, inject, signal, effect } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService } from '../../../core/services/profile.service';
@@ -19,6 +19,7 @@ export class NavComponent {
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly role = signal<UserRole | null>(null);
   readonly isAdmin = signal(false);
+  readonly menuOpen = signal(false);
 
   readonly isAuthPage = toSignal(
     this.router.events.pipe(
@@ -37,7 +38,14 @@ export class NavComponent {
       this.role.set(profile?.role ?? null);
       this.isAdmin.set(profile?.is_admin ?? false);
     }, { allowSignalWrites: true });
+
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      takeUntilDestroyed(),
+    ).subscribe(() => this.menuOpen.set(false));
   }
+
+  closeMenu() { this.menuOpen.set(false); }
 
   async logout() {
     await this.auth.signOut();
