@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
-import { MasterRate, WorkType } from '../../core/models/types';
+import { MasterRate, UserRole, WorkType } from '../../core/models/types';
 
 @Component({
   selector: 'app-profile-edit',
@@ -16,7 +16,7 @@ export class ProfileEditComponent implements OnInit {
   private profileService = inject(ProfileService);
   private router = inject(Router);
 
-  readonly role = signal<'client' | 'master' | null>(null);
+  readonly role = signal<UserRole | null>(null);
   readonly workTypes = signal<WorkType[]>([]);
   readonly rates = signal<MasterRate[]>([]);
   readonly saving = signal(false);
@@ -88,8 +88,11 @@ export class ProfileEditComponent implements OnInit {
     }
 
     this.saving.set(false);
-    await this.router.navigate(
-      this.role() === 'master' ? ['/master/orders'] : ['/client/orders']
-    );
+    const redirectMap: Record<string, string[]> = {
+      master: ['/master/orders'],
+      carrier: ['/carrier/orders'],
+      client: ['/client/orders'],
+    };
+    await this.router.navigate(redirectMap[this.role() ?? 'client'] ?? ['/client/orders']);
   }
 }
