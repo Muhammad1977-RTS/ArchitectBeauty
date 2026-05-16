@@ -15,12 +15,13 @@
         <h2 class="section-title">Тип работы</h2>
         <div class="form-field">
           <label class="form-label">Вид работы <span class="req">*</span></label>
-          <select formControlName="work_type_id" class="form-input" (change)="onWorkTypeChange($event)">
-            <option value="">— Выберите —</option>
+          <div class="wt-chips">
             @for (wt of workTypes(); track wt.id) {
-              <option [value]="wt.id">{{ wt.name }}</option>
+              <button type="button" class="wt-chip"
+                      [class.wt-chip--active]="form.get('work_type_id')?.value === wt.id"
+                      (click)="selectWorkType(wt)">{{ wt.name }}</button>
             }
-          </select>
+          </div>
           @if (form.get('work_type_id')?.touched && form.get('work_type_id')?.invalid) {
             <span class="field-error">Выберите вид работы</span>
           }
@@ -106,6 +107,26 @@
 </div>
 
 <style>
+.wt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.wt-chip {
+  padding: 7px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 20px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.wt-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.wt-chip--active { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+
 .photos-grid {
   display: flex;
   flex-wrap: wrap;
