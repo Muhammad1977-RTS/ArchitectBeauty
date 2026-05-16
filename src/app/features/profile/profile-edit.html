@@ -82,16 +82,14 @@
       </section>
     }
 
-    <section class="form-section form-section--actions">
-      <div class="form-actions">
-        <button type="submit" class="btn-primary" [disabled]="form.invalid || saving()">
-          @if (saving()) { Сохранение... } @else { Сохранить }
-        </button>
-        @if (saved()) {
-          <span class="saved-badge">✓ Сохранено</span>
-        }
-      </div>
-    </section>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="form.invalid || saving()">
+        @if (saving()) { Сохранение... } @else { Сохранить }
+      </button>
+      @if (saved()) {
+        <span class="saved-badge">✓ Сохранено</span>
+      }
+    </div>
 
   </form>
 </div>

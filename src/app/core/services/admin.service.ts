@@ -6,9 +6,10 @@ import { Profile, WorkType } from '../models/types';
 export class AdminService {
   private api = inject(ApiService);
 
-  async getUsers(_role?: 'client' | 'master'): Promise<Profile[]> {
+  async getUsers(role?: 'client' | 'master' | 'carrier' | 'store'): Promise<Profile[]> {
     try {
-      return await this.api.get<Profile[]>('/admin/users');
+      const url = role ? `/admin/users?role=${role}` : '/admin/users';
+      return await this.api.get<Profile[]>(url);
     } catch {
       return [];
     }

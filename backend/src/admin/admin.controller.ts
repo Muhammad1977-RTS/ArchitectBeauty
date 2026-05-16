@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminGuard } from '../common/admin.guard';
 
@@ -8,8 +8,8 @@ export class AdminController {
   constructor(private svc: AdminService) {}
 
   @Get('users')
-  users() {
-    return this.svc.findAllUsers();
+  users(@Query('role') role?: string) {
+    return this.svc.findAllUsers(role);
   }
 
   @Delete('users/:id')

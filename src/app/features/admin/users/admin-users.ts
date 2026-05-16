@@ -3,7 +3,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
 import { Profile } from '../../../core/models/types';
 
-type RoleFilter = 'all' | 'client' | 'master';
+type RoleFilter = 'all' | 'client' | 'master' | 'carrier' | 'store';
 
 @Component({
   selector: 'app-admin-users',
@@ -44,7 +44,13 @@ export class AdminUsersComponent implements OnInit {
   }
 
   roleLabel(role: string): string {
-    return role === 'master' ? 'Мастер' : 'Клиент';
+    const map: Record<string, string> = {
+      client: 'Клиент',
+      master: 'Мастер',
+      carrier: 'Перевозчик',
+      store: 'Магазин',
+    };
+    return map[role] ?? role;
   }
 
   formatDate(iso: string | null | undefined): string {

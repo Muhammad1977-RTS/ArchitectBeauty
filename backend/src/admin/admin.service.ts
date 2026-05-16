@@ -5,8 +5,9 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AdminService {
   constructor(private prisma: PrismaService) {}
 
-  findAllUsers() {
+  findAllUsers(role?: string) {
     return this.prisma.profile.findMany({
+      where: role ? { role } : undefined,
       select: {
         id: true, name: true, role: true, phone: true,
         cityDistrict: true, isAdmin: true, createdAt: true,

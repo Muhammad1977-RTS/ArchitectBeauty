@@ -14,6 +14,8 @@
       <button class="filter-tab" [class.filter-tab--active]="filter() === 'all'" (click)="setFilter('all')">Все</button>
       <button class="filter-tab" [class.filter-tab--active]="filter() === 'client'" (click)="setFilter('client')">Клиенты</button>
       <button class="filter-tab" [class.filter-tab--active]="filter() === 'master'" (click)="setFilter('master')">Мастера</button>
+      <button class="filter-tab" [class.filter-tab--active]="filter() === 'carrier'" (click)="setFilter('carrier')">Перевозчики</button>
+      <button class="filter-tab" [class.filter-tab--active]="filter() === 'store'" (click)="setFilter('store')">Магазины</button>
     </div>
 
     @if (loading()) {
@@ -143,6 +145,8 @@
 }
 .role-badge--client { background: #E8F4FD; color: #1565C0; }
 .role-badge--master { background: #FFF3E0; color: #E65100; }
+.role-badge--carrier { background: #F3E5F5; color: #7B1FA2; }
+.role-badge--store { background: #E8F5E9; color: #2E7D32; }
 
 .btn-delete {
   padding: 5px 12px;

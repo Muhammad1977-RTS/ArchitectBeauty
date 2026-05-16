@@ -26,7 +26,7 @@
   } @else {
     <div class="orders-grid">
       @for (order of filtered(); track order.id) {
-        <div class="order-card card" [class.order-card--deleting]="deleting() === order.id">
+        <div class="order-card card">
           <a [routerLink]="['/client/orders', order.id]" class="order-card__link">
             <div class="order-card__head">
               <span class="order-card__type">{{ order.work_type?.name ?? '—' }}</span>
@@ -51,23 +51,6 @@
             </div>
             <div class="order-card__date">{{ formatDate(order.created_at) }}</div>
           </a>
-          <button class="order-card__delete"
-                  [disabled]="deleting() === order.id"
-                  (click)="deleteOrder(order, $event)"
-                  title="Удалить заявку">
-            @if (deleting() === order.id) {
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="opacity:.5">
-                <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" stroke-dasharray="10 6" stroke-linecap="round"/>
-              </svg>
-            } @else {
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14H6L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4h6v2"/>
-              </svg>
-            }
-          </button>
         </div>
       }
     </div>
@@ -99,13 +82,10 @@
 .orders-grid { display: flex; flex-direction: column; gap: 12px; }
 
 .order-card {
-  display: flex;
-  align-items: stretch;
+  display: block;
   position: relative;
   padding: 0;
-  transition: opacity 0.2s;
 }
-.order-card--deleting { opacity: 0.5; pointer-events: none; }
 
 .order-card__link {
   flex: 1;
@@ -131,24 +111,6 @@
 }
 .dot { color: var(--color-border-strong); }
 .order-card__date { font-size: 12px; color: var(--color-text-secondary); }
-
-.order-card__delete {
-  flex-shrink: 0;
-  width: 44px;
-  background: none;
-  border: none;
-  border-left: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: 20px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  border-radius: 0 var(--radius-card) var(--radius-card) 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.order-card__delete:hover { background: #FFF0F0; color: #E53935; }
-.order-card__delete:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .hint-text { color: var(--color-text-secondary); }
 .empty-state {

@@ -48,6 +48,13 @@ export class AuthService {
     return this.buildResponse(user);
   }
 
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    // Security: always return the same response to prevent user enumeration.
+    // Wire up an actual mailer (Nodemailer / Resend) here when SMTP is configured.
+    await this.prisma.user.findUnique({ where: { email } });
+    return { message: 'If this email is registered, a reset link has been sent.' };
+  }
+
   private buildResponse(user: any) {
     const profile = user.profile;
     const token = this.jwt.sign({

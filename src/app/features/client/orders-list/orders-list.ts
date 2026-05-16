@@ -22,7 +22,6 @@ export class ClientOrdersListComponent implements OnInit {
   readonly loading = signal(true);
   readonly orders = signal<Order[]>([]);
   readonly filter = signal<Filter>('all');
-  readonly deleting = signal<string | null>(null);
   readonly unreadCounts = signal<Map<string, number>>(new Map());
   readonly newResponseCounts = signal<Map<string, number>>(new Map());
 
@@ -60,20 +59,6 @@ export class ClientOrdersListComponent implements OnInit {
 
   newResponseCount(orderId: string): number {
     return this.newResponseCounts().get(orderId) ?? 0;
-  }
-
-  async deleteOrder(order: Order, event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!confirm(`Удалить заявку «${order.work_type?.name ?? 'Заявка'}»? Это действие необратимо.`)) return;
-
-    this.deleting.set(order.id);
-    const ok = await this.orderService.deleteOrder(order.id);
-    this.deleting.set(null);
-
-    if (ok) {
-      this.orders.update(list => list.filter(o => o.id !== order.id));
-    }
   }
 
   statusLabel(status: OrderStatus): string {

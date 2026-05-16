@@ -56,6 +56,8 @@
         }
       </div>
 
+      <a routerLink="/auth/forgot-password" class="forgot-link">Забыли пароль?</a>
+
       <button type="submit" class="btn-primary" [disabled]="loading()">
         @if (loading()) { Вход... } @else { Войти }
       </button>
@@ -69,6 +71,17 @@
 </div>
 
 <style>
+.forgot-link {
+  display: block;
+  text-align: right;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  transition: color .15s;
+  &:hover { color: var(--color-primary); }
+}
 .password-wrap { position: relative; }
 .password-wrap .form-input { padding-right: 42px; }
 .password-toggle {
