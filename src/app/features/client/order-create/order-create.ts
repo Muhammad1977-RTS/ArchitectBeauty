@@ -123,7 +123,7 @@ export class OrderCreateComponent implements OnInit {
     this.loading.set(false);
 
     if (order) {
-      await this.router.navigate(['/client/orders']);
+      await this.router.navigate(['/client/orders', order.id]);
     } else {
       this.error.set('Не удалось создать заявку. Попробуйте снова.');
     }

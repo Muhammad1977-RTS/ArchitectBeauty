@@ -1,5 +1,5 @@
 <div class="main-content">
-  <div class="page-shell">
+  <div class="page-shell page-shell--wide">
 
     <div class="page-header">
       <h1 class="page-title">Администрирование</h1>
@@ -28,6 +28,7 @@
           <span>Роль</span>
           <span>Район</span>
           <span>Дата</span>
+          <span>Email</span>
           <span></span>
         </div>
         @for (u of users(); track u.id) {
@@ -37,6 +38,7 @@
             <span class="role-badge role-badge--{{ u.role }}">{{ roleLabel(u.role) }}</span>
             <span class="user-district">{{ u.city_district ?? '—' }}</span>
             <span class="user-date">{{ formatDate(u.created_at) }}</span>
+            <span class="user-email">{{ u.user?.email ?? '—' }}</span>
             <button class="btn-delete btn-sm"
                     [disabled]="deletingId() === u.id"
                     (click)="deleteUser(u)">
@@ -51,6 +53,8 @@
 </div>
 
 <style>
+.page-shell--wide { max-width: 1100px !important; }
+
 .admin-nav {
   display: flex;
   gap: 4px;
@@ -106,7 +110,7 @@
 }
 .users-table__head {
   display: grid;
-  grid-template-columns: 1fr 130px 90px 120px 110px 80px;
+  grid-template-columns: 130px 130px 90px 130px 110px 1fr 80px;
   gap: 12px;
   padding: 10px 16px;
   background: #F7F5F2;
@@ -118,7 +122,7 @@
 }
 .users-table__row {
   display: grid;
-  grid-template-columns: 1fr 130px 90px 120px 110px 80px;
+  grid-template-columns: 130px 130px 90px 130px 110px 1fr 80px;
   gap: 12px;
   padding: 12px 16px;
   border-top: 1px solid #F0EEEA;
@@ -127,7 +131,8 @@
 }
 .users-table__row:hover { background: #FAFAF8; }
 .user-name { font-weight: 500; }
-.user-phone, .user-district, .user-date { color: var(--color-text-secondary); font-size: 13px; }
+.user-email, .user-phone, .user-district, .user-date { color: var(--color-text-secondary); font-size: 13px; }
+.user-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .role-badge {
   display: inline-block;
@@ -159,6 +164,6 @@
 @media (max-width: 700px) {
   .users-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .users-table__head,
-  .users-table__row { min-width: 560px; }
+  .users-table__row { min-width: 900px; }
 }
 </style>

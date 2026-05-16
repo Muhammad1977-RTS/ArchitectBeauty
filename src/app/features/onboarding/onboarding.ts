@@ -88,7 +88,13 @@ export class OnboardingComponent implements OnInit {
   async finish() {
     await this.saveProfile();
     const role = this.role();
-    await this.router.navigate(role === 'master' ? ['/master/orders'] : ['/client/orders']);
+    const routes: Record<string, string[]> = {
+      master: ['/master/orders'],
+      carrier: ['/carrier/orders'],
+      store: ['/store/products'],
+      client: ['/client/orders'],
+    };
+    await this.router.navigate(routes[role!] ?? ['/client/orders']);
   }
 
   async goCreateOrder() {

@@ -16,6 +16,7 @@ export interface Profile {
   city_district: string | null;
   is_admin: boolean;
   created_at: string;
+  user?: { email: string };
 }
 
 export interface MasterRate {

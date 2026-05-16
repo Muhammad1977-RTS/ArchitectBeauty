@@ -2,7 +2,7 @@ import { test, type BrowserContext, type Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const BASE_URL = 'http://localhost:4200';
+const BASE_URL = 'http://127.0.0.1:4200';
 const SCREENSHOTS_DIR = 'screenshots';
 const AUTH_DIR = path.join('tests', '.auth');
 
@@ -85,6 +85,36 @@ test('master pages', async ({ browser }) => {
 
   await screenshot(page, '/master/orders', 'master-orders');
   await screenshot(page, '/master/responses', 'master-responses');
+
+  await context.close();
+});
+
+// ── Carrier-role pages ─────────────────────────────────────────────────────────
+
+test('carrier pages', async ({ browser }) => {
+  const context = await browser.newContext({
+    storageState: path.join(AUTH_DIR, 'carrier.json'),
+    viewport: { width: 1440, height: 900 },
+  });
+  const page = await context.newPage();
+
+  await screenshot(page, '/carrier/orders', 'carrier-orders');
+  await screenshot(page, '/carrier/responses', 'carrier-responses');
+
+  await context.close();
+});
+
+// ── Store-role pages ───────────────────────────────────────────────────────────
+
+test('store pages', async ({ browser }) => {
+  const context = await browser.newContext({
+    storageState: path.join(AUTH_DIR, 'store.json'),
+    viewport: { width: 1440, height: 900 },
+  });
+  const page = await context.newPage();
+
+  await screenshot(page, '/store/products', 'store-products');
+  await screenshot(page, '/store/profile', 'store-profile');
 
   await context.close();
 });

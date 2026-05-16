@@ -9,8 +9,8 @@ export interface AppUser {
   name: string;
   role: UserRole;
   phone: string | null;
-  cityDistrict: string | null;
-  isAdmin: boolean;
+  city_district: string | null;
+  is_admin: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -51,27 +51,8 @@
       </div>
     </div>
     <div class="hero-visual" aria-hidden="true">
-      <div class="hero-mock-card">
-        <div class="hmc-head">
-          <div class="hmc-avatar">АМ</div>
-          <div class="hmc-info">
-            <div class="hmc-name">Аслан Мусаев</div>
-            <div class="hmc-meta">Грозный · Октябрьский р-н</div>
-            <div class="hmc-stars">★★★★★ <span>5.0</span> (18 работ)</div>
-          </div>
-        </div>
-        <div class="hmc-divider"></div>
-        <div class="hmc-services">
-          <div class="hmc-service-row">
-            <span>Укладка плитки</span>
-            <span class="hmc-price">1 500 ₽/м²</span>
-          </div>
-          <div class="hmc-service-row">
-            <span>Поклейка обоев</span>
-            <span class="hmc-price">800 ₽/м²</span>
-          </div>
-        </div>
-        <div class="hmc-badge">✓ Отклик отправлен</div>
+      <div class="hero-photo-wrap">
+        <img src="маляры.jpg" alt="" class="hero-photo">
       </div>
     </div>
   </section>
@@ -151,9 +132,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 48px;
-  padding: 72px 48px 64px;
-  max-width: 1100px;
-  margin: 0 auto;
+  padding: 72px 0 64px 0;
+  max-width: 1150px;
+  margin: 0 auto 0 8%;
 }
 
 .hero-inner { flex: 1; max-width: 560px; }
@@ -204,47 +185,23 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 280px;
+  width: 480px;
+  margin-right: -80px;
 }
 
-/* Mock master card in hero */
-.hero-mock-card {
+.hero-photo-wrap {
   width: 100%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-hover);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  height: 520px;
 }
-.hmc-head { display: flex; align-items: flex-start; gap: 12px; }
-.hmc-avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(135deg, #1E3A5F, #2d5693);
-  color: #fff; font-size: 14px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+
+.hero-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  display: block;
 }
-.hmc-info { flex: 1; }
-.hmc-name { font-weight: 700; font-size: 15px; color: var(--color-text); }
-.hmc-meta { font-size: 12px; color: var(--color-text-secondary); margin: 2px 0; }
-.hmc-stars { font-size: 12px; color: var(--color-text-secondary); }
-.hmc-stars span { font-weight: 600; color: var(--color-text); }
-.hmc-divider { height: 1px; background: var(--color-border); margin: 0 -4px; }
-.hmc-services { display: flex; flex-direction: column; gap: 6px; }
-.hmc-service-row {
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 13px; color: var(--color-text);
-}
-.hmc-price { font-weight: 600; color: var(--color-primary); font-size: 13px; }
-.hmc-badge {
-  font-size: 12px; font-weight: 600; color: var(--color-success);
-  background: #E8F5EF; border-radius: 20px;
-  padding: 5px 12px; text-align: center;
-}
+
 
 /* Stats bar */
 .hero-stats {
@@ -447,6 +404,7 @@
   }
   .hero-title { font-size: 34px; }
   .hero-visual { display: none; }
+  .hero-photo-wrap { display: none; }
   .hero-stats { gap: 0; }
   .section-inner { padding: 0 24px; }
   .steps-grid {

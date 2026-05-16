@@ -135,6 +135,26 @@
           </div>
           <p class="ob-tip">Совет: заполните ставки за м² в профиле — это ускорит работу с откликами</p>
         }
+
+        @if (role() === 'carrier') {
+          <p class="ob-sub">Просматривайте заявки на перевозку и откликайтесь на подходящие.</p>
+          <div class="ob-done-actions">
+            <button class="btn-primary ob-btn" (click)="finish()">
+              Смотреть заявки
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        }
+
+        @if (role() === 'store') {
+          <p class="ob-sub">Добавьте товары в ваш магазин и начните получать заказы от строителей и клиентов.</p>
+          <div class="ob-done-actions">
+            <button class="btn-primary ob-btn" (click)="finish()">
+              Перейти в магазин
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        }
       </div>
     }
 

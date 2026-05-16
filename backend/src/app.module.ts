@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfilesModule } from './profiles/profiles.module';
@@ -16,6 +16,7 @@ import { ComplaintsModule } from './complaints/complaints.module';
 import { AdminModule } from './admin/admin.module';
 import { MasterRatesModule } from './master-rates/master-rates.module';
 import { JwtAuthGuard } from './common/jwt.guard';
+import { SnakeCaseInterceptor } from './common/snake-case.interceptor';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { JwtAuthGuard } from './common/jwt.guard';
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_INTERCEPTOR, useClass: SnakeCaseInterceptor },
   ],
 })
 export class AppModule {}

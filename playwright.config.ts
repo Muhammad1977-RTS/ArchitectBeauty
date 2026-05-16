@@ -7,7 +7,7 @@ export default defineConfig({
   retries: 0,
   globalSetup: './tests/global-setup.ts',
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: 'http://127.0.0.1:4200',
     headless: true,
     viewport: { width: 1440, height: 900 },
   },

@@ -17,7 +17,7 @@ export class NavComponent {
 
   readonly isAuthenticated = this.auth.isAuthenticated;
   readonly role = computed(() => this.auth.appUser()?.role ?? null);
-  readonly isAdmin = computed(() => this.auth.appUser()?.isAdmin ?? false);
+  readonly isAdmin = computed(() => this.auth.appUser()?.is_admin ?? false);
   readonly menuOpen = signal(false);
 
   readonly isAuthPage = toSignal(
