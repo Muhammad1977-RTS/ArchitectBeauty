@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
@@ -12,7 +12,7 @@ import { Order, OrderStatus, Response, MasterStats, Message } from '../../../cor
   imports: [RouterLink],
   templateUrl: './order-detail.html',
 })
-export class ClientOrderDetailComponent implements OnInit {
+export class ClientOrderDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private auth = inject(AuthService);
@@ -58,6 +58,7 @@ export class ClientOrderDetailComponent implements OnInit {
 
   currentUserId = '';
   private readonly loadedChats = new Set<string>();
+  private readonly pollTimers = new Map<string, ReturnType<typeof setInterval>>();
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -110,6 +111,18 @@ export class ClientOrderDetailComponent implements OnInit {
     const msgs = await this.chatService.loadMessages(orderId, masterId);
     this.chatMessages.update(m => ({ ...m, [masterId]: msgs }));
 
+    const timer = setInterval(async () => {
+      const fresh = await this.chatService.loadMessages(orderId, masterId);
+      if (fresh.length !== (this.chatMessages()[masterId]?.length ?? 0)) {
+        this.chatMessages.update(m => ({ ...m, [masterId]: fresh }));
+        this.scrollChat(masterId);
+      }
+    }, 5000);
+    this.pollTimers.set(masterId, timer);
+  }
+
+  ngOnDestroy() {
+    this.pollTimers.forEach(t => clearInterval(t));
   }
 
   setChatDraft(masterId: string, text: string) {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -13,7 +13,7 @@ import { Order, Response, Message } from '../../../core/models/types';
   imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './order-detail.html',
 })
-export class MasterOrderDetailComponent implements OnInit {
+export class MasterOrderDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
@@ -38,6 +38,7 @@ export class MasterOrderDetailComponent implements OnInit {
   readonly complaintSent = signal(false);
 
   currentUserId = '';
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   form = this.fb.group({
     proposed_price: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -72,9 +73,21 @@ export class MasterOrderDetailComponent implements OnInit {
       this.chatMessages.set(msgs);
       await this.chatService.markAsRead(order.id, user.id);
 
+      this.pollTimer = setInterval(async () => {
+        const fresh = await this.chatService.loadMessages(order.id, user.id);
+        if (fresh.length !== this.chatMessages().length) {
+          this.chatMessages.set(fresh);
+          await this.chatService.markAsRead(order.id, user.id);
+          this.scrollChat();
+        }
+      }, 5000);
     }
 
     this.loading.set(false);
+  }
+
+  ngOnDestroy() {
+    if (this.pollTimer) clearInterval(this.pollTimer);
   }
 
   async sendMessage() {
