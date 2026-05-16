@@ -22,8 +22,8 @@ export declare class ProductsController {
         name: string;
         id: string;
         createdAt: Date;
-        storeId: string;
         description: string | null;
+        storeId: string;
         inStock: boolean;
         price: import("@prisma/client-runtime-utils").Decimal;
         unit: string;
@@ -33,8 +33,8 @@ export declare class ProductsController {
         name: string;
         id: string;
         createdAt: Date;
-        storeId: string;
         description: string | null;
+        storeId: string;
         inStock: boolean;
         price: import("@prisma/client-runtime-utils").Decimal;
         unit: string;
@@ -44,8 +44,8 @@ export declare class ProductsController {
         name: string;
         id: string;
         createdAt: Date;
-        storeId: string;
         description: string | null;
+        storeId: string;
         inStock: boolean;
         price: import("@prisma/client-runtime-utils").Decimal;
         unit: string;
@@ -55,8 +55,8 @@ export declare class ProductsController {
         name: string;
         id: string;
         createdAt: Date;
-        storeId: string;
         description: string | null;
+        storeId: string;
         inStock: boolean;
         price: import("@prisma/client-runtime-utils").Decimal;
         unit: string;
@@ -66,8 +66,8 @@ export declare class ProductsController {
         name: string;
         id: string;
         createdAt: Date;
-        storeId: string;
         description: string | null;
+        storeId: string;
         inStock: boolean;
         price: import("@prisma/client-runtime-utils").Decimal;
         unit: string;
@@ -77,8 +77,8 @@ export declare class ProductsController {
         name: string;
         id: string;
         createdAt: Date;
-        storeId: string;
         description: string | null;
+        storeId: string;
         inStock: boolean;
         price: import("@prisma/client-runtime-utils").Decimal;
         unit: string;

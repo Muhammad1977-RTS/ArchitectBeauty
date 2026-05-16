@@ -15,13 +15,13 @@ export declare class ResponsesService {
     } & {
         id: string;
         createdAt: Date;
-        masterId: string;
         status: string;
         orderId: string;
         proposedPrice: import("@prisma/client-runtime-utils").Decimal;
         comment: string | null;
         estimatedDays: number | null;
         seen: boolean;
+        masterId: string;
     }>;
     findByMaster(masterId: string): import("@prisma/client").Prisma.PrismaPromise<({
         order: {
@@ -33,12 +33,12 @@ export declare class ResponsesService {
         } & {
             id: string;
             createdAt: Date;
-            workTypeId: string;
             updatedAt: Date;
-            address: string;
-            description: string | null;
+            workTypeId: string;
             clientId: string;
             areaSqm: import("@prisma/client-runtime-utils").Decimal;
+            address: string;
+            description: string | null;
             photoUrls: string[];
             status: string;
             selectedMasterId: string | null;
@@ -48,13 +48,13 @@ export declare class ResponsesService {
     } & {
         id: string;
         createdAt: Date;
-        masterId: string;
         status: string;
         orderId: string;
         proposedPrice: import("@prisma/client-runtime-utils").Decimal;
         comment: string | null;
         estimatedDays: number | null;
         seen: boolean;
+        masterId: string;
     })[]>;
     findByOrder(orderId: string): import("@prisma/client").Prisma.PrismaPromise<({
         master: {
@@ -65,13 +65,13 @@ export declare class ResponsesService {
     } & {
         id: string;
         createdAt: Date;
-        masterId: string;
         status: string;
         orderId: string;
         proposedPrice: import("@prisma/client-runtime-utils").Decimal;
         comment: string | null;
         estimatedDays: number | null;
         seen: boolean;
+        masterId: string;
     })[]>;
     markSeen(orderId: string, userId: string): Promise<void>;
     countUnread(masterId: string): Promise<Record<string, number>>;

@@ -4,6 +4,12 @@ declare class UpdateProfileDto {
     phone?: string;
     cityDistrict?: string;
 }
+declare class UpdateCarrierProfileDto {
+    vehicleType?: string;
+    pricePerKm?: number;
+    minPrice?: number;
+    maxWeightKg?: number;
+}
 export declare class ProfilesController {
     private svc;
     constructor(svc: ProfilesService);
@@ -18,10 +24,10 @@ export declare class ProfilesController {
         } | null;
         storeProfile: {
             createdAt: Date;
-            storeId: string;
-            storeName: string;
             address: string | null;
             description: string | null;
+            storeId: string;
+            storeName: string;
         } | null;
         masterRates: ({
             workType: {
@@ -75,6 +81,14 @@ export declare class ProfilesController {
         cityDistrict: string | null;
         isAdmin: boolean;
     })[]>;
+    updateCarrierProfile(user: any, dto: UpdateCarrierProfileDto): Promise<{
+        carrierId: string;
+        vehicleType: string;
+        pricePerKm: import("@prisma/client-runtime-utils").Decimal | null;
+        minPrice: import("@prisma/client-runtime-utils").Decimal | null;
+        maxWeightKg: import("@prisma/client-runtime-utils").Decimal | null;
+        updatedAt: Date;
+    }>;
     getById(id: string): Promise<{
         carrierProfile: {
             carrierId: string;
@@ -86,10 +100,10 @@ export declare class ProfilesController {
         } | null;
         storeProfile: {
             createdAt: Date;
-            storeId: string;
-            storeName: string;
             address: string | null;
             description: string | null;
+            storeId: string;
+            storeName: string;
         } | null;
         masterRates: ({
             workType: {

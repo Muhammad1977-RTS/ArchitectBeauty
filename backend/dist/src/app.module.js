@@ -23,6 +23,7 @@ const store_module_1 = require("./store/store.module");
 const products_module_1 = require("./products/products.module");
 const complaints_module_1 = require("./complaints/complaints.module");
 const admin_module_1 = require("./admin/admin.module");
+const master_rates_module_1 = require("./master-rates/master-rates.module");
 const jwt_guard_1 = require("./common/jwt.guard");
 let AppModule = class AppModule {
 };
@@ -44,6 +45,7 @@ exports.AppModule = AppModule = __decorate([
             products_module_1.ProductsModule,
             complaints_module_1.ComplaintsModule,
             admin_module_1.AdminModule,
+            master_rates_module_1.MasterRatesModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: jwt_guard_1.JwtAuthGuard },

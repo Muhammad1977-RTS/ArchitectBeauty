@@ -36,6 +36,13 @@ let ProfilesService = class ProfilesService {
             data,
         });
     }
+    async upsertCarrierProfile(id, data) {
+        return this.prisma.carrierProfile.upsert({
+            where: { carrierId: id },
+            create: { carrierId: id, vehicleType: (data.vehicleType ?? 'van'), pricePerKm: data.pricePerKm, minPrice: data.minPrice, maxWeightKg: data.maxWeightKg },
+            update: { vehicleType: data.vehicleType, pricePerKm: data.pricePerKm, minPrice: data.minPrice, maxWeightKg: data.maxWeightKg },
+        });
+    }
     async getMasters(workTypeId) {
         return this.prisma.profile.findMany({
             where: {

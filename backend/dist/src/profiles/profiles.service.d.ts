@@ -13,10 +13,10 @@ export declare class ProfilesService {
         } | null;
         storeProfile: {
             createdAt: Date;
-            storeId: string;
-            storeName: string;
             address: string | null;
             description: string | null;
+            storeId: string;
+            storeName: string;
         } | null;
         masterRates: ({
             workType: {
@@ -51,6 +51,19 @@ export declare class ProfilesService {
         phone: string | null;
         cityDistrict: string | null;
         isAdmin: boolean;
+    }>;
+    upsertCarrierProfile(id: string, data: {
+        vehicleType?: string;
+        pricePerKm?: number;
+        minPrice?: number;
+        maxWeightKg?: number;
+    }): Promise<{
+        carrierId: string;
+        vehicleType: string;
+        pricePerKm: import("@prisma/client-runtime-utils").Decimal | null;
+        minPrice: import("@prisma/client-runtime-utils").Decimal | null;
+        maxWeightKg: import("@prisma/client-runtime-utils").Decimal | null;
+        updatedAt: Date;
     }>;
     getMasters(workTypeId?: string): Promise<({
         masterRates: ({

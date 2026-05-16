@@ -13,25 +13,25 @@ export declare class StoreController {
         };
     } & {
         createdAt: Date;
-        storeId: string;
-        storeName: string;
         address: string | null;
         description: string | null;
+        storeId: string;
+        storeName: string;
     })[]>;
     getMyProfile(user: any): import("@prisma/client").Prisma.Prisma__StoreProfileClient<{
         createdAt: Date;
-        storeId: string;
-        storeName: string;
         address: string | null;
         description: string | null;
+        storeId: string;
+        storeName: string;
     } | null, null, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     findOne(id: string): import("@prisma/client").Prisma.Prisma__StoreProfileClient<({
         products: {
             name: string;
             id: string;
             createdAt: Date;
-            storeId: string;
             description: string | null;
+            storeId: string;
             inStock: boolean;
             price: import("@prisma/client-runtime-utils").Decimal;
             unit: string;
@@ -39,17 +39,17 @@ export declare class StoreController {
         }[];
     } & {
         createdAt: Date;
-        storeId: string;
-        storeName: string;
         address: string | null;
         description: string | null;
+        storeId: string;
+        storeName: string;
     }) | null, null, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     upsert(user: any, dto: UpsertStoreDto): import("@prisma/client").Prisma.Prisma__StoreProfileClient<{
         createdAt: Date;
-        storeId: string;
-        storeName: string;
         address: string | null;
         description: string | null;
+        storeId: string;
+        storeName: string;
     }, never, import("@prisma/client/runtime/client").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
 }
 export {};

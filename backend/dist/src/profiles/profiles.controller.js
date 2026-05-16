@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const profiles_service_1 = require("./profiles.service");
 const current_user_decorator_1 = require("../common/current-user.decorator");
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class UpdateProfileDto {
     name;
     phone;
@@ -37,6 +38,35 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateProfileDto.prototype, "cityDistrict", void 0);
+class UpdateCarrierProfileDto {
+    vehicleType;
+    pricePerKm;
+    minPrice;
+    maxWeightKg;
+}
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateCarrierProfileDto.prototype, "vehicleType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateCarrierProfileDto.prototype, "pricePerKm", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateCarrierProfileDto.prototype, "minPrice", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateCarrierProfileDto.prototype, "maxWeightKg", void 0);
 let ProfilesController = class ProfilesController {
     svc;
     constructor(svc) {
@@ -50,6 +80,9 @@ let ProfilesController = class ProfilesController {
     }
     getMasters(workTypeId) {
         return this.svc.getMasters(workTypeId);
+    }
+    updateCarrierProfile(user, dto) {
+        return this.svc.upsertCarrierProfile(user.id, dto);
     }
     getById(id) {
         return this.svc.findById(id);
@@ -78,6 +111,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ProfilesController.prototype, "getMasters", null);
+__decorate([
+    (0, common_1.Patch)('me/carrier-profile'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, UpdateCarrierProfileDto]),
+    __metadata("design:returntype", void 0)
+], ProfilesController.prototype, "updateCarrierProfile", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

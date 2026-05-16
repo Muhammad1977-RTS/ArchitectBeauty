@@ -16,13 +16,13 @@ export declare class ResponsesController {
     } & {
         id: string;
         createdAt: Date;
-        masterId: string;
         status: string;
         orderId: string;
         proposedPrice: import("@prisma/client-runtime-utils").Decimal;
         comment: string | null;
         estimatedDays: number | null;
         seen: boolean;
+        masterId: string;
     }>;
     myResponses(user: any): import("@prisma/client").Prisma.PrismaPromise<({
         order: {
@@ -34,12 +34,12 @@ export declare class ResponsesController {
         } & {
             id: string;
             createdAt: Date;
-            workTypeId: string;
             updatedAt: Date;
-            address: string;
-            description: string | null;
+            workTypeId: string;
             clientId: string;
             areaSqm: import("@prisma/client-runtime-utils").Decimal;
+            address: string;
+            description: string | null;
             photoUrls: string[];
             status: string;
             selectedMasterId: string | null;
@@ -49,13 +49,13 @@ export declare class ResponsesController {
     } & {
         id: string;
         createdAt: Date;
-        masterId: string;
         status: string;
         orderId: string;
         proposedPrice: import("@prisma/client-runtime-utils").Decimal;
         comment: string | null;
         estimatedDays: number | null;
         seen: boolean;
+        masterId: string;
     })[]>;
     byOrder(orderId: string): import("@prisma/client").Prisma.PrismaPromise<({
         master: {
@@ -66,13 +66,13 @@ export declare class ResponsesController {
     } & {
         id: string;
         createdAt: Date;
-        masterId: string;
         status: string;
         orderId: string;
         proposedPrice: import("@prisma/client-runtime-utils").Decimal;
         comment: string | null;
         estimatedDays: number | null;
         seen: boolean;
+        masterId: string;
     })[]>;
 }
 export {};

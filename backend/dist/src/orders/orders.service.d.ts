@@ -15,12 +15,12 @@ export declare class OrdersService {
     } & {
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
@@ -36,23 +36,23 @@ export declare class OrdersService {
         responses: {
             id: string;
             createdAt: Date;
-            masterId: string;
             status: string;
             orderId: string;
             proposedPrice: import("@prisma/client-runtime-utils").Decimal;
             comment: string | null;
             estimatedDays: number | null;
             seen: boolean;
+            masterId: string;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
@@ -78,13 +78,13 @@ export declare class OrdersService {
         } & {
             id: string;
             createdAt: Date;
-            masterId: string;
             status: string;
             orderId: string;
             proposedPrice: import("@prisma/client-runtime-utils").Decimal;
             comment: string | null;
             estimatedDays: number | null;
             seen: boolean;
+            masterId: string;
         })[];
         selectedMaster: {
             name: string;
@@ -94,12 +94,12 @@ export declare class OrdersService {
     } & {
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
@@ -121,12 +121,12 @@ export declare class OrdersService {
     } & {
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
@@ -152,13 +152,13 @@ export declare class OrdersService {
         } & {
             id: string;
             createdAt: Date;
-            masterId: string;
             status: string;
             orderId: string;
             proposedPrice: import("@prisma/client-runtime-utils").Decimal;
             comment: string | null;
             estimatedDays: number | null;
             seen: boolean;
+            masterId: string;
         })[];
         selectedMaster: {
             name: string;
@@ -168,12 +168,12 @@ export declare class OrdersService {
     } & {
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
@@ -199,13 +199,13 @@ export declare class OrdersService {
         } & {
             id: string;
             createdAt: Date;
-            masterId: string;
             status: string;
             orderId: string;
             proposedPrice: import("@prisma/client-runtime-utils").Decimal;
             comment: string | null;
             estimatedDays: number | null;
             seen: boolean;
+            masterId: string;
         })[];
         selectedMaster: {
             name: string;
@@ -215,12 +215,12 @@ export declare class OrdersService {
     } & {
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
@@ -230,12 +230,12 @@ export declare class OrdersService {
     delete(orderId: string, clientId: string): Promise<{
         id: string;
         createdAt: Date;
-        workTypeId: string;
         updatedAt: Date;
-        address: string;
-        description: string | null;
+        workTypeId: string;
         clientId: string;
         areaSqm: import("@prisma/client-runtime-utils").Decimal;
+        address: string;
+        description: string | null;
         photoUrls: string[];
         status: string;
         selectedMasterId: string | null;
