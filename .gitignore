@@ -5,6 +5,11 @@
 /tmp
 /out-tsc
 /bazel-out
+backend/dist/
+backend/tsconfig.build.tsbuildinfo
+
+# Logs
+logs/
 
 # Node
 /node_modules
