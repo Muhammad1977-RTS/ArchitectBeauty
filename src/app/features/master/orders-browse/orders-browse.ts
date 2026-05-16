@@ -34,9 +34,10 @@ export class MasterOrdersBrowseComponent implements OnInit {
     return this.unreadCounts().get(orderId) ?? 0;
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('ru-RU', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    });
+  formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 }

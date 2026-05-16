@@ -11,7 +11,7 @@
 
       <div class="page-header">
         <a routerLink="/client/orders" class="btn-secondary btn-sm">← Назад</a>
-        <h1 class="page-title" style="flex:1">{{ order()!.work_types?.name ?? 'Заявка' }}</h1>
+        <h1 class="page-title" style="flex:1">{{ order()!.work_type?.name ?? 'Заявка' }}</h1>
         <span class="status-badge status-{{ order()!.status }}">{{ statusLabel(order()!.status) }}</span>
       </div>
 

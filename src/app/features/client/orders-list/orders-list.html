@@ -29,7 +29,7 @@
         <div class="order-card card" [class.order-card--deleting]="deleting() === order.id">
           <a [routerLink]="['/client/orders', order.id]" class="order-card__link">
             <div class="order-card__head">
-              <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
+              <span class="order-card__type">{{ order.work_type?.name ?? '—' }}</span>
               <div class="order-card__badges">
                 @if (newResponseCount(order.id) > 0) {
                   <span class="response-badge" title="Новых откликов: {{ newResponseCount(order.id) }}">

@@ -15,7 +15,7 @@
       @for (order of orders(); track order.id) {
         <a [routerLink]="['/master/orders', order.id]" class="order-card card">
           <div class="order-card__head">
-            <span class="order-card__type">{{ order.work_types?.name ?? '—' }}</span>
+            <span class="order-card__type">{{ order.work_type?.name ?? '—' }}</span>
             <div class="order-card__right">
               @if (unreadCount(order.id) > 0) {
                 <span class="msg-badge" title="Новых сообщений: {{ unreadCount(order.id) }}">

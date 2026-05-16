@@ -165,7 +165,7 @@ export class ClientOrderDetailComponent implements OnInit {
   async deleteOrder() {
     const order = this.order();
     if (!order) return;
-    if (!confirm(`Удалить заявку «${order.work_types?.name ?? 'Заявка'}»? Это действие необратимо.`)) return;
+    if (!confirm(`Удалить заявку «${order.work_type?.name ?? 'Заявка'}»? Это действие необратимо.`)) return;
 
     this.actionLoading.set('delete');
     const ok = await this.orderService.deleteOrder(order.id);
@@ -221,8 +221,11 @@ export class ClientOrderDetailComponent implements OnInit {
     return map[status];
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('ru-RU', {
+  formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ru-RU', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
   }

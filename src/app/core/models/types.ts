@@ -24,7 +24,7 @@ export interface MasterRate {
   master_id: string;
   work_type_id: string;
   rate_per_sqm: number;
-  work_types?: WorkType;
+  work_type?: WorkType;
 }
 
 export interface Order {
@@ -41,7 +41,7 @@ export interface Order {
   review_text: string | null;
   created_at: string;
   updated_at: string;
-  work_types?: WorkType;
+  work_type?: WorkType;
   profiles?: Profile;
 }
 
@@ -134,7 +134,7 @@ export interface ResponseOrder {
   address: string;
   status: OrderStatus;
   selected_master_id: string | null;
-  work_types?: WorkType;
+  work_type?: WorkType;
 }
 
 export interface Response {

@@ -65,7 +65,7 @@ export class ClientOrdersListComponent implements OnInit {
   async deleteOrder(order: Order, event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
-    if (!confirm(`Удалить заявку «${order.work_types?.name ?? 'Заявка'}»? Это действие необратимо.`)) return;
+    if (!confirm(`Удалить заявку «${order.work_type?.name ?? 'Заявка'}»? Это действие необратимо.`)) return;
 
     this.deleting.set(order.id);
     const ok = await this.orderService.deleteOrder(order.id);
@@ -85,9 +85,10 @@ export class ClientOrdersListComponent implements OnInit {
     return map[status];
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('ru-RU', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    });
+  formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 }

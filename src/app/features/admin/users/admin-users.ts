@@ -47,7 +47,10 @@ export class AdminUsersComponent implements OnInit {
     return role === 'master' ? 'Мастер' : 'Клиент';
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+  formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 }

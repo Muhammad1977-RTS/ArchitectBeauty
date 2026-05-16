@@ -145,8 +145,11 @@ export class MasterOrderDetailComponent implements OnInit {
     if (ok) { this.complaintSent.set(true); this.complaintOpen.set(false); }
   }
 
-  formatDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('ru-RU', {
+  formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('ru-RU', {
       day: 'numeric', month: 'long', year: 'numeric',
     });
   }
