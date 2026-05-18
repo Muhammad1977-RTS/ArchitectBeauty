@@ -11,19 +11,31 @@ class SendMessageDto {
 export class MessagesController {
   constructor(private svc: MessagesService) {}
 
-  @Get('order/:orderId')
-  byOrder(@Param('orderId') orderId: string) {
-    return this.svc.findByOrder(orderId);
+  @Get('order/:orderId/master/:masterId')
+  byOrder(
+    @Param('orderId') orderId: string,
+    @Param('masterId') masterId: string,
+  ) {
+    return this.svc.findByOrder(orderId, masterId);
   }
 
-  @Post('order/:orderId')
-  send(@Param('orderId') orderId: string, @CurrentUser() user: any, @Body() dto: SendMessageDto) {
-    return this.svc.send(orderId, user.id, dto.content);
+  @Post('order/:orderId/master/:masterId')
+  send(
+    @Param('orderId') orderId: string,
+    @Param('masterId') masterId: string,
+    @CurrentUser() user: any,
+    @Body() dto: SendMessageDto,
+  ) {
+    return this.svc.send(orderId, masterId, user.id, dto.content);
   }
 
-  @Post('order/:orderId/read')
-  markRead(@Param('orderId') orderId: string, @CurrentUser() user: any) {
-    return this.svc.markRead(orderId, user.id);
+  @Post('order/:orderId/master/:masterId/read')
+  markRead(
+    @Param('orderId') orderId: string,
+    @Param('masterId') masterId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.svc.markRead(orderId, masterId, user.id);
   }
 
   @Get('unread')

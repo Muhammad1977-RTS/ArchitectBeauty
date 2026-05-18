@@ -57,8 +57,9 @@ export interface Message {
   master_id: string;
   sender_id: string;
   content: string;
+  read_at?: string | null;
   created_at: string;
-  profiles?: { name: string };
+  sender?: { id: string; name: string; role: string };
 }
 
 export type VehicleType = 'car' | 'minivan' | 'gazelle' | 'truck';
@@ -145,6 +146,6 @@ export interface Response {
   comment: string | null;
   estimated_days: number | null;
   created_at: string;
-  profiles?: Profile;
-  orders?: ResponseOrder;
+  master?: { id: string; name: string; phone: string | null };
+  order?: ResponseOrder;
 }

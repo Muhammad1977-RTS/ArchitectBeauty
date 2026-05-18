@@ -29,4 +29,14 @@ export class ResponsesController {
   byOrder(@Param('orderId') orderId: string) {
     return this.svc.findByOrder(orderId);
   }
+
+  @Get('unseen-counts')
+  unseenCounts(@CurrentUser() user: any) {
+    return this.svc.countUnseenForClient(user.id);
+  }
+
+  @Post('order/:orderId/seen')
+  markSeen(@Param('orderId') orderId: string, @CurrentUser() user: any) {
+    return this.svc.markSeen(orderId, user.id);
+  }
 }

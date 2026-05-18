@@ -58,4 +58,16 @@ export class ResponsesService {
     }
     return counts;
   }
+
+  async countUnseenForClient(clientId: string) {
+    const responses = await this.prisma.response.findMany({
+      where: { order: { clientId }, seen: false },
+      select: { orderId: true },
+    });
+    const counts: Record<string, number> = {};
+    for (const r of responses) {
+      counts[r.orderId] = (counts[r.orderId] || 0) + 1;
+    }
+    return counts;
+  }
 }

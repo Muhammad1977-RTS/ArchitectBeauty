@@ -82,7 +82,7 @@
 
                   <button class="acc-head" (click)="toggleResponse(r.id, r.master_id)">
                     <div class="acc-head__left">
-                      <span class="acc-name">{{ r.profiles?.name ?? 'Мастер' }}</span>
+                      <span class="acc-name">{{ r.master?.name ?? 'Мастер' }}</span>
                       @if (stats?.reviews_count) {
                         <span class="acc-rating">★ {{ stats.avg_rating }}
                           <span class="acc-rating__count">({{ stats.reviews_count }})</span>
@@ -162,7 +162,7 @@
             <div class="selected-master-card">
               <div class="selected-master-head">
                 <div>
-                  <div class="acc-name">{{ selR.profiles?.name ?? 'Мастер' }}</div>
+                  <div class="acc-name">{{ selR.master?.name ?? 'Мастер' }}</div>
                 </div>
                 <div style="text-align:right; flex-shrink:0">
                   <div class="acc-price">{{ formatPrice(selR.proposed_price) }}</div>
@@ -212,7 +212,7 @@
                     <div class="complaint-actions">
                       <button class="btn-primary btn-sm"
                               [disabled]="!complaintText().trim() || complaintLoading()"
-                              (click)="submitComplaint(selR.master_id, selR.profiles?.name ?? 'Мастер')">
+                              (click)="submitComplaint(selR.master_id, selR.master?.name ?? 'Мастер')">
                         {{ complaintLoading() ? 'Отправляем...' : 'Отправить' }}
                       </button>
                       <button class="btn-secondary btn-sm" (click)="complaintOpen.set(false)">Отмена</button>
@@ -301,7 +301,7 @@
 .responses-count {
   display: inline-flex; align-items: center; justify-content: center;
   width: 22px; height: 22px; border-radius: 50%;
-  background: var(--color-primary); color: #fff;
+  background: #E53935; color: #fff;
   font-size: 12px; font-weight: 600; margin-left: 8px; vertical-align: middle;
 }
 

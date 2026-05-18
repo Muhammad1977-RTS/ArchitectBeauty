@@ -38,7 +38,7 @@
            class="response-card card"
            [class.response-card--selected]="isSelected(r)">
           <div class="response-card__head">
-            <span class="response-card__type">{{ r.orders?.work_type?.name ?? '—' }}</span>
+            <span class="response-card__type">{{ r.order?.work_type?.name ?? '—' }}</span>
             <div class="response-card__right">
               @if (unreadCount(r.order_id) > 0) {
                 <span class="msg-badge" title="Новых сообщений от клиента: {{ unreadCount(r.order_id) }}">
@@ -49,16 +49,16 @@
             </div>
           </div>
           <div class="response-card__meta">
-            <span>{{ r.orders?.area_sqm }} м²</span>
+            <span>{{ r.order?.area_sqm }} м²</span>
             <span class="dot">·</span>
-            <span>{{ r.orders?.address }}</span>
+            <span>{{ r.order?.address }}</span>
           </div>
           <div class="response-card__footer">
             @if (r.estimated_days) {
               <span class="response-card__days">{{ r.estimated_days }} дн.</span>
             }
-            <span class="status-badge status-{{ r.orders?.status }}">
-              {{ statusLabel(r.orders?.status ?? '') }}
+            <span class="status-badge status-{{ r.order?.status }}">
+              {{ statusLabel(r.order?.status ?? '') }}
             </span>
             @if (isSelected(r)) {
               <span class="selected-badge">Вас выбрали!</span>

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
@@ -13,7 +13,7 @@ type Filter = OrderStatus | 'all';
   imports: [RouterLink],
   templateUrl: './orders-list.html',
 })
-export class ClientOrdersListComponent implements OnInit {
+export class ClientOrdersListComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private orderService = inject(OrderService);
   private chatService = inject(ChatService);
@@ -24,6 +24,7 @@ export class ClientOrdersListComponent implements OnInit {
   readonly filter = signal<Filter>('all');
   readonly unreadCounts = signal<Map<string, number>>(new Map());
   readonly newResponseCounts = signal<Map<string, number>>(new Map());
+  private badgePollTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly filtered = computed(() => {
     const f = this.filter();
@@ -51,6 +52,20 @@ export class ClientOrdersListComponent implements OnInit {
     this.newResponseCounts.set(newResponses);
     this.loading.set(false);
 
+    this.badgePollTimer = setInterval(async () => {
+      const u = this.auth.user();
+      if (!u) return;
+      const [freshUnread, freshResponses] = await Promise.all([
+        this.chatService.getUnreadCountsForClient(u.id),
+        this.responseService.getNewResponseCountsForClient(u.id),
+      ]);
+      this.unreadCounts.set(freshUnread);
+      this.newResponseCounts.set(freshResponses);
+    }, 10000);
+  }
+
+  ngOnDestroy() {
+    if (this.badgePollTimer) clearInterval(this.badgePollTimer);
   }
 
   unreadCount(orderId: string): number {
@@ -68,6 +83,14 @@ export class ClientOrdersListComponent implements OnInit {
       completed: 'Завершена',
     };
     return map[status];
+  }
+
+  async deleteOrder(id: string, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!confirm('Удалить заявку?')) return;
+    const ok = await this.orderService.deleteOrder(id);
+    if (ok) this.orders.update(list => list.filter(o => o.id !== id));
   }
 
   formatDate(iso: string | null | undefined): string {

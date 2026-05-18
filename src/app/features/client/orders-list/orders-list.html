@@ -32,6 +32,14 @@
     <div class="orders-grid">
       @for (order of filtered(); track order.id) {
         <div class="order-card card">
+          <button class="order-card__delete" (click)="deleteOrder(order.id, $event)" title="Удалить заявку" aria-label="Удалить заявку">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+              <path d="M10 11v6M14 11v6"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+          </button>
           <a [routerLink]="['/client/orders', order.id]" class="order-card__link">
             <div class="order-card__head">
               <span class="order-card__type">{{ order.work_type?.name ?? '—' }}</span>
@@ -92,12 +100,34 @@
   padding: 0;
 }
 
+.order-card__delete {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.order-card__delete:hover {
+  color: #E53935;
+  background: rgba(229, 57, 53, 0.08);
+}
+
 .order-card__link {
   flex: 1;
   display: block;
   text-decoration: none;
   color: inherit;
-  padding: 18px 20px;
+  padding: 18px 54px 18px 20px;
 }
 .order-card__head {
   display: flex;
@@ -141,7 +171,7 @@
 .response-badge {
   display: inline-flex; align-items: center; justify-content: center;
   height: 22px; padding: 0 8px;
-  border-radius: 11px; background: #F57C00; color: #fff;
+  border-radius: 11px; background: #E53935; color: #fff;
   font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
 }
 </style>

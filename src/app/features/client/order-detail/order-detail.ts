@@ -73,7 +73,6 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     this.responses.set(responses);
 
     if (order) {
-      this.chatService.markAsReadClient(order.id, this.currentUserId);
       this.responseService.markResponsesSeenForOrder(order.id);
     }
 
@@ -110,14 +109,20 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
 
     const msgs = await this.chatService.loadMessages(orderId, masterId);
     this.chatMessages.update(m => ({ ...m, [masterId]: msgs }));
+    await this.chatService.markAsRead(orderId, masterId);
+    this.scrollChat(masterId);
 
     const timer = setInterval(async () => {
       const fresh = await this.chatService.loadMessages(orderId, masterId);
-      if (fresh.length !== (this.chatMessages()[masterId]?.length ?? 0)) {
+      const cur = this.chatMessages()[masterId] ?? [];
+      const lastCurId = cur[cur.length - 1]?.id;
+      const lastFreshId = fresh[fresh.length - 1]?.id;
+      if (fresh.length !== cur.length || lastFreshId !== lastCurId) {
         this.chatMessages.update(m => ({ ...m, [masterId]: fresh }));
+        await this.chatService.markAsRead(orderId, masterId);
         this.scrollChat(masterId);
       }
-    }, 5000);
+    }, 2000);
     this.pollTimers.set(masterId, timer);
   }
 
@@ -135,7 +140,7 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     if (!order || !content || this.chatSending()) return;
 
     // Оптимистичное добавление
-    const tempId = crypto.randomUUID();
+    const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const tempMsg: Message = {
       id: tempId,
       order_id: order.id,
@@ -149,8 +154,17 @@ export class ClientOrderDetailComponent implements OnInit, OnDestroy {
     this.scrollChat(masterId);
 
     this.chatSending.set(true);
-    await this.chatService.send(order.id, masterId, this.currentUserId, content);
+    const ok = await this.chatService.send(order.id, masterId, content);
     this.chatSending.set(false);
+
+    if (ok) {
+      const fresh = await this.chatService.loadMessages(order.id, masterId);
+      const cur = this.chatMessages()[masterId] ?? [];
+      if (fresh.length !== cur.length || fresh[fresh.length - 1]?.id !== cur[cur.length - 1]?.id) {
+        this.chatMessages.update(m => ({ ...m, [masterId]: fresh }));
+        this.scrollChat(masterId);
+      }
+    }
   }
 
   private scrollChat(masterId: string) {

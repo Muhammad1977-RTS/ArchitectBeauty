@@ -6,32 +6,28 @@ import { Message } from '../models/types';
 export class ChatService {
   private api = inject(ApiService);
 
-  async loadMessages(orderId: string, _masterId: string): Promise<Message[]> {
+  async loadMessages(orderId: string, masterId: string): Promise<Message[]> {
     try {
-      return await this.api.get<Message[]>(`/messages/order/${orderId}`);
-    } catch {
+      return await this.api.get<Message[]>(`/messages/order/${orderId}/master/${masterId}`);
+    } catch (e) {
+      console.error('loadMessages failed:', e);
       return [];
     }
   }
 
-  async send(orderId: string, _masterId: string, _senderId: string, content: string): Promise<boolean> {
+  async send(orderId: string, masterId: string, content: string): Promise<boolean> {
     try {
-      await this.api.post(`/messages/order/${orderId}`, { content });
+      await this.api.post(`/messages/order/${orderId}/master/${masterId}`, { content });
       return true;
-    } catch {
+    } catch (e) {
+      console.error('Chat send failed:', e);
       return false;
     }
   }
 
-  async markAsRead(orderId: string, _masterId: string): Promise<void> {
+  async markAsRead(orderId: string, masterId: string): Promise<void> {
     try {
-      await this.api.post(`/messages/order/${orderId}/read`, {});
-    } catch {}
-  }
-
-  async markAsReadClient(orderId: string, _clientId: string): Promise<void> {
-    try {
-      await this.api.post(`/messages/order/${orderId}/read`, {});
+      await this.api.post(`/messages/order/${orderId}/master/${masterId}/read`, {});
     } catch {}
   }
 

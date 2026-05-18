@@ -46,6 +46,11 @@ export class OrderCreateComponent implements OnInit {
     this.workTypes.set(other ? [...rest, other] : rest);
   }
 
+  selectWorkTypeById(id: string) {
+    const wt = this.workTypes().find(w => w.id === id);
+    if (wt) this.selectWorkType(wt);
+  }
+
   selectWorkType(wt: WorkType) {
     this.form.patchValue({ work_type_id: wt.id });
     this.selectedWorkTypeSlug.set(wt.slug ?? '');

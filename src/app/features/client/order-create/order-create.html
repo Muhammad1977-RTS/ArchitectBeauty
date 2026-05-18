@@ -22,6 +22,17 @@
                       (click)="selectWorkType(wt)">{{ wt.name }}</button>
             }
           </div>
+          <div class="wt-select-wrap">
+            <select class="form-input wt-select"
+                    [value]="form.get('work_type_id')?.value ?? ''"
+                    (change)="selectWorkTypeById($any($event.target).value)">
+              <option value="" disabled>— Выбрать из списка —</option>
+              @for (wt of workTypes(); track wt.id) {
+                <option [value]="wt.id">{{ wt.name }}</option>
+              }
+            </select>
+          </div>
+
           @if (form.get('work_type_id')?.touched && form.get('work_type_id')?.invalid) {
             <span class="field-error">Выберите вид работы</span>
           }
@@ -126,6 +137,9 @@
 }
 .wt-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .wt-chip--active { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
+
+.wt-select-wrap { margin-top: 10px; }
+.wt-select { width: 100%; cursor: pointer; }
 
 .photos-grid {
   display: flex;

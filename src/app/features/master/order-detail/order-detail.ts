@@ -72,15 +72,19 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
       const msgs = await this.chatService.loadMessages(order.id, user.id);
       this.chatMessages.set(msgs);
       await this.chatService.markAsRead(order.id, user.id);
+      this.scrollChat();
 
       this.pollTimer = setInterval(async () => {
         const fresh = await this.chatService.loadMessages(order.id, user.id);
-        if (fresh.length !== this.chatMessages().length) {
+        const cur = this.chatMessages();
+        const lastCurId = cur[cur.length - 1]?.id;
+        const lastFreshId = fresh[fresh.length - 1]?.id;
+        if (fresh.length !== cur.length || lastFreshId !== lastCurId) {
           this.chatMessages.set(fresh);
           await this.chatService.markAsRead(order.id, user.id);
           this.scrollChat();
         }
-      }, 5000);
+      }, 2000);
     }
 
     this.loading.set(false);
@@ -96,7 +100,7 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
     if (!order || !content || this.chatSending()) return;
 
     const tempMsg: Message = {
-      id: crypto.randomUUID(),
+      id: `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       order_id: order.id,
       master_id: this.currentUserId,
       sender_id: this.currentUserId,
@@ -108,8 +112,17 @@ export class MasterOrderDetailComponent implements OnInit, OnDestroy {
     this.scrollChat();
 
     this.chatSending.set(true);
-    await this.chatService.send(order.id, this.currentUserId, this.currentUserId, content);
+    const ok = await this.chatService.send(order.id, this.currentUserId, content);
     this.chatSending.set(false);
+
+    if (ok) {
+      const fresh = await this.chatService.loadMessages(order.id, this.currentUserId);
+      const cur = this.chatMessages();
+      if (fresh.length !== cur.length || fresh[fresh.length - 1]?.id !== cur[cur.length - 1]?.id) {
+        this.chatMessages.set(fresh);
+        this.scrollChat();
+      }
+    }
   }
 
   private scrollChat() {

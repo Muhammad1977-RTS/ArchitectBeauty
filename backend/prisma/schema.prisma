@@ -11,44 +11,41 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   createdAt    DateTime @default(now()) @map("created_at")
-
-  profile Profile?
+  profile      Profile?
 
   @@map("users")
 }
 
 model Profile {
-  id           String   @id
-  role         String
-  name         String   @default("")
-  phone        String?
-  cityDistrict String?  @map("city_district")
-  isAdmin      Boolean  @default(false) @map("is_admin")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [id], references: [id], onDelete: Cascade)
-
-  masterRates               MasterRate[]
-  ordersAsClient            Order[]             @relation("ClientOrders")
-  ordersAsSelectedMaster    Order[]             @relation("SelectedMaster")
-  responses                 Response[]
-  messagesAsSender          Message[]
-  complaintsReported        Complaint[]         @relation("ReporterComplaints")
-  complaintsReceived        Complaint[]         @relation("ReportedComplaints")
-  carrierProfile            CarrierProfile?
-  transportOrdersAsClient   TransportOrder[]    @relation("ClientTransportOrders")
-  transportOrdersAsCarrier  TransportOrder[]    @relation("SelectedCarrier")
-  transportResponses        TransportResponse[]
-  storeProfile              StoreProfile?
+  id                       String              @id
+  role                     String
+  name                     String              @default("")
+  phone                    String?
+  cityDistrict             String?             @map("city_district")
+  isAdmin                  Boolean             @default(false) @map("is_admin")
+  createdAt                DateTime            @default(now()) @map("created_at")
+  carrierProfile           CarrierProfile?
+  complaintsReceived       Complaint[]         @relation("ReportedComplaints")
+  complaintsReported       Complaint[]         @relation("ReporterComplaints")
+  masterRates              MasterRate[]
+  messagesAsSender         Message[]           @relation("MessagesSender")
+  messagesAsMaster         Message[]           @relation("MessagesMaster")
+  ordersAsClient           Order[]             @relation("ClientOrders")
+  ordersAsSelectedMaster   Order[]             @relation("SelectedMaster")
+  user                     User                @relation(fields: [id], references: [id], onDelete: Cascade)
+  responses                Response[]
+  storeProfile             StoreProfile?
+  transportOrdersAsClient  TransportOrder[]    @relation("ClientTransportOrders")
+  transportOrdersAsCarrier TransportOrder[]    @relation("SelectedCarrier")
+  transportResponses       TransportResponse[]
 
   @@map("profiles")
 }
 
 model WorkType {
-  id   String @id @default(uuid())
-  name String
-  slug String @unique
-
+  id          String       @id @default(uuid())
+  name        String
+  slug        String       @unique
   masterRates MasterRate[]
   orders      Order[]
 
@@ -56,38 +53,36 @@ model WorkType {
 }
 
 model MasterRate {
-  id         String  @id @default(uuid())
-  masterId   String  @map("master_id")
-  workTypeId String  @map("work_type_id")
-  ratePerSqm Decimal @map("rate_per_sqm") @db.Decimal(10, 2)
-
-  master   Profile  @relation(fields: [masterId], references: [id], onDelete: Cascade)
-  workType WorkType @relation(fields: [workTypeId], references: [id], onDelete: Cascade)
+  id         String   @id @default(uuid())
+  masterId   String   @map("master_id")
+  workTypeId String   @map("work_type_id")
+  ratePerSqm Decimal  @map("rate_per_sqm") @db.Decimal(10, 2)
+  master     Profile  @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  workType   WorkType @relation(fields: [workTypeId], references: [id], onDelete: Cascade)
 
   @@unique([masterId, workTypeId])
   @@map("master_rates")
 }
 
 model Order {
-  id               String   @id @default(uuid())
-  clientId         String   @map("client_id")
-  workTypeId       String   @map("work_type_id")
-  areaSqm          Decimal  @map("area_sqm") @db.Decimal(8, 2)
+  id               String     @id @default(uuid())
+  clientId         String     @map("client_id")
+  workTypeId       String     @map("work_type_id")
+  areaSqm          Decimal    @map("area_sqm") @db.Decimal(8, 2)
   address          String
   description      String?
-  photoUrls        String[] @default([]) @map("photo_urls")
-  status           String   @default("new")
-  selectedMasterId String?  @map("selected_master_id")
+  photoUrls        String[]   @default([]) @map("photo_urls")
+  status           String     @default("new")
+  selectedMasterId String?    @map("selected_master_id")
   rating           Int?
-  reviewText       String?  @map("review_text")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-
-  client         Profile    @relation("ClientOrders", fields: [clientId], references: [id], onDelete: Cascade)
-  workType       WorkType   @relation(fields: [workTypeId], references: [id])
-  selectedMaster Profile?   @relation("SelectedMaster", fields: [selectedMasterId], references: [id])
-  responses      Response[]
-  messages       Message[]
+  reviewText       String?    @map("review_text")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+  messages         Message[]
+  client           Profile    @relation("ClientOrders", fields: [clientId], references: [id], onDelete: Cascade)
+  selectedMaster   Profile?   @relation("SelectedMaster", fields: [selectedMasterId], references: [id])
+  workType         WorkType   @relation(fields: [workTypeId], references: [id])
+  responses        Response[]
 
   @@map("orders")
 }
@@ -102,9 +97,8 @@ model Response {
   status        String   @default("new")
   seen          Boolean  @default(false)
   createdAt     DateTime @default(now()) @map("created_at")
-
-  order  Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  master Profile @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  master        Profile  @relation(fields: [masterId], references: [id], onDelete: Cascade)
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, masterId])
   @@map("responses")
@@ -113,13 +107,14 @@ model Response {
 model Message {
   id        String    @id @default(uuid())
   orderId   String    @map("order_id")
+  masterId  String?   @map("master_id")
   senderId  String    @map("sender_id")
   content   String
   readAt    DateTime? @map("read_at")
   createdAt DateTime  @default(now()) @map("created_at")
-
-  order  Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  sender Profile @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  master    Profile?  @relation("MessagesMaster", fields: [masterId], references: [id], onDelete: Cascade)
+  sender    Profile   @relation("MessagesSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }
@@ -131,9 +126,8 @@ model Complaint {
   reason         String
   status         String   @default("pending")
   createdAt      DateTime @default(now()) @map("created_at")
-
-  reporter     Profile @relation("ReporterComplaints", fields: [reporterId], references: [id], onDelete: Cascade)
-  reportedUser Profile @relation("ReportedComplaints", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reportedUser   Profile  @relation("ReportedComplaints", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reporter       Profile  @relation("ReporterComplaints", fields: [reporterId], references: [id], onDelete: Cascade)
 
   @@map("complaints")
 }
@@ -145,78 +139,73 @@ model CarrierProfile {
   minPrice    Decimal? @map("min_price") @db.Decimal(10, 2)
   maxWeightKg Decimal? @map("max_weight_kg") @db.Decimal(10, 2)
   updatedAt   DateTime @updatedAt @map("updated_at")
-
-  carrier Profile @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  carrier     Profile  @relation(fields: [carrierId], references: [id], onDelete: Cascade)
 
   @@map("carrier_profiles")
 }
 
 model TransportOrder {
-  id                String    @id @default(uuid())
-  clientId          String    @map("client_id")
-  fromAddress       String    @map("from_address")
-  toAddress         String    @map("to_address")
-  cargoDescription  String    @map("cargo_description")
-  cargoWeightKg     Decimal?  @map("cargo_weight_kg") @db.Decimal(10, 2)
-  cargoVolumeM3     Decimal?  @map("cargo_volume_m3") @db.Decimal(10, 2)
-  transportDate     DateTime? @map("transport_date") @db.Date
-  budget            Decimal?  @db.Decimal(10, 2)
-  status            String    @default("new")
-  selectedCarrierId String?   @map("selected_carrier_id")
+  id                String              @id @default(uuid())
+  clientId          String              @map("client_id")
+  fromAddress       String              @map("from_address")
+  toAddress         String              @map("to_address")
+  cargoDescription  String              @map("cargo_description")
+  cargoWeightKg     Decimal?            @map("cargo_weight_kg") @db.Decimal(10, 2)
+  cargoVolumeM3     Decimal?            @map("cargo_volume_m3") @db.Decimal(10, 2)
+  transportDate     DateTime?           @map("transport_date") @db.Date
+  budget            Decimal?            @db.Decimal(10, 2)
+  status            String              @default("new")
+  selectedCarrierId String?             @map("selected_carrier_id")
   rating            Int?
-  reviewText        String?   @map("review_text")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
-
-  client          Profile             @relation("ClientTransportOrders", fields: [clientId], references: [id], onDelete: Cascade)
-  selectedCarrier Profile?            @relation("SelectedCarrier", fields: [selectedCarrierId], references: [id])
-  responses       TransportResponse[]
+  reviewText        String?             @map("review_text")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime            @updatedAt @map("updated_at")
+  client            Profile             @relation("ClientTransportOrders", fields: [clientId], references: [id], onDelete: Cascade)
+  selectedCarrier   Profile?            @relation("SelectedCarrier", fields: [selectedCarrierId], references: [id])
+  responses         TransportResponse[]
 
   @@map("transport_orders")
 }
 
 model TransportResponse {
-  id            String   @id @default(uuid())
-  orderId       String   @map("order_id")
-  carrierId     String   @map("carrier_id")
-  proposedPrice Decimal  @map("proposed_price") @db.Decimal(10, 2)
+  id            String         @id @default(uuid())
+  orderId       String         @map("order_id")
+  carrierId     String         @map("carrier_id")
+  proposedPrice Decimal        @map("proposed_price") @db.Decimal(10, 2)
   comment       String?
-  vehicleType   String?  @map("vehicle_type")
-  status        String   @default("new")
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  order   TransportOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  carrier Profile        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  vehicleType   String?        @map("vehicle_type")
+  status        String         @default("new")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  carrier       Profile        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
+  order         TransportOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, carrierId])
   @@map("transport_responses")
 }
 
 model StoreProfile {
-  storeId     String   @id @map("store_id")
-  storeName   String   @default("") @map("store_name")
+  storeId     String    @id @map("store_id")
+  storeName   String    @default("") @map("store_name")
   address     String?
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  store    Profile   @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  products Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  products    Product[]
+  store       Profile   @relation(fields: [storeId], references: [id], onDelete: Cascade)
 
   @@map("store_profiles")
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  storeId     String   @map("store_id")
+  id          String       @id @default(uuid())
+  storeId     String       @map("store_id")
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
-  unit        String   @default("шт")
+  price       Decimal      @db.Decimal(10, 2)
+  unit        String       @default("шт")
   category    String?
-  inStock     Boolean  @default(true) @map("in_stock")
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  store StoreProfile @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
+  inStock     Boolean      @default(true) @map("in_stock")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  store       StoreProfile @relation(fields: [storeId], references: [storeId], onDelete: Cascade)
 
   @@map("products")
 }

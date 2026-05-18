@@ -52,12 +52,17 @@ export class ResponseService {
   }
 
   async getNewResponseCountsForClient(_clientId: string): Promise<Map<string, number>> {
-    return new Map();
+    try {
+      const counts = await this.api.get<Record<string, number>>('/responses/unseen-counts');
+      return new Map(Object.entries(counts));
+    } catch {
+      return new Map();
+    }
   }
 
   async markResponsesSeenForOrder(orderId: string): Promise<void> {
     try {
-      await this.api.post(`/messages/order/${orderId}/read`, {});
+      await this.api.post(`/responses/order/${orderId}/seen`, {});
     } catch {}
   }
 

@@ -5,24 +5,24 @@ import { PrismaService } from '../prisma/prisma.service';
 export class MessagesService {
   constructor(private prisma: PrismaService) {}
 
-  findByOrder(orderId: string) {
+  findByOrder(orderId: string, masterId: string) {
     return this.prisma.message.findMany({
-      where: { orderId },
+      where: { orderId, masterId },
       include: { sender: { select: { id: true, name: true, role: true } } },
       orderBy: { createdAt: 'asc' },
     });
   }
 
-  send(orderId: string, senderId: string, content: string) {
+  send(orderId: string, masterId: string, senderId: string, content: string) {
     return this.prisma.message.create({
-      data: { orderId, senderId, content },
+      data: { orderId, masterId, senderId, content },
       include: { sender: { select: { id: true, name: true, role: true } } },
     });
   }
 
-  async markRead(orderId: string, userId: string) {
+  async markRead(orderId: string, masterId: string, userId: string) {
     await this.prisma.message.updateMany({
-      where: { orderId, senderId: { not: userId }, readAt: null },
+      where: { orderId, masterId, senderId: { not: userId }, readAt: null },
       data: { readAt: new Date() },
     });
   }
