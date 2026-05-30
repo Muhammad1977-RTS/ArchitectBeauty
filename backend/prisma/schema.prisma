@@ -30,6 +30,8 @@ model Profile {
   masterRates              MasterRate[]
   messagesAsSender         Message[]           @relation("MessagesSender")
   messagesAsMaster         Message[]           @relation("MessagesMaster")
+  transportMessagesAsSender   TransportMessage[] @relation("TransportMessagesSender")
+  transportMessagesAsCarrier  TransportMessage[] @relation("TransportMessagesCarrier")
   ordersAsClient           Order[]             @relation("ClientOrders")
   ordersAsSelectedMaster   Order[]             @relation("SelectedMaster")
   user                     User                @relation(fields: [id], references: [id], onDelete: Cascade)
@@ -160,9 +162,10 @@ model TransportOrder {
   reviewText        String?             @map("review_text")
   createdAt         DateTime            @default(now()) @map("created_at")
   updatedAt         DateTime            @updatedAt @map("updated_at")
-  client            Profile             @relation("ClientTransportOrders", fields: [clientId], references: [id], onDelete: Cascade)
-  selectedCarrier   Profile?            @relation("SelectedCarrier", fields: [selectedCarrierId], references: [id])
+  client            Profile              @relation("ClientTransportOrders", fields: [clientId], references: [id], onDelete: Cascade)
+  selectedCarrier   Profile?             @relation("SelectedCarrier", fields: [selectedCarrierId], references: [id])
   responses         TransportResponse[]
+  messages          TransportMessage[]
 
   @@map("transport_orders")
 }
@@ -175,12 +178,28 @@ model TransportResponse {
   comment       String?
   vehicleType   String?        @map("vehicle_type")
   status        String         @default("new")
+  seen          Boolean        @default(false)
   createdAt     DateTime       @default(now()) @map("created_at")
   carrier       Profile        @relation(fields: [carrierId], references: [id], onDelete: Cascade)
   order         TransportOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@unique([orderId, carrierId])
   @@map("transport_responses")
+}
+
+model TransportMessage {
+  id        String         @id @default(uuid())
+  orderId   String         @map("order_id")
+  carrierId String         @map("carrier_id")
+  senderId  String         @map("sender_id")
+  content   String
+  readAt    DateTime?      @map("read_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+  order     TransportOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  carrier   Profile        @relation("TransportMessagesCarrier", fields: [carrierId], references: [id], onDelete: Cascade)
+  sender    Profile        @relation("TransportMessagesSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@map("transport_messages")
 }
 
 model StoreProfile {

@@ -58,11 +58,25 @@
       <div class="order-detail__date">{{ formatDate(order()!.created_at) }}</div>
     </div>
 
-    <!-- Завершить + рейтинг -->
-    @if (order()!.status === 'carrier_selected' && !order()!.rating) {
+    <!-- Шаг 1: перевозчик выбран — кнопка завершить -->
+    @if (order()!.status === 'carrier_selected') {
       <div class="card">
-        <h2 class="card-section-title">Завершить заявку</h2>
-        <p class="hint-text" style="margin-bottom: 16px;">Оцените работу перевозчика и отметьте заявку завершённой.</p>
+        <h2 class="card-section-title">Перевозка выполнена?</h2>
+        <p class="hint-text" style="margin-bottom: 16px;">Нажмите когда груз доставлен. После этого сможете оценить перевозчика.</p>
+        <button
+          class="btn-primary"
+          [disabled]="actionLoading() === 'complete'"
+          (click)="complete()">
+          @if (actionLoading() === 'complete') { Сохраняем... } @else { Груз доставлен — завершить }
+        </button>
+      </div>
+    }
+
+    <!-- Шаг 2: завершена, но без оценки — форма оценки -->
+    @if (order()!.status === 'completed' && !order()!.rating) {
+      <div class="card">
+        <h2 class="card-section-title">Оцените перевозчика</h2>
+        <p class="hint-text" style="margin-bottom: 16px;">Как прошла перевозка?</p>
         <div class="stars-row">
           @for (n of starRange; track n) {
             <button
@@ -85,13 +99,14 @@
         <button
           class="btn-primary"
           style="margin-top: 12px;"
-          [disabled]="!ratingSelected() || actionLoading() === 'complete'"
-          (click)="complete()">
-          @if (actionLoading() === 'complete') { Сохраняем... } @else { Завершить заявку }
+          [disabled]="!ratingSelected() || actionLoading() === 'rate'"
+          (click)="rate()">
+          @if (actionLoading() === 'rate') { Сохраняем... } @else { Отправить оценку }
         </button>
       </div>
     }
 
+    <!-- Шаг 3: оценка уже оставлена -->
     @if (order()!.status === 'completed' && order()!.rating) {
       <div class="card rating-card">
         <div class="rating-stars">{{ '★'.repeat(order()!.rating!) }}{{ '☆'.repeat(5 - order()!.rating!) }}</div>
@@ -154,6 +169,37 @@
         </div>
       }
     </div>
+
+    <!-- Чат с перевозчиком -->
+    @if (order()!.selected_carrier_id) {
+      <div class="card chat-card">
+        <h2 class="card-section-title">Чат с перевозчиком</h2>
+        <div class="chat-messages" id="transport-chat">
+          @if (chatMessages().length === 0) {
+            <p class="chat-empty">Напишите перевозчику — он увидит сообщение</p>
+          }
+          @for (msg of chatMessages(); track msg.id) {
+            <div class="chat-msg" [class.chat-msg--mine]="msg.sender_id === currentUserId">
+              <div class="chat-bubble">{{ msg.content }}</div>
+              <div class="chat-time">{{ formatTime(msg.created_at) }}</div>
+            </div>
+          }
+        </div>
+        <div class="chat-input-row">
+          <input
+            class="form-input chat-input"
+            type="text"
+            placeholder="Сообщение..."
+            [value]="chatDraft()"
+            (input)="chatDraft.set($any($event.target).value)"
+            (keydown.enter)="sendMessage()"
+          />
+          <button class="btn-primary btn-sm" [disabled]="!chatDraft().trim() || chatSending()" (click)="sendMessage()">
+            Отправить
+          </button>
+        </div>
+      </div>
+    }
   }
 </div>
 
@@ -265,4 +311,35 @@
 }
 .empty-icon { font-size: 36px; }
 .empty-text { font-size: 15px; color: var(--color-text-secondary); margin: 0; }
+
+.chat-card { padding: 20px; margin-bottom: 16px; }
+.chat-messages {
+  min-height: 120px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 4px 0;
+}
+.chat-empty { font-size: 14px; color: var(--color-text-secondary); text-align: center; padding: 20px 0; margin: 0; }
+.chat-msg { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.chat-msg--mine { align-items: flex-end; }
+.chat-bubble {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--color-bg-secondary, #f4f4f4);
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.chat-msg--mine .chat-bubble {
+  background: var(--color-primary);
+  color: #fff;
+}
+.chat-time { font-size: 11px; color: var(--color-text-secondary); padding: 0 4px; }
+.chat-input-row { display: flex; gap: 8px; align-items: center; }
+.chat-input { flex: 1; }
 </style>

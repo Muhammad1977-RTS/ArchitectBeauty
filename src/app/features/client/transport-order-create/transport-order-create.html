@@ -115,9 +115,11 @@
         </div>
       </div>
 
-      <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
-        @if (loading()) { Создаём... } @else { Разместить заявку }
-      </button>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || loading()">
+          @if (loading()) { Создаём... } @else { Разместить заявку }
+        </button>
+      </div>
     </form>
   </div>
 </div>

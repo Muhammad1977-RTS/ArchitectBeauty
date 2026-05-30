@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CarrierService } from '../../../core/services/carrier.service';
@@ -9,7 +9,7 @@ import { TransportOrder, TransportResponse, VehicleType } from '../../../core/mo
   imports: [RouterLink],
   templateUrl: './transport-order-detail.html',
 })
-export class ClientTransportOrderDetailComponent implements OnInit {
+export class ClientTransportOrderDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private auth = inject(AuthService);
@@ -25,6 +25,12 @@ export class ClientTransportOrderDetailComponent implements OnInit {
   readonly reviewText = signal('');
   readonly starRange = [1, 2, 3, 4, 5];
 
+  readonly chatMessages = signal<any[]>([]);
+  readonly chatDraft = signal('');
+  readonly chatSending = signal(false);
+  currentUserId = '';
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+
   readonly vehicleLabels: Record<VehicleType, string> = {
     car: 'Легковая',
     minivan: 'Минивэн',
@@ -34,6 +40,7 @@ export class ClientTransportOrderDetailComponent implements OnInit {
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
+    this.currentUserId = this.auth.user()?.id ?? '';
     if (!id) { this.loading.set(false); return; }
 
     const [order, responses] = await Promise.all([
@@ -44,6 +51,65 @@ export class ClientTransportOrderDetailComponent implements OnInit {
     this.order.set(order);
     this.responses.set(responses);
     this.loading.set(false);
+
+    this.carrierService.markTransportResponsesSeenForOrder(id);
+
+    if (order?.selected_carrier_id) {
+      await this.loadChat(order.id, order.selected_carrier_id);
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.pollTimer) clearInterval(this.pollTimer);
+  }
+
+  private async loadChat(orderId: string, carrierId: string) {
+    const msgs = await this.carrierService.loadMessages(orderId, carrierId);
+    this.chatMessages.set(msgs);
+    await this.carrierService.markMessagesRead(orderId, carrierId);
+    this.scrollChat();
+
+    this.pollTimer = setInterval(async () => {
+      const fresh = await this.carrierService.loadMessages(orderId, carrierId);
+      const cur = this.chatMessages();
+      if (fresh.length !== cur.length || fresh[fresh.length - 1]?.id !== cur[cur.length - 1]?.id) {
+        this.chatMessages.set(fresh);
+        await this.carrierService.markMessagesRead(orderId, carrierId);
+        this.scrollChat();
+      }
+    }, 3000);
+  }
+
+  private scrollChat() {
+    setTimeout(() => {
+      const el = document.getElementById('transport-chat');
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 30);
+  }
+
+  async sendMessage() {
+    const order = this.order();
+    const content = this.chatDraft().trim();
+    if (!order?.selected_carrier_id || !content || this.chatSending()) return;
+
+    const tempMsg = {
+      id: `tmp-${Date.now()}`,
+      sender_id: this.currentUserId,
+      content,
+      created_at: new Date().toISOString(),
+      sender: { id: this.currentUserId, name: '', role: '' },
+    };
+    this.chatMessages.update(m => [...m, tempMsg]);
+    this.chatDraft.set('');
+    this.scrollChat();
+
+    this.chatSending.set(true);
+    await this.carrierService.sendMessage(order.id, order.selected_carrier_id, content);
+    this.chatSending.set(false);
+
+    const fresh = await this.carrierService.loadMessages(order.id, order.selected_carrier_id);
+    this.chatMessages.set(fresh);
+    this.scrollChat();
   }
 
   async selectCarrier(response: TransportResponse) {
@@ -59,23 +125,32 @@ export class ClientTransportOrderDetailComponent implements OnInit {
         ...r,
         status: r.carrier_id === response.carrier_id ? 'selected' : 'rejected',
       })));
+      const order = this.order();
+      if (order) await this.loadChat(order.id, response.carrier_id);
     }
     this.actionLoading.set(null);
   }
 
   async complete() {
     const order = this.order();
-    const rating = this.ratingSelected();
     if (!order) return;
     this.actionLoading.set('complete');
-    const ok = await this.carrierService.completeTransportOrder(
-      order.id,
-      rating,
-      this.reviewText(),
-    );
+    const ok = await this.carrierService.completeTransportOrder(order.id);
+    if (ok) {
+      this.order.update(o => o ? { ...o, status: 'completed' } : o);
+    }
+    this.actionLoading.set(null);
+  }
+
+  async rate() {
+    const order = this.order();
+    const rating = this.ratingSelected();
+    if (!order || !rating) return;
+    this.actionLoading.set('rate');
+    const ok = await this.carrierService.rateTransportOrder(order.id, rating, this.reviewText());
     if (ok) {
       this.order.update(o => o ? {
-        ...o, status: 'completed', rating, review_text: this.reviewText() || null,
+        ...o, rating, review_text: this.reviewText() || null,
       } : o);
     }
     this.actionLoading.set(null);
@@ -109,6 +184,10 @@ export class ClientTransportOrderDetailComponent implements OnInit {
 
   formatPrice(price: number): string {
     return price.toLocaleString('ru-RU') + ' ₽';
+  }
+
+  formatTime(iso: string): string {
+    return new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   }
 
   selectedResponse(): TransportResponse | null {

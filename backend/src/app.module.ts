@@ -10,6 +10,7 @@ import { ResponsesModule } from './responses/responses.module';
 import { MessagesModule } from './messages/messages.module';
 import { TransportOrdersModule } from './transport-orders/transport-orders.module';
 import { TransportResponsesModule } from './transport-responses/transport-responses.module';
+import { TransportMessagesModule } from './transport-messages/transport-messages.module';
 import { StoreModule } from './store/store.module';
 import { ProductsModule } from './products/products.module';
 import { ComplaintsModule } from './complaints/complaints.module';
@@ -31,6 +32,7 @@ import { SnakeCaseInterceptor } from './common/snake-case.interceptor';
     MessagesModule,
     TransportOrdersModule,
     TransportResponsesModule,
+    TransportMessagesModule,
     StoreModule,
     ProductsModule,
     ComplaintsModule,

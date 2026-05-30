@@ -64,9 +64,18 @@ export class CarrierService {
     }
   }
 
-  async completeTransportOrder(orderId: string, rating: number, reviewText: string): Promise<boolean> {
+  async completeTransportOrder(orderId: string): Promise<boolean> {
     try {
-      await this.api.patch(`/transport-orders/${orderId}/complete`, { rating, reviewText });
+      await this.api.patch(`/transport-orders/${orderId}/complete`, {});
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async rateTransportOrder(orderId: string, rating: number, reviewText: string): Promise<boolean> {
+    try {
+      await this.api.patch(`/transport-orders/${orderId}/rate`, { rating, reviewText });
       return true;
     } catch {
       return false;
@@ -124,6 +133,53 @@ export class CarrierService {
     } catch {
       return null;
     }
+  }
+
+  async loadMessages(orderId: string, carrierId: string): Promise<any[]> {
+    try {
+      return await this.api.get<any[]>(`/transport-messages/order/${orderId}/carrier/${carrierId}`);
+    } catch {
+      return [];
+    }
+  }
+
+  async sendMessage(orderId: string, carrierId: string, content: string): Promise<boolean> {
+    try {
+      await this.api.post(`/transport-messages/order/${orderId}/carrier/${carrierId}`, { content });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async markMessagesRead(orderId: string, carrierId: string): Promise<void> {
+    try {
+      await this.api.post(`/transport-messages/order/${orderId}/carrier/${carrierId}/read`, {});
+    } catch {}
+  }
+
+  async getUnreadMessageCounts(): Promise<Map<string, number>> {
+    try {
+      const counts = await this.api.get<Record<string, number>>('/transport-messages/unread');
+      return new Map(Object.entries(counts));
+    } catch {
+      return new Map();
+    }
+  }
+
+  async getNewResponseCountsForTransport(): Promise<Map<string, number>> {
+    try {
+      const counts = await this.api.get<Record<string, number>>('/transport-responses/unseen-counts');
+      return new Map(Object.entries(counts));
+    } catch {
+      return new Map();
+    }
+  }
+
+  async markTransportResponsesSeenForOrder(orderId: string): Promise<void> {
+    try {
+      await this.api.post(`/transport-responses/order/${orderId}/seen`, {});
+    } catch {}
   }
 
   async saveCarrierProfile(profile: CarrierProfile): Promise<boolean> {

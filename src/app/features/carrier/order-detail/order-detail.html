@@ -123,13 +123,46 @@
             ></textarea>
           </div>
 
-          <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting()">
-            @if (submitting()) { Отправляем... } @else { Откликнуться }
-          </button>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="form.invalid || submitting()">
+              @if (submitting()) { Отправляем... } @else { Откликнуться }
+            </button>
+          </div>
         </form>
       </div>
     } @else {
       <p class="hint-text">Заявка уже не принимает отклики.</p>
+    }
+
+    <!-- Чат с клиентом (только если перевозчик выбран) -->
+    @if (myResponse()?.status === 'selected') {
+      <div class="card chat-card">
+        <h2 class="card-title" style="margin-bottom:12px">Чат с клиентом</h2>
+        <div class="chat-messages" id="transport-chat-carrier">
+          @if (chatMessages().length === 0) {
+            <p class="chat-empty">Клиент напишет вам здесь</p>
+          }
+          @for (msg of chatMessages(); track msg.id) {
+            <div class="chat-msg" [class.chat-msg--mine]="msg.sender_id === currentUserId">
+              <div class="chat-bubble">{{ msg.content }}</div>
+              <div class="chat-time">{{ formatTime(msg.created_at) }}</div>
+            </div>
+          }
+        </div>
+        <div class="chat-input-row">
+          <input
+            class="form-input chat-input"
+            type="text"
+            placeholder="Сообщение..."
+            [value]="chatDraft()"
+            (input)="chatDraft.set($any($event.target).value)"
+            (keydown.enter)="sendMessage()"
+          />
+          <button class="btn-primary btn-sm" [disabled]="!chatDraft().trim() || chatSending()" (click)="sendMessage()">
+            Отправить
+          </button>
+        </div>
+      </div>
     }
   }
 </div>
@@ -167,7 +200,7 @@
 .prop-label { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 .prop-value { font-size: 14px; font-weight: 600; }
 
-.order-detail__footer { }
+
 .order-date { font-size: 12px; color: var(--color-text-secondary); }
 
 .card-title { font-size: 18px; font-weight: 700; margin: 0 0 20px; }
@@ -208,4 +241,31 @@
 
 .response-form { display: flex; flex-direction: column; gap: 16px; }
 .hint-text { color: var(--color-text-secondary); }
+
+.chat-card { padding: 20px; margin-bottom: 16px; }
+.chat-messages {
+  min-height: 120px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.chat-empty { font-size: 14px; color: var(--color-text-secondary); text-align: center; padding: 20px 0; margin: 0; }
+.chat-msg { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.chat-msg--mine { align-items: flex-end; }
+.chat-bubble {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--color-bg-secondary, #f4f4f4);
+  font-size: 14px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.chat-msg--mine .chat-bubble { background: var(--color-primary); color: #fff; }
+.chat-time { font-size: 11px; color: var(--color-text-secondary); padding: 0 4px; }
+.chat-input-row { display: flex; gap: 8px; align-items: center; }
+.chat-input { flex: 1; }
 </style>
