@@ -411,11 +411,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 24px;
+  padding: 12px 40px;
   background: var(--color-primary);
   color: #fff;
   border: none;
-  border-radius: var(--radius-btn);
+  border-radius: 24px;
   font: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -551,6 +551,7 @@ body {
 .form-actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
 }
 

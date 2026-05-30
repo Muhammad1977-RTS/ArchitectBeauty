@@ -8,14 +8,14 @@
       <a routerLink="/shops" class="back-link">← Все магазины</a>
       <h1 class="shop-title">{{ store()!.store_name }}</h1>
       <div class="shop-meta">
-        @if (store()!.profiles?.['city_district']) {
-          <span class="shop-meta-item">{{ store()!.profiles?.['city_district'] }}</span>
+        @if (store()!['store']?.['city_district']) {
+          <span class="shop-meta-item">{{ store()!['store']?.['city_district'] }}</span>
         }
         @if (store()!.address) {
           <span class="shop-meta-item">{{ store()!.address }}</span>
         }
-        @if (store()!.profiles?.['phone']) {
-          <span class="shop-meta-item">{{ store()!.profiles?.['phone'] }}</span>
+        @if (store()!['store']?.['phone']) {
+          <span class="shop-meta-item">📞 {{ store()!['store']?.['phone'] }}</span>
         }
       </div>
       @if (store()!.description) {
@@ -61,6 +61,18 @@
                 {{ product.in_stock ? 'В наличии' : 'Нет' }}
               </span>
             </div>
+            @if (product.in_stock) {
+              <div class="product-card-contact">
+                @if (store()!['store']?.['phone']) {
+                  <a [href]="'tel:' + store()!['store']?.['phone']" class="btn-contact">
+                    Позвонить
+                  </a>
+                }
+                @if (store()!.address) {
+                  <span class="contact-address">{{ store()!.address }}</span>
+                }
+              </div>
+            }
           </div>
         }
       </div>
@@ -101,5 +113,27 @@
 .product-stock-badge { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 12px; }
 .product-stock-badge.in { background: #E8F5E9; color: #2E7D32; }
 .product-stock-badge.out { background: #FFF3E0; color: #E65100; }
+.product-card-contact {
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn-contact {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--radius-btn);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.btn-contact:hover { opacity: .85; }
+.contact-address { font-size: 12px; color: var(--color-text-secondary); }
 .empty-hint { color: var(--color-text-secondary); font-size: 15px; }
 </style>

@@ -7,14 +7,20 @@ export class StoreService {
 
   findAll() {
     return this.prisma.storeProfile.findMany({
-      include: { _count: { select: { products: true } } },
+      include: {
+        store: { select: { phone: true, cityDistrict: true } },
+        _count: { select: { products: true } },
+      },
     });
   }
 
   findById(storeId: string) {
     return this.prisma.storeProfile.findUnique({
       where: { storeId },
-      include: { products: { where: { inStock: true } } },
+      include: {
+        store: { select: { phone: true, cityDistrict: true } },
+        products: { where: { inStock: true } },
+      },
     });
   }
 
