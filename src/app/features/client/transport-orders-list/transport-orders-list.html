@@ -39,9 +39,21 @@
             <div class="order-card__route">
               {{ order.from_address }} → {{ order.to_address }}
             </div>
-            <span class="status-badge status-{{ order.status }}">
-              {{ statusLabel(order.status) }}
-            </span>
+            <div class="order-card__badges">
+              @if (newResponseCount(order.id) > 0) {
+                <span class="response-badge" title="Новых откликов: {{ newResponseCount(order.id) }}">
+                  {{ newResponseCount(order.id) > 9 ? '9+' : newResponseCount(order.id) }} отклик{{ newResponseCount(order.id) === 1 ? '' : newResponseCount(order.id) < 5 ? 'а' : 'ов' }}
+                </span>
+              }
+              @if (unreadMsgCount(order.id) > 0) {
+                <span class="msg-badge" title="Новых сообщений: {{ unreadMsgCount(order.id) }}">
+                  {{ unreadMsgCount(order.id) > 9 ? '9+' : unreadMsgCount(order.id) }}
+                </span>
+              }
+              <span class="status-badge status-{{ order.status }}">
+                {{ statusLabel(order.status) }}
+              </span>
+            </div>
           </div>
           <div class="order-card__cargo">{{ order.cargo_description }}</div>
           <div class="order-card__meta">
@@ -108,6 +120,24 @@
   gap: 12px;
   margin-bottom: 6px;
 }
+.order-card__badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.response-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 22px; padding: 0 8px;
+  border-radius: 11px; background: #E53935; color: #fff;
+  font-size: 12px; font-weight: 600; line-height: 1; white-space: nowrap;
+}
+.msg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 5px;
+  border-radius: 11px; background: #E53935; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 1;
+}
 .order-card__route { font-weight: 600; font-size: 15px; line-height: 1.4; }
 .order-card__cargo {
   font-size: 14px;
@@ -132,7 +162,6 @@
 .order-card__date { font-size: 12px; color: var(--color-text-secondary); }
 
 .status-badge {
-  flex-shrink: 0;
   font-size: 12px;
   font-weight: 600;
   padding: 3px 8px;

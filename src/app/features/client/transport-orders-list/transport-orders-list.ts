@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CarrierService } from '../../../core/services/carrier.service';
@@ -11,13 +11,16 @@ type Filter = TransportOrderStatus | 'all';
   imports: [RouterLink],
   templateUrl: './transport-orders-list.html',
 })
-export class ClientTransportOrdersListComponent implements OnInit {
+export class ClientTransportOrdersListComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private carrierService = inject(CarrierService);
 
   readonly loading = signal(true);
   readonly orders = signal<TransportOrder[]>([]);
   readonly filter = signal<Filter>('all');
+  readonly newResponseCounts = signal<Map<string, number>>(new Map());
+  readonly unreadMsgCounts = signal<Map<string, number>>(new Map());
+  private badgePollTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly filters: { value: Filter; label: string }[] = [
     { value: 'all', label: 'Все' },
@@ -35,9 +38,36 @@ export class ClientTransportOrdersListComponent implements OnInit {
   async ngOnInit() {
     const user = this.auth.user();
     if (!user) { this.loading.set(false); return; }
-    const orders = await this.carrierService.getClientTransportOrders(user.id);
+    const [orders, newResponses, unreadMsgs] = await Promise.all([
+      this.carrierService.getClientTransportOrders(user.id),
+      this.carrierService.getNewResponseCountsForTransport(),
+      this.carrierService.getUnreadMessageCounts(),
+    ]);
     this.orders.set(orders);
+    this.newResponseCounts.set(newResponses);
+    this.unreadMsgCounts.set(unreadMsgs);
     this.loading.set(false);
+
+    this.badgePollTimer = setInterval(async () => {
+      const [freshResponses, freshMsgs] = await Promise.all([
+        this.carrierService.getNewResponseCountsForTransport(),
+        this.carrierService.getUnreadMessageCounts(),
+      ]);
+      this.newResponseCounts.set(freshResponses);
+      this.unreadMsgCounts.set(freshMsgs);
+    }, 10000);
+  }
+
+  ngOnDestroy() {
+    if (this.badgePollTimer) clearInterval(this.badgePollTimer);
+  }
+
+  newResponseCount(orderId: string): number {
+    return this.newResponseCounts().get(orderId) ?? 0;
+  }
+
+  unreadMsgCount(orderId: string): number {
+    return this.unreadMsgCounts().get(orderId) ?? 0;
   }
 
   statusLabel(status: TransportOrderStatus): string {

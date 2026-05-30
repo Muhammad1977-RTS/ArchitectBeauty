@@ -38,10 +38,19 @@
            class="response-card card"
            [class.response-card--selected]="isSelected(r)">
           <div class="response-card__head">
-            <div class="response-card__route">
-              {{ r.transport_orders?.from_address ?? '—' }} → {{ r.transport_orders?.to_address ?? '—' }}
+            @if (r.transport_orders?.from_address || r.transport_orders?.to_address) {
+              <div class="response-card__route">
+                {{ r.transport_orders?.from_address ?? '—' }} → {{ r.transport_orders?.to_address ?? '—' }}
+              </div>
+            }
+            <div class="response-card__right">
+              @if (unreadMsgCount(r.order_id) > 0) {
+                <span class="msg-badge" title="Новых сообщений: {{ unreadMsgCount(r.order_id) }}">
+                  {{ unreadMsgCount(r.order_id) > 9 ? '9+' : unreadMsgCount(r.order_id) }}
+                </span>
+              }
+              <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
             </div>
-            <span class="response-card__price">{{ formatPrice(r.proposed_price) }}</span>
           </div>
           <div class="response-card__footer">
             <span class="status-label">{{ statusLabel(r) }}</span>
@@ -103,7 +112,8 @@
   gap: 12px;
 }
 .response-card__route { font-weight: 600; font-size: 15px; line-height: 1.4; }
-.response-card__price { font-weight: 700; font-size: 16px; color: var(--color-primary); flex-shrink: 0; }
+.response-card__right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.response-card__price { font-weight: 700; font-size: 16px; color: var(--color-primary); }
 .response-card__footer {
   display: flex;
   align-items: center;
@@ -120,6 +130,12 @@
   color: #fff;
   font-size: 12px;
   font-weight: 600;
+}
+.msg-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 5px;
+  border-radius: 11px; background: #E53935; color: #fff;
+  font-size: 12px; font-weight: 700; line-height: 1;
 }
 .hint-text { color: var(--color-text-secondary); }
 .empty-state {

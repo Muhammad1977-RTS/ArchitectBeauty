@@ -36,4 +36,23 @@ export class TransportResponsesService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async countUnseenForClient(clientId: string) {
+    const responses = await this.prisma.transportResponse.findMany({
+      where: { order: { clientId }, seen: false },
+      select: { orderId: true },
+    });
+    const counts: Record<string, number> = {};
+    for (const r of responses) {
+      counts[r.orderId] = (counts[r.orderId] || 0) + 1;
+    }
+    return counts;
+  }
+
+  async markSeen(orderId: string, _userId: string) {
+    await this.prisma.transportResponse.updateMany({
+      where: { orderId, seen: false },
+      data: { seen: true },
+    });
+  }
 }
