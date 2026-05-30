@@ -52,7 +52,7 @@
 
 ### Авторизация
 - Регистрация: email + пароль + выбор роли (клиент / мастер / перевозчик / магазин)
-- Вход, выход, сброс пароля (Supabase Auth)
+- Вход, выход, сброс пароля (JWT через NestJS)
 - После регистрации → `/onboarding` (3-шаговый флоу)
 
 ### Онбординг (`/onboarding`)
@@ -86,10 +86,10 @@
 - Клиент сравнивает отклики и выбирает мастера → статус `master_selected`
 - Кнопка «Завершить» → статус `completed`, рейтинг + отзыв
 
-### Чат
-- Realtime-чат по паре `(order_id, master_id)` через Supabase Realtime
-- Бейджи непрочитанных сообщений: на карточках заявок и в навбаре мастера
-- Счётчик обновляется в реальном времени
+### Чат (клиент ↔ мастер)
+- Чат по паре `(order_id, master_id)`, хранится в `messages`
+- Polling каждые 2 сек, оптимистичная отправка, `read_at` при открытии
+- Бейджи непрочитанных сообщений на карточках заявок (polling 10 сек)
 
 ### Транспортные заявки (клиент/мастер ↔ перевозчик)
 - Создание доступно клиентам и мастерам (хранится как `client_id`)
@@ -183,6 +183,8 @@ Seed (19 видов): укладка плитки, малярные работы
 | proposed_price | numeric(10,2) NOT NULL |
 | comment | text |
 | estimated_days | integer |
+| status | text DEFAULT 'new' (new/selected/rejected) |
+| seen | boolean DEFAULT false |
 | created_at | timestamptz DEFAULT now() |
 | UNIQUE | (order_id, master_id) |
 
@@ -191,11 +193,10 @@ Seed (19 видов): укладка плитки, малярные работы
 |------|-----|
 | id | uuid PK |
 | order_id | uuid FK → orders |
-| master_id | uuid FK → profiles |
+| master_id | uuid FK → profiles NULLABLE |
 | sender_id | uuid FK → profiles |
 | content | text NOT NULL |
-| is_read_by_client | bool DEFAULT false |
-| is_read_by_master | bool DEFAULT false |
+| read_at | timestamptz NULLABLE |
 | created_at | timestamptz DEFAULT now() |
 
 ### `carrier_profiles`
@@ -299,20 +300,17 @@ Seed (19 видов): укладка плитки, малярные работы
 
 ---
 
-## Row Level Security
+## Авторизация и доступ (NestJS Guards)
 
-| таблица | правило |
-|---------|---------|
-| profiles | SELECT — любой авторизованный; UPDATE — только свой профиль |
-| master_rates | SELECT — любой авторизованный; INSERT/UPDATE/DELETE — только свой master_id |
-| orders | SELECT(new) — любой авторизованный; INSERT — только клиент; UPDATE — только владелец |
-| responses | SELECT — владелец заявки + сам мастер; INSERT — только мастер, статус = 'new' |
-| messages | SELECT/INSERT — участники чата (клиент заявки или мастер отклика) |
-| carrier_profiles | SELECT — любой авторизованный; INSERT/UPDATE — только свой carrier_id |
-| transport_orders | SELECT(new) — любой авторизованный; INSERT — только клиент; UPDATE — только владелец |
-| transport_responses | SELECT — владелец заявки + сам перевозчик; INSERT — только перевозчик |
-| store_profiles | SELECT — любой авторизованный; INSERT/UPDATE — только свой store_id |
-| products | SELECT — любой авторизованный; INSERT/UPDATE/DELETE — только владелец магазина |
+Supabase RLS не используется — доступ контролируется на уровне NestJS:
+
+| Guard | назначение |
+|-------|-----------|
+| `JwtAuthGuard` | глобальный — все роуты требуют JWT, кроме помеченных `@Public()` |
+| `RoleGuard` | проверяет `user.role` для защищённых разделов |
+| `AdminGuard` | `is_admin = true` для `/admin/*` |
+
+Бизнес-правила (владелец заявки, участник чата) проверяются внутри сервисов через `ForbiddenException`.
 
 ---
 
@@ -409,53 +407,101 @@ src/app/
 
 ---
 
-## Ключевые Supabase-запросы
+## NestJS API (база URL: `/api`, порт 3001)
 
-```typescript
-// Все открытые заявки для мастера
-supabase
-  .from('orders')
-  .select('*, work_types(name), profiles!client_id(name, city_district)')
-  .eq('status', 'new')
-  .order('created_at', { ascending: false })
+### Авторизация
+| метод | путь | описание |
+|-------|------|----------|
+| POST | `/auth/register` | регистрация → `{ token, user }` |
+| POST | `/auth/login` | вход → `{ token, user }` |
+| POST | `/auth/forgot-password` | сброс пароля |
 
-// Создать отклик мастера
-supabase
-  .from('responses')
-  .insert({ order_id, master_id, proposed_price, comment, estimated_days })
+### Профили
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/profiles/me` | свой профиль + carrier_profile/store_profile/master_rates |
+| PATCH | `/profiles/me` | обновить имя, телефон, район |
+| GET | `/profiles/:id` | профиль по ID |
+| PATCH | `/profiles/me/carrier-profile` | обновить профиль перевозчика |
+| POST | `/master-rates` | добавить/обновить ставку мастера |
+| DELETE | `/master-rates/:workTypeId` | удалить ставку |
 
-// Выбрать мастера (клиент)
-supabase
-  .from('orders')
-  .update({ status: 'master_selected', selected_master_id: masterId })
-  .eq('id', orderId).eq('client_id', currentUserId)
+### Заявки на ремонт
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/orders` | все открытые заявки (для мастера) |
+| GET | `/orders/my` | заявки клиента |
+| GET | `/orders/:id` | детали заявки |
+| POST | `/orders` | создать заявку |
+| PATCH | `/orders/:id/select-master` | выбрать мастера |
+| PATCH | `/orders/:id/complete` | завершить заявку |
+| PATCH | `/orders/:id/rate` | оставить рейтинг |
+| DELETE | `/orders/:id` | удалить заявку |
+| GET | `/orders/master-stats` | статистика мастеров (рейтинг, кол-во заявок) |
 
-// Авторасчёт цены мастера
-const rate = await supabase
-  .from('master_rates')
-  .select('rate_per_sqm')
-  .eq('master_id', masterId).eq('work_type_id', workTypeId).single()
-const price = order.area_sqm * (rate.data?.rate_per_sqm ?? 0)
+### Отклики мастера
+| метод | путь | описание |
+|-------|------|----------|
+| POST | `/responses` | создать отклик |
+| GET | `/responses/my` | свои отклики |
+| GET | `/responses/by-order/:orderId` | отклики по заявке |
+| GET | `/responses/unseen-counts` | непросмотренные отклики по заявкам клиента |
+| POST | `/responses/order/:orderId/seen` | пометить отклики заявки просмотренными |
 
-// Все открытые транспортные заявки
-supabase
-  .from('transport_orders')
-  .select('*, profiles!client_id(name)')
-  .eq('status', 'new')
-  .order('created_at', { ascending: false })
+### Чат (ремонт)
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/messages/order/:orderId/master/:masterId` | загрузить сообщения |
+| POST | `/messages/order/:orderId/master/:masterId` | отправить сообщение |
+| POST | `/messages/order/:orderId/master/:masterId/read` | пометить прочитанными |
+| GET | `/messages/unread` | количество непрочитанных по заявкам |
 
-// Выбрать перевозчика + отклонить остальных
-supabase.from('transport_orders').update({ status: 'carrier_selected', selected_carrier_id }).eq('id', orderId)
-supabase.from('transport_responses').update({ status: 'selected' }).eq('id', responseId)
-supabase.from('transport_responses').update({ status: 'rejected' }).eq('order_id', orderId).neq('id', responseId)
+### Транспортные заявки
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/transport-orders` | все открытые (для перевозчика) |
+| GET | `/transport-orders/my` | свои заявки (клиент/мастер) |
+| GET | `/transport-orders/:id` | детали |
+| POST | `/transport-orders` | создать |
+| PATCH | `/transport-orders/:id/select-carrier` | выбрать перевозчика |
+| PATCH | `/transport-orders/:id/complete` | завершить |
+| PATCH | `/transport-orders/:id/rate` | оценить |
 
-// Непрочитанные сообщения (клиент)
-supabase
-  .from('messages')
-  .select('order_id')
-  .eq('is_read_by_client', false)
-  .neq('sender_id', currentUserId)
-```
+### Отклики перевозчика
+| метод | путь | описание |
+|-------|------|----------|
+| POST | `/transport-responses` | создать отклик |
+| GET | `/transport-responses/my` | свои отклики |
+| GET | `/transport-responses/by-order/:orderId` | отклики по заявке |
+| GET | `/transport-responses/unseen-counts` | непросмотренные отклики |
+| POST | `/transport-responses/order/:orderId/seen` | пометить просмотренными |
+
+### Чат (транспорт)
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/transport-messages/order/:orderId/carrier/:carrierId` | загрузить сообщения |
+| POST | `/transport-messages/order/:orderId/carrier/:carrierId` | отправить |
+| POST | `/transport-messages/order/:orderId/carrier/:carrierId/read` | пометить прочитанными |
+| GET | `/transport-messages/unread` | количество непрочитанных |
+
+### Магазины и товары
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/store/all` | все магазины |
+| GET | `/store/:id` | витрина магазина + товары |
+| GET | `/store/profile` | свой профиль магазина |
+| POST/PATCH | `/store/profile` | сохранить профиль |
+| GET | `/products/my` | свои товары |
+| POST | `/products` | добавить товар |
+| PATCH | `/products/:id` | обновить |
+| DELETE | `/products/:id` | удалить |
+
+### Прочее
+| метод | путь | описание |
+|-------|------|----------|
+| GET | `/work-types` | список видов работ |
+| POST | `/complaints` | подать жалобу |
+| POST | `/uploads/photo` | загрузить фото → `{ url }` |
 
 ---
 
@@ -501,8 +547,8 @@ supabase
 | Роль перевозчика | ✅ реализовано |
 | Роль строительного магазина | ✅ реализовано |
 | Мобильная версия (responsive) | ✅ реализовано |
-| Онлайн-оплата | ⏳ после тестирования |
-| Email-уведомления | Supabase webhook → Edge Function → Resend |
+| Онлайн-оплата | ⏳ после Flutter-релиза |
+| Email-уведомления | NestJS + nodemailer/Resend (триггер: новый отклик, выбор) |
 | Портфолио мастера | важно для доверия |
 | iOS / Android (Flutter) | 🔜 следующий этап |
 
@@ -510,8 +556,8 @@ supabase
 
 ## Расширение после MVP
 
-- **Email:** Supabase Database Webhook → Edge Function → Resend (триггеры: новый отклик, выбран мастер/перевозчик)
-- **Оплата:** ЮKassa (основной провайдер для РФ), поле `payment_status` в `orders` и `transport_orders`, эскроу-флоу. Вебхуки обрабатываются на NestJS бэкенде (секретный ключ не может быть на фронте). Реализовывать только после миграции на NestJS.
+- **Email:** NestJS сервис (nodemailer или Resend SDK) — триггеры: новый отклик, выбран мастер/перевозчик, завершение заявки.
+- **Оплата:** ЮKassa (основной провайдер для РФ), поле `payment_status` в `orders` и `transport_orders`, эскроу-флоу. Вебхуки обрабатываются на NestJS бэкенде (секретный ключ не может быть на фронте). Реализовывать после Flutter-релиза.
 - **Регионы:** поле `region` в `profiles` и заявках, фильтр в ленте
 
 ---
@@ -531,59 +577,35 @@ MVP запускается **бесплатно** — приоритет наб�
 
 ---
 
-## Миграция с Supabase на собственный бэкенд
-
-### Причина
-Supabase недоступен без VPN в регионе пользователя. После завершения всего функционала нужен переход на собственный бэкенд.
-
-### Когда делать
-**Лучший момент:** когда все роли реализованы и протестированы — тогда есть чёткие API-контракты и не нужно параллельно разрабатывать новый функционал.
-
-### Что заменить
-
-| Supabase | Своё решение |
-|---|---|
-| PostgreSQL (cloud) | PostgreSQL self-hosted (Railway, Render, VPS) |
-| Supabase Auth | NestJS + Passport.js + JWT + bcrypt |
-| PostgREST API | NestJS REST API |
-| RLS политики | Guards / Middleware в NestJS |
-| Supabase Realtime | Socket.io (WebSocket) |
-| supabase-js клиент | Angular HttpClient |
-
-### Архитектура нового бэкенда
+## NestJS Backend — архитектура
 
 ```
-NestJS API
-├── auth/          — регистрация, логин, JWT refresh
-├── users/         — профили, роли
-├── orders/        — заказы на ремонт
-├── responses/     — отклики мастеров
-├── transport/     — транспортные заявки и отклики
-├── carriers/      — профили перевозчиков
-└── admin/         — управление пользователями
+backend/src/
+├── auth/               — регистрация, вход, JWT стратегия
+├── profiles/           — профили пользователей
+├── master-rates/       — ставки мастера
+├── work-types/         — виды работ
+├── orders/             — заявки на ремонт
+├── responses/          — отклики мастеров
+├── messages/           — чат клиент ↔ мастер
+├── transport-orders/   — транспортные заявки
+├── transport-responses/— отклики перевозчиков
+├── transport-messages/ — чат заказчик ↔ перевозчик
+├── carrier-profiles/   — профили перевозчиков
+├── store/              — профили магазинов
+├── products/           — товары магазина
+├── uploads/            — загрузка фото (локально в /uploads)
+├── complaints/         — жалобы
+├── admin/              — управление пользователями
+├── common/             — jwt.guard, role.guard, snake-case interceptor
+└── prisma/             — PrismaService
 ```
 
-### Что НЕ придётся переписывать
-- Все Angular компоненты и шаблоны
-- Бизнес-логику в компонентах
-- Роутинг и guards (только auth.guard поменяется)
-- Стили и UI
-- База данных — та же схема PostgreSQL
-
-### Что придётся переписывать
-- `SupabaseService` → базовый `HttpClient` сервис
-- `AuthService` — логин/регистрация через REST вместо supabase-js
-- Все методы в сервисах (`ProfileService`, `CarrierService` и т.д.) — запросы через `HttpClient`
+**Snake-case interceptor** — автоматически конвертирует camelCase ответы в snake_case для фронтенда.
 
 ---
 
 ## Мобильное приложение (Flutter)
-
-### Почему Flutter
-- Попадание в Google Play и App Store
-- Нативная плавность и скорость (рисует UI сам, без WebView)
-- Один код → iOS + Android
-- Подходит для маркетплейса: списки, карточки, формы, уведомления
 
 ### Стек
 
@@ -594,8 +616,8 @@ NestJS API
 | Состояние | Riverpod |
 | HTTP клиент | Dio |
 | Бэкенд | NestJS REST API (тот же, что и для веба) |
-| Оплата | ЮKassa Flutter SDK |
 | Push-уведомления | Firebase Cloud Messaging (FCM) |
+| Оплата | ЮKassa Flutter SDK (после релиза) |
 
 ### Архитектура
 
@@ -606,6 +628,3 @@ Flutter (mobile)──┘
 ```
 
 Оба клиента работают с одним бэкендом. Бизнес-логика не дублируется.
-
-### Когда делать
-После миграции на NestJS — Flutter-приложение строится поверх уже готового REST API.
