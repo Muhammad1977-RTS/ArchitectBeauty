@@ -4,9 +4,10 @@ import { CurrentUser } from '../common/current-user.decorator';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 class UpsertStoreDto {
-  @IsString() @IsNotEmpty() storeName: string;
+  @IsString() @IsNotEmpty() storeName!: string;
   @IsOptional() @IsString() address?: string;
   @IsOptional() @IsString() description?: string;
+  @IsOptional() @IsString() phone?: string;
 }
 
 @Controller('store')

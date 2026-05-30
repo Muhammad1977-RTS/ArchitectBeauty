@@ -24,15 +24,26 @@ export class StoreService {
     });
   }
 
-  upsert(storeId: string, data: { storeName: string; address?: string; description?: string }) {
-    return this.prisma.storeProfile.upsert({
+  async upsert(storeId: string, data: { storeName: string; address?: string; description?: string; phone?: string }) {
+    const { phone, ...storeData } = data;
+    const result = await this.prisma.storeProfile.upsert({
       where: { storeId },
-      create: { storeId, ...data },
-      update: data,
+      create: { storeId, ...storeData },
+      update: storeData,
     });
+    if (phone !== undefined) {
+      await this.prisma.profile.update({
+        where: { id: storeId },
+        data: { phone: phone || null },
+      });
+    }
+    return result;
   }
 
   getProfile(storeId: string) {
-    return this.prisma.storeProfile.findUnique({ where: { storeId } });
+    return this.prisma.storeProfile.findUnique({
+      where: { storeId },
+      include: { store: { select: { phone: true } } },
+    });
   }
 }

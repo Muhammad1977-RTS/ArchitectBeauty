@@ -115,6 +115,7 @@ export interface StoreProfile {
   description: string | null;
   created_at: string;
   profiles?: Profile;
+  store?: { phone?: string | null; cityDistrict?: string | null };
 }
 
 export interface Product {

@@ -22,6 +22,7 @@ export class StoreProfileComponent implements OnInit {
   form = this.fb.group({
     store_name: ['', [Validators.required, Validators.minLength(2)]],
     address: [''],
+    phone: [''],
     description: [''],
   });
 
@@ -33,6 +34,7 @@ export class StoreProfileComponent implements OnInit {
       this.form.patchValue({
         store_name: profile.store_name,
         address: profile.address ?? '',
+        phone: profile.store?.phone ?? '',
         description: profile.description ?? '',
       });
     }
@@ -47,11 +49,12 @@ export class StoreProfileComponent implements OnInit {
     this.saving.set(true);
     this.error.set(null);
 
-    const { store_name, address, description } = this.form.value;
+    const { store_name, address, phone, description } = this.form.value;
     try {
       await this.storeService.saveStoreProfile(user.id, {
         store_name: store_name!,
         address: address || null,
+        phone: phone || null,
         description: description || null,
       });
       this.saved.set(true);

@@ -30,12 +30,13 @@ export class StoreService {
     }
   }
 
-  async saveStoreProfile(_storeId: string, payload: { store_name: string; address: string | null; description: string | null }): Promise<void> {
+  async saveStoreProfile(_storeId: string, payload: { store_name: string; address: string | null; description: string | null; phone: string | null }): Promise<void> {
     try {
       await this.api.put('/store/my', {
         storeName: payload.store_name,
         address: payload.address,
         description: payload.description,
+        phone: payload.phone,
       });
     } catch (e) {
       console.error(e);

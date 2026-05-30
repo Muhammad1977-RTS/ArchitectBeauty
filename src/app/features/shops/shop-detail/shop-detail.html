@@ -8,14 +8,14 @@
       <a routerLink="/shops" class="back-link">← Все магазины</a>
       <h1 class="shop-title">{{ store()!.store_name }}</h1>
       <div class="shop-meta">
-        @if (store()!['store']?.['city_district']) {
-          <span class="shop-meta-item">{{ store()!['store']?.['city_district'] }}</span>
+        @if (store()!.store?.cityDistrict) {
+          <span class="shop-meta-item">{{ store()!.store?.cityDistrict }}</span>
         }
         @if (store()!.address) {
           <span class="shop-meta-item">{{ store()!.address }}</span>
         }
-        @if (store()!['store']?.['phone']) {
-          <span class="shop-meta-item">📞 {{ store()!['store']?.['phone'] }}</span>
+        @if (store()!.store?.phone) {
+          <span class="shop-meta-item">📞 {{ store()!.store?.phone }}</span>
         }
       </div>
       @if (store()!.description) {
@@ -63,8 +63,8 @@
             </div>
             @if (product.in_stock) {
               <div class="product-card-contact">
-                @if (store()!['store']?.['phone']) {
-                  <a [href]="'tel:' + store()!['store']?.['phone']" class="btn-contact">
+                @if (store()!.store?.phone) {
+                  <a [href]="'tel:' + store()!.store?.phone" class="btn-contact">
                     Позвонить
                   </a>
                 }
