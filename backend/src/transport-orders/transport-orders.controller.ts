@@ -18,7 +18,7 @@ class SelectCarrierDto {
   @IsUUID() carrierId: string;
 }
 
-class CompleteDto {
+class RateDto {
   @Type(() => Number) @IsNumber() @Min(1) rating: number;
   @IsOptional() @IsString() reviewText?: string;
 }
@@ -53,7 +53,12 @@ export class TransportOrdersController {
   }
 
   @Patch(':id/complete')
-  complete(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: CompleteDto) {
-    return this.svc.complete(id, user.id, dto.rating, dto.reviewText);
+  complete(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.svc.complete(id, user.id);
+  }
+
+  @Patch(':id/rate')
+  rate(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: RateDto) {
+    return this.svc.rate(id, user.id, dto.rating, dto.reviewText);
   }
 }

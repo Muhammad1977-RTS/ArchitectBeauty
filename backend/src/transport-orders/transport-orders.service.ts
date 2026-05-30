@@ -76,14 +76,27 @@ export class TransportOrdersService {
     });
   }
 
-  async complete(orderId: string, clientId: string, rating: number, reviewText?: string) {
+  async complete(orderId: string, clientId: string) {
     const order = await this.prisma.transportOrder.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException();
     if (order.clientId !== clientId) throw new ForbiddenException();
+    if (order.status !== 'carrier_selected') throw new BadRequestException('Order is not in carrier_selected state');
 
     return this.prisma.transportOrder.update({
       where: { id: orderId },
-      data: { status: 'completed', rating, reviewText },
+      data: { status: 'completed' },
+    });
+  }
+
+  async rate(orderId: string, clientId: string, rating: number, reviewText?: string) {
+    const order = await this.prisma.transportOrder.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException();
+    if (order.clientId !== clientId) throw new ForbiddenException();
+    if (order.status !== 'completed') throw new BadRequestException('Order must be completed before rating');
+
+    return this.prisma.transportOrder.update({
+      where: { id: orderId },
+      data: { rating, reviewText },
     });
   }
 }
