@@ -94,6 +94,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/master/my-responses/my-responses').then(m => m.MasterMyResponsesComponent),
       },
+      {
+        path: 'transport-orders',
+        loadComponent: () =>
+          import('./features/master/transport-orders-list/transport-orders-list').then(m => m.MasterTransportOrdersListComponent),
+      },
+      {
+        path: 'transport-orders/new',
+        loadComponent: () =>
+          import('./features/master/transport-order-create/transport-order-create').then(m => m.MasterTransportOrderCreateComponent),
+      },
+      {
+        path: 'transport-orders/:id',
+        loadComponent: () =>
+          import('./features/master/transport-order-detail/transport-order-detail').then(m => m.MasterTransportOrderDetailComponent),
+      },
       { path: '', redirectTo: 'orders', pathMatch: 'full' },
     ],
   },

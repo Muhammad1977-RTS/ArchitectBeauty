@@ -19,6 +19,7 @@
         @if (role() === 'master') {
           <a routerLink="/master/orders" routerLinkActive="nav-link--active" class="nav-link">Найти заказ</a>
           <a routerLink="/master/responses" routerLinkActive="nav-link--active" class="nav-link">Мои отклики</a>
+          <a routerLink="/master/transport-orders" routerLinkActive="nav-link--active" class="nav-link">Перевозки</a>
         }
         @if (role() === 'carrier') {
           <a routerLink="/carrier/orders" routerLinkActive="nav-link--active" class="nav-link">Заявки</a>
@@ -60,6 +61,7 @@
       @if (role() === 'master') {
         <a routerLink="/master/orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Найти заказ</a>
         <a routerLink="/master/responses" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Мои отклики</a>
+        <a routerLink="/master/transport-orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Перевозки</a>
       }
       @if (role() === 'carrier') {
         <a routerLink="/carrier/orders" routerLinkActive="nav-mobile-link--active" class="nav-mobile-link" (click)="closeMenu()">Заявки</a>
