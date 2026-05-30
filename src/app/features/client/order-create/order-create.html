@@ -15,23 +15,22 @@
         <h2 class="section-title">Тип работы</h2>
         <div class="form-field">
           <label class="form-label">Вид работы <span class="req">*</span></label>
-          <div class="wt-chips">
-            @for (wt of workTypes(); track wt.id) {
-              <button type="button" class="wt-chip"
-                      [class.wt-chip--active]="form.get('work_type_id')?.value === wt.id"
-                      (click)="selectWorkType(wt)">{{ wt.name }}</button>
+          <div class="wt-chips-wrap" [class.wt-chips--collapsed]="!showAllChips()">
+            <div class="wt-chips">
+              @for (wt of workTypes(); track wt.id) {
+                <button type="button" class="wt-chip"
+                        [class.wt-chip--active]="form.get('work_type_id')?.value === wt.id"
+                        (click)="selectWorkType(wt)">{{ wt.name }}</button>
+              }
+            </div>
+            @if (!showAllChips()) {
+              <div class="wt-chips-fade"></div>
             }
           </div>
-          <div class="wt-select-wrap">
-            <select class="form-input wt-select"
-                    [value]="form.get('work_type_id')?.value ?? ''"
-                    (change)="selectWorkTypeById($any($event.target).value)">
-              <option value="" disabled>— Выбрать из списка —</option>
-              @for (wt of workTypes(); track wt.id) {
-                <option [value]="wt.id">{{ wt.name }}</option>
-              }
-            </select>
-          </div>
+          <button type="button" class="wt-chips-toggle" (click)="toggleChips()">
+            @if (showAllChips()) { Свернуть <span class="toggle-arrow">▲</span> }
+            @else { Показать все виды работ <span class="toggle-arrow">▼</span> }
+          </button>
 
           @if (form.get('work_type_id')?.touched && form.get('work_type_id')?.invalid) {
             <span class="field-error">Выберите вид работы</span>
@@ -118,6 +117,22 @@
 </div>
 
 <style>
+.wt-chips-wrap {
+  position: relative;
+}
+.wt-chips-wrap.wt-chips--collapsed .wt-chips {
+  max-height: 82px;
+  overflow: hidden;
+}
+.wt-chips-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, var(--color-bg-card, #fff));
+  pointer-events: none;
+}
 .wt-chips {
   display: flex;
   flex-wrap: wrap;
@@ -134,12 +149,37 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap;
 }
 .wt-chip:hover { border-color: var(--color-primary); color: var(--color-primary); }
 .wt-chip--active { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
-
-.wt-select-wrap { margin-top: 10px; }
-.wt-select { width: 100%; cursor: pointer; }
+.wt-chips-toggle {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 20px;
+  padding: 6px 16px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-weight: 500;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  transition: background .15s, color .15s;
+}
+.wt-chips-toggle:hover {
+  background: var(--color-primary);
+  color: #fff;
+}
+.wt-chips-toggle .toggle-arrow {
+  font-size: 9px;
+  line-height: 1;
+}
 
 .photos-grid {
   display: flex;

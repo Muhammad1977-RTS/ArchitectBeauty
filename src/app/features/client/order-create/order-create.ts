@@ -24,6 +24,7 @@ export class OrderCreateComponent implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly previews = signal<string[]>([]);
+  readonly showAllChips = signal(false);
   private selectedFiles: File[] = [];
 
   readonly selectedWorkTypeSlug = signal('');
@@ -57,6 +58,10 @@ export class OrderCreateComponent implements OnInit {
     if (wt.slug !== 'other') {
       this.form.patchValue({ work_type_custom: '' });
     }
+  }
+
+  toggleChips() {
+    this.showAllChips.update(v => !v);
   }
 
   onPhotos(event: Event) {
