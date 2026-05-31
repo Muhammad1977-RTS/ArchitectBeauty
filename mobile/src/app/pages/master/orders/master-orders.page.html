@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Доступные заказы</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <ion-list *ngIf="!loading">
+    <ion-item *ngIf="orders.length === 0">
+      <ion-label color="medium">Новых заказов нет</ion-label>
+    </ion-item>
+    <ion-item *ngFor="let o of orders" [routerLink]="o.id" detail>
+      <ion-label>
+        <h2>{{ o.work_type?.name ?? 'Работа' }}</h2>
+        <p>{{ o.address }}</p>
+        <p>{{ o.area_sqm }} м²</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

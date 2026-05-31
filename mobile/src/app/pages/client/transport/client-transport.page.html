@@ -1,0 +1,73 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Перевозка</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showForm = !showForm">
+        <ion-icon slot="icon-only" [name]="showForm ? 'close' : 'add'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <ion-card *ngIf="showForm">
+    <ion-card-header><ion-card-title>Новая заявка</ion-card-title></ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="form" (ngSubmit)="create()">
+        <ion-item>
+          <ion-label position="floating">Откуда</ion-label>
+          <ion-input formControlName="from_address"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Куда</ion-label>
+          <ion-input formControlName="to_address"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Описание груза</ion-label>
+          <ion-textarea formControlName="cargo_description" rows="2"></ion-textarea>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Вес (кг)</ion-label>
+          <ion-input type="number" formControlName="cargo_weight_kg"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Бюджет (₸)</ion-label>
+          <ion-input type="number" formControlName="budget"></ion-input>
+        </ion-item>
+        <ion-button expand="block" type="submit" [disabled]="submitting" class="ion-margin-top">
+          <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+          <span *ngIf="!submitting">Создать</span>
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <ion-list *ngIf="!loading">
+    <ion-item *ngIf="orders.length === 0">
+      <ion-label color="medium" class="ion-text-center ion-padding">
+        <p>Заявок пока нет</p>
+        <p>Нажмите + чтобы создать</p>
+      </ion-label>
+    </ion-item>
+    <ion-item *ngFor="let o of orders" detail [routerLink]="o.id">
+      <ion-label>
+        <h2>{{ o.from_address }} → {{ o.to_address }}</h2>
+        <p>{{ o.cargo_description }}</p>
+        <p *ngIf="o.budget">Бюджет: {{ o.budget | number }} ₸</p>
+      </ion-label>
+      <ion-badge slot="end" [color]="statusColors[o.status]">{{ statusLabels[o.status] }}</ion-badge>
+    </ion-item>
+  </ion-list>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="showForm = !showForm">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

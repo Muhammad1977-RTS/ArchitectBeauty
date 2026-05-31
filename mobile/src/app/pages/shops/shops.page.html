@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Магазины</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <ion-list *ngIf="!loading">
+    <ion-item *ngIf="shops.length === 0">
+      <ion-label color="medium" class="ion-text-center">Магазинов пока нет</ion-label>
+    </ion-item>
+
+    <ion-card *ngFor="let s of shops">
+      <ion-card-header>
+        <ion-card-title>{{ s.store_name }}</ion-card-title>
+        <ion-card-subtitle *ngIf="s.address">{{ s.address }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p *ngIf="s.description">{{ s.description }}</p>
+        <p *ngIf="s.store?.cityDistrict">Район: {{ s.store?.cityDistrict }}</p>
+        <ion-button
+          *ngIf="s.store?.phone"
+          expand="block"
+          fill="outline"
+          color="success"
+          (click)="call(s.store!.phone!)"
+          class="ion-margin-top">
+          <ion-icon slot="start" name="call"></ion-icon>
+          {{ s.store?.phone }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </ion-list>
+</ion-content>

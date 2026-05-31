@@ -1,0 +1,123 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+/* ===================== DARK THEME ===================== */
+body.app-dark {
+  --ion-background-color: #0f0a1e;
+  --ion-background-color-rgb: 15, 10, 30;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+  --ion-item-background: #1a1135;
+  --ion-card-background: #1a1135;
+  --ion-toolbar-background: #1f2937;
+  --ion-tab-bar-background: #1a1135;
+  --ion-border-color: #2d2050;
+  --ion-color-step-50: #1a1135;
+  --ion-color-step-100: #201540;
+  --ion-color-step-150: #261950;
+  --ion-color-step-200: #2d1f60;
+  --ion-color-step-250: #3a2d6a;
+  --ion-color-step-300: #473b74;
+  --ion-color-step-350: #54497e;
+  --ion-color-step-400: #615788;
+  --ion-color-step-450: #6e6592;
+  --ion-color-step-500: #7b739c;
+  --ion-color-step-550: #8881a6;
+  --ion-color-step-600: #958fb0;
+  --ion-color-step-650: #a29dba;
+  --ion-color-step-700: #afabc4;
+  --ion-color-step-750: #bcb9ce;
+  --ion-color-step-800: #c9c7d8;
+  --ion-color-step-850: #d6d5e2;
+  --ion-color-step-900: #e3e3ec;
+  --ion-color-step-950: #f0f1f6;
+  --ion-color-medium: #9090b8;
+  --ion-placeholder-color: #9090b8;
+}
+
+body.app-dark ion-card-title { color: #ffffff !important; }
+body.app-dark ion-card-subtitle { color: rgba(255,255,255,0.7) !important; }
+body.app-dark ion-card-content,
+body.app-dark ion-card-content p { color: rgba(255,255,255,0.85) !important; }
+body.app-dark ion-label h2 { color: #ffffff !important; }
+body.app-dark ion-label p { color: rgba(255,255,255,0.65) !important; }
+body.app-dark ion-tab-button { color: rgba(255,255,255,0.55); }
+body.app-dark .action-sheet-group { --background: #1a1135 !important; }
+body.app-dark .action-sheet-button { color: #ffffff !important; }
+body.app-dark .alert-wrapper,
+body.app-dark ion-select-popover ion-list { --background: #1a1135; background: #1a1135 !important; }
+body.app-dark .alert-button,
+body.app-dark .select-interface-option { color: #ffffff !important; }
+body.app-dark ion-label[position="floating"],
+body.app-dark ion-label[position="stacked"] { color: rgba(255,255,255,0.65) !important; }
+body.app-dark ion-list-header ion-label { color: rgba(255,255,255,0.55); }
+
+/* ===================== LIGHT THEME ===================== */
+body.app-light {
+  --ion-background-color: #f4f5f8;
+  --ion-background-color-rgb: 244, 245, 248;
+  --ion-text-color: #16161a;
+  --ion-text-color-rgb: 22, 22, 26;
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+  --ion-toolbar-background: #1f2937;
+  --ion-tab-bar-background: #ffffff;
+  --ion-border-color: #e0e0e0;
+  --ion-color-medium: #666680;
+  --ion-placeholder-color: #999;
+}
+
+body.app-light ion-card-title { color: #16161a !important; }
+body.app-light ion-card-subtitle { color: #555 !important; }
+body.app-light ion-card-content,
+body.app-light ion-card-content p { color: #333 !important; }
+body.app-light ion-label h2 { color: #16161a !important; }
+body.app-light ion-label p { color: #555 !important; }
+body.app-light ion-tab-button { color: #888; }
+body.app-light ion-list-header ion-label { color: #888; }
+
+/* ===================== SHARED ===================== */
+ion-tab-button.tab-selected { color: #15803d !important; }
+
+ion-button[expand="block"]:not([color]):not([fill="outline"]):not([fill="clear"]) {
+  --background: #15803d;
+  --background-hover: #166534;
+  --background-activated: #14532d;
+  --border-radius: 10px;
+}
+

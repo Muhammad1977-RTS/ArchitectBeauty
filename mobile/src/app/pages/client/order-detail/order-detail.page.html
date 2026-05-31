@@ -1,0 +1,77 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/client-orders"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Заявка</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="loading" class="ion-text-center ion-padding">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <div *ngIf="!loading && order">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>{{ order.work_type?.name }}</ion-card-subtitle>
+        <ion-card-title>{{ order.address }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Площадь: {{ order.area_sqm }} м²</p>
+        <p *ngIf="order.description">{{ order.description }}</p>
+        <ion-badge [color]="order.status === 'new' ? 'primary' : order.status === 'master_selected' ? 'warning' : 'success'">
+          {{ statusLabel(order.status) }}
+        </ion-badge>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Responses -->
+    <ion-list-header *ngIf="order.status === 'new'">
+      <ion-label>Отклики ({{ responses.length }})</ion-label>
+    </ion-list-header>
+    <ion-list *ngIf="order.status === 'new'">
+      <ion-item *ngIf="responses.length === 0">
+        <ion-label color="medium">Откликов пока нет</ion-label>
+      </ion-item>
+      <ion-item *ngFor="let r of responses">
+        <ion-label>
+          <h2>{{ r.master?.name }}</h2>
+          <p>{{ r.proposed_price | number }} ₸</p>
+          <p *ngIf="r.comment">{{ r.comment }}</p>
+        </ion-label>
+        <ion-button slot="end" fill="outline" (click)="selectMaster(r.master_id)">
+          Выбрать
+        </ion-button>
+      </ion-item>
+    </ion-list>
+
+    <!-- Chat -->
+    <div *ngIf="order.status === 'master_selected'">
+      <ion-list-header><ion-label>Чат</ion-label></ion-list-header>
+      <ion-list>
+        <ion-item *ngFor="let m of messages" [class.own]="m.sender_id === auth.appUser()?.id">
+          <ion-label>
+            <p class="msg-sender">{{ m.sender?.name }}</p>
+            <p>{{ m.content }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <div class="ion-padding">
+        <ion-item>
+          <ion-input placeholder="Сообщение..." [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"></ion-input>
+          <ion-button slot="end" fill="clear" (click)="sendMessage()">
+            <ion-icon name="send"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+
+      <div class="ion-padding">
+        <ion-button expand="block" color="success" (click)="complete()">
+          Завершить работу
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

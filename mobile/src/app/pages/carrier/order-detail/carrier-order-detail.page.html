@@ -1,0 +1,61 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/carrier-orders"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Заявка на перевозку</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <div *ngIf="!loading && order">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ order.from_address }} → {{ order.to_address }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ order.cargo_description }}</p>
+        <p *ngIf="order.cargo_weight_kg">Вес: {{ order.cargo_weight_kg }} кг</p>
+        <p *ngIf="order.cargo_volume_m3">Объём: {{ order.cargo_volume_m3 }} м³</p>
+        <p *ngIf="order.transport_date">Дата: {{ order.transport_date | date:'dd.MM.yyyy' }}</p>
+        <p *ngIf="order.budget">Бюджет: {{ order.budget | number }} ₸</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="myResponse">
+      <ion-card-header><ion-card-title>Мой отклик</ion-card-title></ion-card-header>
+      <ion-card-content>
+        <p>Цена: {{ myResponse.proposed_price | number }} ₸</p>
+        <p *ngIf="myResponse.comment">{{ myResponse.comment }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="!myResponse && order.status === 'new'">
+      <ion-card-header><ion-card-title>Откликнуться</ion-card-title></ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="respondForm" (ngSubmit)="respond()">
+          <ion-item>
+            <ion-label position="floating">Ваша цена (₸)</ion-label>
+            <ion-input type="number" formControlName="proposed_price"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>Тип транспорта</ion-label>
+            <ion-select formControlName="vehicle_type" interface="action-sheet">
+              <ion-select-option *ngFor="let v of vehicleTypes" [value]="v.value">{{ v.label }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Комментарий</ion-label>
+            <ion-textarea formControlName="comment" rows="2"></ion-textarea>
+          </ion-item>
+          <ion-button expand="block" type="submit" [disabled]="submitting" class="ion-margin-top">
+            <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+            <span *ngIf="!submitting">Отправить</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

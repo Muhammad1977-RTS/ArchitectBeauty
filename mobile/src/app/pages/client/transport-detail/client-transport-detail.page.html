@@ -1,0 +1,79 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/client-transport"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Перевозка</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <div *ngIf="!loading && order">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>{{ order.from_address }} → {{ order.to_address }}</ion-card-title>
+        <ion-card-subtitle>
+          <ion-badge [color]="statusColors[order.status]">{{ statusLabels[order.status] }}</ion-badge>
+        </ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p>{{ order.cargo_description }}</p>
+        <p *ngIf="order.cargo_weight_kg">Вес: {{ order.cargo_weight_kg }} кг</p>
+        <p *ngIf="order.budget">Бюджет: {{ order.budget | number }} ₸</p>
+        <p *ngIf="order.transport_date">Дата: {{ order.transport_date | date:'dd.MM.yyyy' }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Отклики перевозчиков -->
+    <ion-list-header *ngIf="order.status === 'new'">
+      <ion-label>Отклики ({{ responses.length }})</ion-label>
+    </ion-list-header>
+    <ion-list *ngIf="order.status === 'new'">
+      <ion-item *ngIf="responses.length === 0">
+        <ion-label color="medium">Откликов пока нет</ion-label>
+      </ion-item>
+      <ion-item *ngFor="let r of responses">
+        <ion-label>
+          <h2>{{ r.profiles?.name }}</h2>
+          <p>{{ r.proposed_price | number }} ₸</p>
+          <p *ngIf="r.vehicle_type">{{ r.vehicle_type }}</p>
+          <p *ngIf="r.comment">{{ r.comment }}</p>
+        </ion-label>
+        <ion-button slot="end" fill="outline" color="success" (click)="selectCarrier(r.carrier_id)">
+          Выбрать
+        </ion-button>
+      </ion-item>
+    </ion-list>
+
+    <!-- Чат с перевозчиком -->
+    <div *ngIf="order.status === 'carrier_selected'">
+      <ion-list-header><ion-label>Чат с перевозчиком</ion-label></ion-list-header>
+      <ion-list>
+        <ion-item *ngIf="messages.length === 0">
+          <ion-label color="medium">Сообщений пока нет</ion-label>
+        </ion-item>
+        <ion-item *ngFor="let m of messages">
+          <ion-label>
+            <p class="msg-sender">{{ m.sender?.name }}</p>
+            <p>{{ m.content }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <div class="ion-padding">
+        <ion-item>
+          <ion-input placeholder="Сообщение..." [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"></ion-input>
+          <ion-button slot="end" fill="clear" (click)="sendMessage()">
+            <ion-icon name="send"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+      <div class="ion-padding">
+        <ion-button expand="block" color="success" (click)="complete()">
+          Завершить перевозку
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

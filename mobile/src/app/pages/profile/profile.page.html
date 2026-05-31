@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Профиль</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="auth.appUser() as user">
+    <ion-item lines="none" class="user-card">
+      <ion-avatar slot="start">
+        <ion-icon name="person-circle" style="font-size: 48px;"></ion-icon>
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ user.name }}</h2>
+        <p>{{ user.email }}</p>
+        <ion-badge [color]="'primary'">{{ roleLabels[user.role] }}</ion-badge>
+      </ion-label>
+    </ion-item>
+
+    <form [formGroup]="form" (ngSubmit)="save()" class="ion-margin-top">
+      <ion-item>
+        <ion-label position="floating">Имя</ion-label>
+        <ion-input formControlName="name"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Телефон</ion-label>
+        <ion-input type="tel" formControlName="phone"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating">Район</ion-label>
+        <ion-input formControlName="city_district"></ion-input>
+      </ion-item>
+
+      <ion-button expand="block" type="submit" [disabled]="saving" class="ion-margin-top">
+        <ion-spinner *ngIf="saving" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="saved && !saving" name="checkmark"></ion-icon>
+        <span *ngIf="!saving && !saved">Сохранить</span>
+        <span *ngIf="saved && !saving">Сохранено!</span>
+      </ion-button>
+    </form>
+
+    <ion-item lines="none" class="ion-margin-top">
+      <ion-icon slot="start" [name]="theme.isDark() ? 'moon' : 'sunny'" style="font-size: 20px; margin-right: 8px;"></ion-icon>
+      <ion-label>{{ theme.isDark() ? 'Тёмная тема' : 'Светлая тема' }}</ion-label>
+      <ion-toggle slot="end" [checked]="theme.isDark()" (ionChange)="theme.toggle()"></ion-toggle>
+    </ion-item>
+
+    <ion-button expand="block" fill="clear" color="medium" (click)="logout()" class="ion-margin-top logout-btn">
+      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+      Выйти
+    </ion-button>
+  </div>
+</ion-content>

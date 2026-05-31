@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/master-orders"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Заказ</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <div *ngIf="!loading && order">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-subtitle>{{ order.work_type?.name }}</ion-card-subtitle>
+        <ion-card-title>{{ order.address }}</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <p>Площадь: {{ order.area_sqm }} м²</p>
+        <p *ngIf="order.description">{{ order.description }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Already responded -->
+    <ion-card *ngIf="myResponse">
+      <ion-card-header><ion-card-title>Мой отклик</ion-card-title></ion-card-header>
+      <ion-card-content>
+        <p>Цена: {{ myResponse.proposed_price | number }} ₸</p>
+        <p *ngIf="myResponse.comment">{{ myResponse.comment }}</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Respond form -->
+    <ion-card *ngIf="!myResponse && order.status === 'new'">
+      <ion-card-header><ion-card-title>Откликнуться</ion-card-title></ion-card-header>
+      <ion-card-content>
+        <form [formGroup]="respondForm" (ngSubmit)="respond()">
+          <ion-item>
+            <ion-label position="floating">Ваша цена (₸)</ion-label>
+            <ion-input type="number" formControlName="proposed_price"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Комментарий</ion-label>
+            <ion-textarea formControlName="comment" rows="2"></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label position="floating">Срок (дней)</ion-label>
+            <ion-input type="number" formControlName="estimated_days"></ion-input>
+          </ion-item>
+          <ion-button expand="block" type="submit" [disabled]="submitting" class="ion-margin-top">
+            <ion-spinner *ngIf="submitting" name="crescent"></ion-spinner>
+            <span *ngIf="!submitting">Отправить отклик</span>
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Chat (when selected) -->
+    <div *ngIf="order.selected_master_id === auth.appUser()?.id">
+      <ion-list-header><ion-label>Чат с клиентом</ion-label></ion-list-header>
+      <ion-list>
+        <ion-item *ngFor="let m of messages">
+          <ion-label>
+            <p class="msg-sender">{{ m.sender?.name }}</p>
+            <p>{{ m.content }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      <div class="ion-padding">
+        <ion-item>
+          <ion-input placeholder="Сообщение..." [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"></ion-input>
+          <ion-button slot="end" fill="clear" (click)="sendMessage()">
+            <ion-icon name="send"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Мои отклики</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="loading" class="ion-text-center ion-padding"><ion-spinner></ion-spinner></div>
+
+  <ion-list *ngIf="!loading">
+    <ion-item *ngIf="responses.length === 0">
+      <ion-label color="medium">Откликов пока нет</ion-label>
+    </ion-item>
+    <ion-item *ngFor="let r of responses">
+      <ion-label>
+        <h2>{{ r.transport_orders?.from_address }} → {{ r.transport_orders?.to_address }}</h2>
+        <p>Ваша цена: {{ r.proposed_price | number }} ₸</p>
+      </ion-label>
+      <ion-badge slot="end" [color]="r.status === 'selected' ? 'success' : 'medium'">
+        {{ r.status === 'selected' ? 'Выбран' : 'Ожидание' }}
+      </ion-badge>
+    </ion-item>
+  </ion-list>
+</ion-content>
