@@ -52,11 +52,11 @@ class StoreProfile {
   });
 
   factory StoreProfile.fromJson(Map<String, dynamic> j) => StoreProfile(
-        id: j['id'] as String,
-        storeName: j['store_name'] as String,
+        id: (j['store_id'] ?? j['id']) as String? ?? '',
+        storeName: j['store_name'] as String? ?? '',
         address: j['address'] as String?,
         description: j['description'] as String?,
         phone: j['phone'] as String?,
-        ownerId: j['owner_id'] as String,
+        ownerId: (j['store_id'] ?? j['id']) as String? ?? '',
       );
 }

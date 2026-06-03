@@ -21,6 +21,7 @@ import '../../features/carrier/screens/carrier_orders_screen.dart';
 import '../../features/carrier/screens/carrier_responses_screen.dart';
 import '../../features/store/screens/store_shell.dart';
 import '../../features/store/screens/store_products_screen.dart';
+import '../../features/store/screens/store_profile_screen.dart';
 import '../../features/admin/screens/admin_shell.dart';
 import '../../features/admin/screens/admin_users_screen.dart';
 import '../../features/admin/screens/admin_complaints_screen.dart';
@@ -96,6 +97,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __, child) => StoreShell(child: child),
         routes: [
           GoRoute(path: '/store', builder: (_, __) => const StoreProductsScreen()),
+          GoRoute(path: '/store/profile-page', builder: (_, __) => const StoreProfileScreen()),
         ],
       ),
 

@@ -5,21 +5,26 @@ class StoreShell extends StatelessWidget {
   final Widget child;
   const StoreShell({super.key, required this.child});
 
+  int _idx(String location) {
+    if (location.startsWith('/store/profile-page')) return 1;
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    final idx = location.startsWith('/profile') ? 1 : 0;
     return Scaffold(
       body: child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: idx,
+        currentIndex: _idx(location),
         onTap: (i) {
           if (i == 0) context.go('/store');
-          if (i == 1) context.go('/profile');
+          if (i == 1) context.go('/store/profile-page');
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.inventory), label: 'Товары'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Профиль'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.storefront), label: 'Профиль'),
         ],
       ),
     );
