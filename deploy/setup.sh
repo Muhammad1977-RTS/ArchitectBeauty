@@ -118,16 +118,26 @@ ufw allow 'Nginx Full'
 ufw --force enable
 
 # ── 11. SSL ───────────────────────────────────────────────────
-log "SSL сертификат Let's Encrypt..."
-certbot --nginx \
-  -d "${DOMAIN}" -d "www.${DOMAIN}" \
-  --non-interactive --agree-tos \
-  --email "${ADMIN_EMAIL}" \
-  --redirect
+log "Проверка DNS для ${DOMAIN}..."
+SERVER_IP=$(curl -s ifconfig.me || curl -s api.ipify.org)
+DNS_IP=$(dig +short "${DOMAIN}" | head -1)
 
-# Авто-обновление сертификата
-systemctl enable certbot.timer 2>/dev/null && systemctl start certbot.timer 2>/dev/null || \
-  (crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet") | crontab -
+if [[ "${DNS_IP}" == "${SERVER_IP}" ]]; then
+  log "DNS указывает верно (${DNS_IP}). Получаю SSL сертификат..."
+  certbot --nginx \
+    -d "${DOMAIN}" -d "www.${DOMAIN}" \
+    --non-interactive --agree-tos \
+    --email "${ADMIN_EMAIL}" \
+    --redirect && \
+    ((crontab -l 2>/dev/null; echo "0 3 * * * certbot renew --quiet") | crontab -) && \
+    log "SSL настроен, авто-обновление включено." || \
+    warn "Certbot не смог выпустить сертификат — возможно www.${DOMAIN} не настроен. Попробуйте вручную: certbot --nginx -d ${DOMAIN}"
+else
+  warn "DNS ещё не распространился (${DNS_IP:-не найден} ≠ ${SERVER_IP})."
+  warn "Сайт уже работает на http://${DOMAIN}"
+  warn "Как только DNS распространится, запустите вручную:"
+  warn "  certbot --nginx -d ${DOMAIN} -d www.${DOMAIN} --redirect"
+fi
 
 # ── Done ─────────────────────────────────────────────────────
 echo ""
@@ -135,12 +145,12 @@ echo -e "${GREEN}╔════════════════════
 echo -e "${GREEN}║        Деплой завершён успешно!          ║${NC}"
 echo -e "${GREEN}╚══════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "  Сайт:   ${BLUE}https://${DOMAIN}${NC}"
-echo -e "  API:    ${BLUE}https://${DOMAIN}/api${NC}"
+echo -e "  Сайт (HTTP):  ${BLUE}http://${DOMAIN}${NC}"
+echo -e "  API:          ${BLUE}http://${DOMAIN}/api${NC}"
 echo ""
-echo -e "  pm2 status          — статус процессов"
+echo -e "  pm2 status           — статус процессов"
 echo -e "  pm2 logs mastero-api — логи API"
 echo ""
 warn "Сохраните учётные данные (записаны в backend/.env):"
-warn "  DB_PASS  = ${DB_PASS}"
+warn "  DB_PASS    = ${DB_PASS}"
 warn "  JWT_SECRET = ${JWT_SECRET}"
