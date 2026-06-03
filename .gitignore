@@ -64,3 +64,7 @@ tests/.auth/
 # Lazyweb design research artifacts
 .lazyweb/
 
+# Flutter APK builds
+mastero_flutter/mastero-release.apk
+mastero_flutter/flutter_*.log
+
