@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'mastero-api',
-      script: 'dist/main.js',
+      script: 'dist/src/main.js',
       cwd: '/var/www/mastero/backend',
       instances: 1,
       autorestart: true,
