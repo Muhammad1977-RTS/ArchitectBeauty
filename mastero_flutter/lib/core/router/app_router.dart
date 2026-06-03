@@ -7,6 +7,8 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/client/screens/client_shell.dart';
 import '../../features/client/screens/client_orders_screen.dart';
+import '../../features/client/screens/client_transport_screen.dart';
+import '../../features/client/screens/client_stores_screen.dart';
 import '../../features/client/screens/create_order_screen.dart';
 import '../../features/client/screens/order_detail_screen.dart';
 import '../../features/master/screens/master_shell.dart';
@@ -62,6 +64,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/client/orders/:id',
             builder: (_, state) => OrderDetailScreen(orderId: state.pathParameters['id']!),
           ),
+          GoRoute(path: '/client/transport', builder: (_, __) => const ClientTransportScreen()),
+          GoRoute(path: '/client/stores', builder: (_, __) => const ClientStoresScreen()),
         ],
       ),
 

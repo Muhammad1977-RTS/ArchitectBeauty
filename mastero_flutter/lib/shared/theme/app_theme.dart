@@ -127,5 +127,12 @@ class AppTheme {
           seedColor: AppColors.primary,
           brightness: Brightness.dark,
         ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF1E1E2E),
+          selectedItemColor: AppColors.primary,
+          unselectedItemColor: Color(0xFF9E9EB8),
+          elevation: 8,
+          type: BottomNavigationBarType.fixed,
+        ),
       );
 }
