@@ -15,6 +15,7 @@ import '../../features/client/screens/transport_order_detail_screen.dart';
 import '../../features/master/screens/master_shell.dart';
 import '../../features/master/screens/master_orders_screen.dart';
 import '../../features/master/screens/master_responses_screen.dart';
+import '../../features/master/screens/master_transport_screen.dart';
 import '../../features/carrier/screens/carrier_shell.dart';
 import '../../features/carrier/screens/carrier_orders_screen.dart';
 import '../../features/carrier/screens/carrier_responses_screen.dart';
@@ -77,6 +78,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: '/master', builder: (_, __) => const MasterOrdersScreen()),
           GoRoute(path: '/master/responses', builder: (_, __) => const MasterResponsesScreen()),
+          GoRoute(path: '/master/transport', builder: (_, __) => const MasterTransportScreen()),
         ],
       ),
 

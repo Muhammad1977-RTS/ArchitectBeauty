@@ -105,7 +105,7 @@ class _TransportCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => context.go('/transport/${order.id}'),
+        onTap: () => context.push('/transport/${order.id}'),
         child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

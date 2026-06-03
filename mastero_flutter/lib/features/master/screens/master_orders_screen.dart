@@ -18,7 +18,7 @@ class MasterOrdersScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('$e')),
         data: (orders) {
-          final open = orders.where((o) => o.status == 'open').toList();
+          final open = orders.where((o) => o.status == 'new').toList();
           if (open.isEmpty) {
             return const Center(
               child: Text('Нет доступных заказов',
