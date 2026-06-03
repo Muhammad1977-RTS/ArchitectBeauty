@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/models/transport_order.dart';
 import '../../../core/providers/transport_provider.dart';
@@ -95,14 +96,17 @@ class _TransportCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = switch (order.status) {
-      'open' => AppColors.secondary,
-      'in_progress' => AppColors.warning,
+      'new' => AppColors.secondary,
+      'carrier_selected' => AppColors.warning,
       'completed' => AppColors.textSecondary,
       _ => AppColors.textSecondary,
     };
 
     return Card(
-      child: Padding(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.go('/transport/${order.id}'),
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,6 +170,7 @@ class _TransportCard extends StatelessWidget {
               ),
             ],
           ],
+        ),
         ),
       ),
     );

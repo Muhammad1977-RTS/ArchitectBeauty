@@ -9,7 +9,7 @@ class TransportOrder {
   final double? budget;
   final String status;
   final String clientId;
-  final String? carrierId;
+  final String? selectedCarrierId;
   final DateTime createdAt;
   final int? rating;
 
@@ -24,7 +24,7 @@ class TransportOrder {
     this.budget,
     required this.status,
     required this.clientId,
-    this.carrierId,
+    this.selectedCarrierId,
     required this.createdAt,
     this.rating,
   });
@@ -40,15 +40,16 @@ class TransportOrder {
         budget: (j['budget'] as num?)?.toDouble(),
         status: j['status'] as String,
         clientId: j['client_id'] as String,
-        carrierId: j['carrier_id'] as String?,
+        selectedCarrierId: j['selected_carrier_id'] as String?,
         createdAt: DateTime.parse(j['created_at'] as String),
         rating: j['rating'] as int?,
       );
 
   String get statusLabel => switch (status) {
-        'open' => 'Открыт',
-        'in_progress' => 'В работе',
+        'new' => 'Новый',
+        'carrier_selected' => 'Перевозчик выбран',
         'completed' => 'Завершён',
+        'cancelled' => 'Отменён',
         _ => status,
       };
 }
@@ -61,6 +62,8 @@ class TransportResponse {
   final double proposedPrice;
   final String? comment;
   final String? vehicleType;
+  final String status;
+  final TransportOrder? order;
   final DateTime createdAt;
 
   const TransportResponse({
@@ -71,6 +74,8 @@ class TransportResponse {
     required this.proposedPrice,
     this.comment,
     this.vehicleType,
+    required this.status,
+    this.order,
     required this.createdAt,
   });
 
@@ -82,6 +87,17 @@ class TransportResponse {
         proposedPrice: (j['proposed_price'] as num).toDouble(),
         comment: j['comment'] as String?,
         vehicleType: j['vehicle_type'] as String?,
+        status: j['status'] as String? ?? 'new',
+        order: j['transport_order'] != null
+            ? TransportOrder.fromJson(j['transport_order'] as Map<String, dynamic>)
+            : null,
         createdAt: DateTime.parse(j['created_at'] as String),
       );
+
+  String get statusLabel => switch (status) {
+        'new' => 'Ожидает',
+        'selected' => 'Выбран',
+        'rejected' => 'Отклонён',
+        _ => status,
+      };
 }

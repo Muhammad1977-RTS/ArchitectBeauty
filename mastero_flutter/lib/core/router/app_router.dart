@@ -11,11 +11,13 @@ import '../../features/client/screens/client_transport_screen.dart';
 import '../../features/client/screens/client_stores_screen.dart';
 import '../../features/client/screens/create_order_screen.dart';
 import '../../features/client/screens/order_detail_screen.dart';
+import '../../features/client/screens/transport_order_detail_screen.dart';
 import '../../features/master/screens/master_shell.dart';
 import '../../features/master/screens/master_orders_screen.dart';
 import '../../features/master/screens/master_responses_screen.dart';
 import '../../features/carrier/screens/carrier_shell.dart';
 import '../../features/carrier/screens/carrier_orders_screen.dart';
+import '../../features/carrier/screens/carrier_responses_screen.dart';
 import '../../features/store/screens/store_shell.dart';
 import '../../features/store/screens/store_products_screen.dart';
 import '../../features/admin/screens/admin_shell.dart';
@@ -83,6 +85,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, __, child) => CarrierShell(child: child),
         routes: [
           GoRoute(path: '/carrier', builder: (_, __) => const CarrierOrdersScreen()),
+          GoRoute(path: '/carrier/responses', builder: (_, __) => const CarrierResponsesScreen()),
         ],
       ),
 
@@ -102,6 +105,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/admin/complaints', builder: (_, __) => const AdminComplaintsScreen()),
           GoRoute(path: '/admin/work-types', builder: (_, __) => const AdminWorkTypesScreen()),
         ],
+      ),
+
+      // Transport order detail (shared — accessible from client, master, carrier)
+      GoRoute(
+        path: '/transport/:id',
+        builder: (_, state) =>
+            TransportOrderDetailScreen(orderId: state.pathParameters['id']!),
       ),
 
       // Shared routes
