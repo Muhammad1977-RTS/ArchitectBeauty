@@ -1,0 +1,17 @@
+allprojects {
+    repositories {
+        maven { url = uri("C:/dev/flutter/bin/cache/flutter_maven_local") }
+        google()
+        mavenCentral()
+    }
+
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            project.android.compileSdkVersion 36
+        }
+    }
+}
+
+tasks.register("clean", Delete) {
+    delete layout.buildDirectory
+}
