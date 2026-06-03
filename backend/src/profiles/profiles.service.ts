@@ -9,13 +9,14 @@ export class ProfilesService {
     const profile = await this.prisma.profile.findUnique({
       where: { id },
       include: {
+        user: { select: { email: true } },
         masterRates: { include: { workType: true } },
         carrierProfile: true,
         storeProfile: true,
       },
     });
     if (!profile) throw new NotFoundException('Profile not found');
-    return profile;
+    return { ...profile, email: profile.user?.email };
   }
 
   async update(id: string, data: { name?: string; phone?: string; cityDistrict?: string }) {
