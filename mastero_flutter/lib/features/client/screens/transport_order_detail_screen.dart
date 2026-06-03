@@ -446,12 +446,12 @@ class _CarrierSelectedBanner extends ConsumerWidget {
   }
 }
 
-class _CompletedBanner extends StatelessWidget {
+class _CompletedBanner extends ConsumerWidget {
   final TransportOrder order;
   const _CompletedBanner({required this.order});
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context, WidgetRef ref) => Card(
         color: AppColors.secondary.withOpacity(0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -459,33 +459,160 @@ class _CompletedBanner extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.check_circle, color: AppColors.secondary, size: 28),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const Row(
                 children: [
-                  const Text('Заказ завершён',
+                  Icon(Icons.check_circle, color: AppColors.secondary, size: 24),
+                  SizedBox(width: 10),
+                  Text('Заказ завершён',
                       style: TextStyle(
                           fontWeight: FontWeight.w600,
                           color: AppColors.secondary,
                           fontSize: 16)),
-                  if (order.rating != null)
-                    Row(
-                      children: List.generate(
-                        5,
-                        (i) => Icon(
-                          i < order.rating! ? Icons.star : Icons.star_border,
-                          size: 18,
-                          color: AppColors.warning,
-                        ),
-                      ),
-                    ),
                 ],
               ),
+              const SizedBox(height: 12),
+              if (order.rating != null) ...[
+                Row(
+                  children: [
+                    ...List.generate(
+                      5,
+                      (i) => Icon(
+                        i < order.rating! ? Icons.star : Icons.star_border,
+                        size: 24,
+                        color: AppColors.warning,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text('${order.rating}/5',
+                        style: const TextStyle(
+                            color: AppColors.textSecondary, fontSize: 14)),
+                  ],
+                ),
+              ] else ...[
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.star_outline, size: 16),
+                  label: const Text('Оценить перевозчика'),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 44),
+                    backgroundColor: AppColors.warning,
+                  ),
+                  onPressed: () => _showRatingSheet(context, ref),
+                ),
+              ],
             ],
           ),
         ),
       );
+
+  void _showRatingSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => _RatingSheet(
+        title: 'Оценить перевозчика',
+        onSubmit: (rating, review) async {
+          await ref.read(apiClientProvider).patch(
+            '/transport-orders/${order.id}/rate',
+            data: {'rating': rating, if (review.isNotEmpty) 'review_text': review},
+          );
+          ref.invalidate(transportOrderDetailProvider(order.id));
+          ref.invalidate(myTransportOrdersProvider);
+        },
+      ),
+    );
+  }
+}
+
+class _RatingSheet extends ConsumerStatefulWidget {
+  final String title;
+  final Future<void> Function(int rating, String review) onSubmit;
+  const _RatingSheet({required this.title, required this.onSubmit});
+
+  @override
+  ConsumerState<_RatingSheet> createState() => _RatingSheetState();
+}
+
+class _RatingSheetState extends ConsumerState<_RatingSheet> {
+  int _rating = 0;
+  final _reviewCtrl = TextEditingController();
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _reviewCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_rating == 0) return;
+    setState(() => _loading = true);
+    try {
+      await widget.onSubmit(_rating, _reviewCtrl.text.trim());
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding:
+          EdgeInsets.fromLTRB(24, 24, 24, MediaQuery.of(context).viewInsets.bottom + 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(widget.title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              5,
+              (i) => GestureDetector(
+                onTap: () => setState(() => _rating = i + 1),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Icon(
+                    i < _rating ? Icons.star : Icons.star_border,
+                    size: 40,
+                    color: AppColors.warning,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _reviewCtrl,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: 'Оставьте отзыв (необязательно)',
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: (_rating == 0 || _loading) ? null : _submit,
+            child: _loading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Text('Отправить оценку'),
+          ),
+        ],
+      ),
+    );
+  }
 }

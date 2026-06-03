@@ -48,7 +48,7 @@ class Order {
         status: j['status'] as String,
         workType: WorkType.fromJson(j['work_type'] as Map<String, dynamic>),
         clientId: j['client_id'] as String,
-        masterId: j['master_id'] as String?,
+        masterId: j['selected_master_id'] as String?,
         photoUrls: (j['photo_urls'] as List<dynamic>?)
                 ?.map((e) => e.toString())
                 .toList() ??
@@ -59,8 +59,8 @@ class Order {
       );
 
   String get statusLabel => switch (status) {
-        'open' => 'Открыт',
-        'in_progress' => 'В работе',
+        'new' => 'Новый',
+        'master_selected' => 'Мастер выбран',
         'completed' => 'Завершён',
         'cancelled' => 'Отменён',
         _ => status,

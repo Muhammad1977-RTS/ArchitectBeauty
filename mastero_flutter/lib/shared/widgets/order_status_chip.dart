@@ -8,8 +8,8 @@ class OrderStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (status) {
-      'open' => ('Открыт', AppColors.primary),
-      'in_progress' => ('В работе', AppColors.warning),
+      'new' => ('Новый', AppColors.primary),
+      'master_selected' => ('Мастер выбран', AppColors.warning),
       'completed' => ('Завершён', AppColors.secondary),
       'cancelled' => ('Отменён', AppColors.error),
       _ => (status, AppColors.textSecondary),
