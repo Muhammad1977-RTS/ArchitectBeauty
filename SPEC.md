@@ -6,7 +6,7 @@
 
 **Запуск:** Чеченская Республика. Архитектура рассчитана на расширение по регионам РФ.
 
-**Стек:** Angular · NestJS (Prisma + PostgreSQL) · JWT Auth · REST API
+**Стек:** Angular · NestJS (Prisma + PostgreSQL) · JWT Auth · REST API · Ionic · Flutter
 
 **Дизайн-система:** [DESIGN.md](DESIGN.md) — единственный источник истины по UI.
 
@@ -530,15 +530,17 @@ src/app/
 - [x] Роль строительного магазина ✅
 - [x] Responsive UI на Angular ✅
 - [x] Миграция с Supabase на NestJS — единый API для веба и мобилки ✅
-- [x] База данных подключена (Supabase PostgreSQL через Prisma, схема применена) ✅
+- [x] База данных подключена (PostgreSQL через Prisma, схема применена) ✅
 - [x] Чат перевозчик ↔ заказчик с уведомлениями ✅
 - [x] Мастер может заказывать перевозки ✅
 - [x] Телефон магазина + кнопка звонка на товарах ✅
 - [x] Сквозное тестирование: полный цикл клиент+мастер+перевозчик+магазин пройден ✅
 - [x] Ionic-приложение (Angular + Ionic 8) — протестировано на реальном телефоне ✅
-- [ ] Тест чата клиент ↔ мастер в Ionic
-- [ ] Flutter-приложение (Google Play + App Store) — поверх NestJS API
-- [ ] Онлайн-оплата (ЮKassa) — после Flutter, интегрируется и в веб и в Flutter
+- [x] Flutter-приложение — вход/регистрация работают на Android ✅
+- [ ] Тест функциональности Flutter: создать заказ, откликнуться, чат
+- [ ] Release APK Flutter (flutter build apk --release) для раздачи
+- [ ] Деплой на VPS (Nginx + PM2 + PostgreSQL + Certbot)
+- [ ] Онлайн-оплата (ЮKassa) — после деплоя
 
 ---
 
@@ -553,7 +555,7 @@ src/app/
 | Email-уведомления | NestJS + nodemailer/Resend (триггер: новый отклик, выбор) |
 | Портфолио мастера | важно для доверия |
 | iOS / Android (Ionic) | ✅ реализовано 2026-05-31 |
-| iOS / Android (Flutter) | 🔜 следующий этап после Ionic |
+| iOS / Android (Flutter) | ✅ вход/регистрация работают 2026-06-03 |
 
 ---
 
@@ -671,26 +673,62 @@ Ionic (мобилка, порт 4201) ──┘
 
 ---
 
-## Мобильное приложение (Flutter)
+## Мобильное приложение (Flutter) ✅ реализовано 2026-06-03
 
 ### Стек
 
 | Слой | Технология |
 |---|---|
-| Мобильный фреймворк | Flutter (Dart) |
-| Навигация | GoRouter |
-| Состояние | Riverpod |
-| HTTP клиент | Dio |
+| Мобильный фреймворк | Flutter 3.44.0 / Dart 3.12.0 |
+| Навигация | GoRouter 13 |
+| Состояние | Riverpod 2 |
+| HTTP клиент | Dio 5 + PrettyDioLogger |
 | Бэкенд | NestJS REST API (тот же, что и для веба) |
-| Push-уведомления | Firebase Cloud Messaging (FCM) |
-| Оплата | ЮKassa Flutter SDK (после релиза) |
+| Хранение токена | flutter_secure_storage |
+
+### Расположение
+
+```
+C:\Users\ADMIN\Documents\Мастеро\mastero_flutter\
+C:\mastero_flutter\   ← junction (обход ошибки кириллицы в пути)
+```
+
+### Запуск
+
+```bash
+adb reverse tcp:3001 tcp:3001   # пробросить порт бэкенда на телефон
+cd C:\mastero_flutter
+C:\dev\flutter\bin\flutter.bat run -d 32a18edd   # RMX3472, Android 14
+```
 
 ### Архитектура
 
 ```
-Angular (веб)  ──┐
-                  ├──► NestJS API ──► PostgreSQL
-Flutter (mobile)──┘
+Angular (веб, порт 4200)    ──┐
+Ionic  (мобилка, порт 4201) ──┼──► NestJS API (порт 3001) ──► PostgreSQL
+Flutter (APK на Android)    ──┘
 ```
 
-Оба клиента работают с одним бэкендом. Бизнес-логика не дублируется.
+Все три клиента работают с одним бэкендом. Бизнес-логика не дублируется.
+
+### Страницы
+
+| Роль | Экраны |
+|------|--------|
+| Клиент | Мои заказы, создание заказа, детали + отклики, создать транспортный заказ |
+| Мастер | Лента заказов, детали + отклик, мои отклики |
+| Перевозчик | Лента грузов, детали + отклик, мои отклики |
+| Магазин | Товары, добавление/редактирование |
+| Все | Профиль, выход |
+
+### Решённые проблемы
+
+| проблема | решение |
+|----------|---------|
+| Кириллица в пути ломает Gradle | junction `C:\mastero_flutter` + `android.overridePathCheck=true` |
+| Gradle 9.1 + AGP 8.1 несовместимы | обновлены AGP 8.11.1 + Kotlin 2.2.20 |
+| NDK отсутствует | NDK 28.2.13676358 скачан вручную |
+| Flutter engine JARs не найдены | локальный Maven репо `flutter_maven_local` |
+| Login: 404 на все запросы | base URL был `localhost:3001` → исправлено на `localhost:3001/api` |
+| Login: "Ошибка входа" после 200 OK | поле `access_token` → исправлено на `token` |
+| Login: crash при парсинге профиля | `/profiles/me` не возвращал `email` → добавлен `user: { select: { email: true } }` |
