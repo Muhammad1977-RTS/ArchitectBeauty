@@ -7,12 +7,7 @@
     <p class="hint-text">Загружаем заявки...</p>
   } @else if (orders().length === 0) {
     <div class="empty-state">
-      <svg class="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="1" y="3" width="15" height="13" rx="1"/>
-        <path d="M16 8h4l3 5v4h-7V8z"/>
-        <circle cx="5.5" cy="18.5" r="2.5"/>
-        <circle cx="18.5" cy="18.5" r="2.5"/>
-      </svg>
+      <img src="empty-transport.svg" class="empty-illustration" alt="" aria-hidden="true" />
       <p class="empty-text">Пока нет открытых заявок на перевозку</p>
     </div>
   } @else {
@@ -101,6 +96,6 @@
   padding: 60px 20px;
   text-align: center;
 }
-.empty-icon { color: var(--color-text-secondary); display: block; }
+.empty-illustration { width: 240px; height: auto; opacity: 0.93; }
 .empty-text { font-size: 16px; color: var(--color-text-secondary); margin: 0; }
 </style>
