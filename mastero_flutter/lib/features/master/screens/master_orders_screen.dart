@@ -4,6 +4,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/models/order.dart';
 import '../../../core/providers/orders_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/empty_illustration.dart';
 import '../../../shared/widgets/order_status_chip.dart';
 
 class MasterOrdersScreen extends ConsumerWidget {
@@ -20,9 +21,9 @@ class MasterOrdersScreen extends ConsumerWidget {
         data: (orders) {
           final open = orders.where((o) => o.status == 'new').toList();
           if (open.isEmpty) {
-            return const Center(
-              child: Text('Нет доступных заказов',
-                  style: TextStyle(color: AppColors.textSecondary)),
+            return const EmptyIllustration(
+              asset: 'assets/images/empty-orders.svg',
+              text: 'Нет доступных заказов',
             );
           }
           return RefreshIndicator(

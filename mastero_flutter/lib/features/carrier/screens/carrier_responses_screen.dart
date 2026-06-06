@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/transport_order.dart';
 import '../../../core/providers/transport_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/empty_illustration.dart';
 
 class CarrierResponsesScreen extends ConsumerWidget {
   const CarrierResponsesScreen({super.key});
@@ -31,24 +32,9 @@ class CarrierResponsesScreen extends ConsumerWidget {
         ),
         data: (responses) {
           if (responses.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.reply_all, size: 64, color: AppColors.border),
-                  SizedBox(height: 16),
-                  Text(
-                    'Вы ещё не откликались',
-                    style: TextStyle(fontSize: 18, color: AppColors.textSecondary),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Перейдите во вкладку «Заказы»\nи откликнитесь на груз',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
+            return const EmptyIllustration(
+              asset: 'assets/images/empty-transport.svg',
+              text: 'Вы ещё не откликались\nПерейдите во вкладку «Заказы»',
             );
           }
           return RefreshIndicator(
