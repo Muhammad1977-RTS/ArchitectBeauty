@@ -539,7 +539,7 @@ src/app/
 - [x] Flutter-приложение — вход/регистрация работают на Android ✅
 - [ ] Тест функциональности Flutter: создать заказ, откликнуться, чат
 - [ ] Release APK Flutter (flutter build apk --release) для раздачи
-- [ ] Деплой на VPS (Nginx + PM2 + PostgreSQL + Certbot)
+- [x] Деплой на VPS (Nginx + PM2 + PostgreSQL + Certbot) ✅
 - [ ] Онлайн-оплата (ЮKassa) — после деплоя
 
 ---

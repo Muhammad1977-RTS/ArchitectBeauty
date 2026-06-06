@@ -26,6 +26,11 @@ class UpdateProductDto {
 export class ProductsController {
   constructor(private svc: ProductsService) {}
 
+  @Get()
+  findAll() {
+    return this.svc.findAll();
+  }
+
   @Get('my')
   myProducts(@CurrentUser() user: any) {
     return this.svc.findByStore(user.id);

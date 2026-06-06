@@ -5,6 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
+  findAll() {
+    return this.prisma.product.findMany({
+      where: { inStock: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   findByStore(storeId: string) {
     return this.prisma.product.findMany({
       where: { storeId },
