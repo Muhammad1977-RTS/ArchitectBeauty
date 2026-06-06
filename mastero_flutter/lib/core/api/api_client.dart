@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-const _baseUrl = 'http://localhost:3001/api';
+const _baseUrl = 'https://nexa.quest/api';
 const _tokenKey = 'auth_token';
 
 final secureStorageProvider = Provider<FlutterSecureStorage>(
