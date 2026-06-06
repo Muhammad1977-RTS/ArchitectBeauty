@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/models/user.dart';
 import '../../../core/providers/auth_provider.dart';
@@ -129,6 +130,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ],
             const SizedBox(height: 40),
             OutlinedButton.icon(
+              icon: const Icon(Icons.list_alt_outlined),
+              label: const Text('Мои заказы'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              onPressed: () => context.go(_ordersRouteForRole(user.role)),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
               icon: const Icon(Icons.logout, color: AppColors.error),
               label: const Text('Выйти', style: TextStyle(color: AppColors.error)),
               style: OutlinedButton.styleFrom(
@@ -148,6 +158,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         UserRole.master => AppColors.master,
         UserRole.carrier => AppColors.carrier,
         UserRole.store => AppColors.store,
+      };
+
+  String _ordersRouteForRole(UserRole role) => switch (role) {
+        UserRole.client => '/client',
+        UserRole.master => '/master',
+        UserRole.carrier => '/carrier',
+        UserRole.store => '/store',
       };
 }
 

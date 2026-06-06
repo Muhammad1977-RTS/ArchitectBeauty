@@ -1,24 +1,24 @@
 /* ─── Design tokens ─── */
 :root {
-  --color-primary:        #1E3A5F;
-  --color-primary-hover:  #16304F;
-  --color-accent:         #C86A3A;
-  --color-accent-light:   #F5E8DF;
-  --color-bg:             #F7F4F0;
-  --color-surface:        #FFFFFF;
-  --color-text:           #1A1A1A;
-  --color-text-secondary: #6B6560;
-  --color-border:         #E0DBD5;
-  --color-border-strong:  #C8C2BA;
-  --color-error:          #C13515;
-  --color-success:        #2D7A5F;
+  --color-primary:        #2563EB;
+  --color-primary-hover:  #1D4ED8;
+  --color-accent:         #E07A45;
+  --color-accent-light:   rgba(224,122,69,0.12);
+  --color-bg:             #0F172A;
+  --color-surface:        #1E293B;
+  --color-text:           #F1F5F9;
+  --color-text-secondary: #94A3B8;
+  --color-border:         #334155;
+  --color-border-strong:  #475569;
+  --color-error:          #EF4444;
+  --color-success:        #10B981;
 
   --radius-card:  16px;
   --radius-btn:   12px;
   --radius-input: 10px;
 
-  --shadow-card:  0 2px 16px rgba(0,0,0,.07);
-  --shadow-hover: 0 6px 28px rgba(0,0,0,.12);
+  --shadow-card:  0 2px 16px rgba(0,0,0,.35);
+  --shadow-hover: 0 6px 28px rgba(0,0,0,.5);
 
   --font: 'Golos Text', system-ui, -apple-system, sans-serif;
 }
@@ -211,7 +211,7 @@ body {
   text-align: left;
   transition: background .1s;
 
-  &:hover, &:active { background: #FFF0EE; }
+  &:hover, &:active { background: rgba(239,68,68,0.1); }
 }
 
 /* ─── Main layout ─── */
@@ -286,11 +286,11 @@ body {
   &:hover {
     border-color: var(--color-primary);
     box-shadow: var(--shadow-hover);
-    background: #EAF0F8;
+    background: rgba(37,99,235,0.15);
   }
   &:active {
     border-color: var(--color-primary);
-    background: #D6E4F5;
+    background: rgba(37,99,235,0.25);
     transform: scale(0.98);
   }
 }
@@ -304,7 +304,7 @@ body {
   gap: 6px;
   padding: 5px 12px;
   background: var(--color-accent-light);
-  border: 1px solid #E8C9B5;
+  border: 1px solid rgba(224,122,69,0.3);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
@@ -320,7 +320,7 @@ body {
   gap: 4px;
   padding: 3px 10px;
   background: var(--color-accent-light);
-  border: 1px solid #E8C9B5;
+  border: 1px solid rgba(224,122,69,0.3);
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
@@ -350,7 +350,7 @@ body {
   background: var(--color-surface);
   outline: none;
   transition: border-color .15s;
-  &::placeholder { color: #AAAAAA; }
+  &::placeholder { color: #64748B; }
   &:hover  { border-color: var(--color-border-strong); }
   &:focus  { border-color: var(--color-primary); }
   &.ng-invalid.ng-touched { border-color: var(--color-error); }
@@ -360,8 +360,8 @@ body {
 
 .form-error-box {
   padding: 10px 14px;
-  background: #FFF0EE;
-  border: 1px solid #FFCDD0;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
   border-radius: 8px;
   font-size: 13px;
   color: var(--color-error);
@@ -369,11 +369,11 @@ body {
 
 .success-box {
   padding: 12px 14px;
-  background: #E8F5EF;
-  border: 1px solid #B2D9C8;
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.25);
   border-radius: 8px;
   font-size: 13px;
-  color: #1D5941;
+  color: var(--color-success);
   margin-bottom: 16px;
 }
 
@@ -424,7 +424,7 @@ body {
   transition: background .15s, box-shadow .15s;
   &:hover:not(:disabled) {
     background: var(--color-primary-hover);
-    box-shadow: 0 4px 14px rgba(30,58,95,.30);
+    box-shadow: 0 4px 14px rgba(37,99,235,.35);
   }
   &:disabled { opacity: .55; cursor: not-allowed; }
 }
@@ -446,8 +446,8 @@ body {
   text-decoration: none;
   transition: background .15s, box-shadow .15s;
   &:hover:not(:disabled) {
-    background: #b05c30;
-    box-shadow: 0 4px 14px rgba(200,106,58,.35);
+    background: #c96830;
+    box-shadow: 0 4px 14px rgba(224,122,69,.35);
   }
   &:disabled { opacity: .55; cursor: not-allowed; }
 }
@@ -520,7 +520,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 6px 0;
-  border-bottom: 1px solid #F0EEEA;
+  border-bottom: 1px solid var(--color-border);
   &:last-child { border-bottom: none; }
 }
 
@@ -568,9 +568,9 @@ body {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
-  &.status-new             { background: #EDF5FF; color: #1565C0; }
-  &.status-master_selected { background: #FFF3E0; color: #E65100; }
-  &.status-completed       { background: #E8F5E9; color: #2E7D32; }
+  &.status-new             { background: rgba(37,99,235,0.15);   color: #60A5FA; }
+  &.status-master_selected { background: rgba(217,119,6,0.15);   color: #FCD34D; }
+  &.status-completed       { background: rgba(16,185,129,0.15);  color: #10B981; }
 }
 
 /* ─── Cards ─── */
