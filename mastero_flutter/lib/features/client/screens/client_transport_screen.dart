@@ -5,6 +5,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/models/transport_order.dart';
 import '../../../core/providers/transport_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/empty_illustration.dart';
 
 class ClientTransportScreen extends ConsumerWidget {
   const ClientTransportScreen({super.key});
@@ -32,27 +33,13 @@ class ClientTransportScreen extends ConsumerWidget {
         ),
         data: (orders) {
           if (orders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.local_shipping_outlined, size: 64, color: AppColors.border),
-                  const SizedBox(height: 16),
-                  const Text('Нет заказов на перевозку',
-                      style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
-                  const SizedBox(height: 8),
-                  const Text('Закажите перевозку груза',
-                      style: TextStyle(color: AppColors.textSecondary)),
-                  const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.add),
-                      label: const Text('Создать заказ'),
-                      onPressed: () => _showCreate(context, ref),
-                    ),
-                  ),
-                ],
+            return EmptyIllustration(
+              asset: 'assets/images/empty-transport.svg',
+              text: 'У вас пока нет заказов на перевозку',
+              action: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Создать заказ'),
+                onPressed: () => _showCreate(context, ref),
               ),
             );
           }

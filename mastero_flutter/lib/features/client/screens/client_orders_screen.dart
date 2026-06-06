@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/order.dart';
 import '../../../core/providers/orders_provider.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/empty_illustration.dart';
 import '../../../shared/widgets/order_status_chip.dart';
 
 class ClientOrdersScreen extends ConsumerWidget {
@@ -40,21 +41,13 @@ class ClientOrdersScreen extends ConsumerWidget {
         ),
         data: (orders) {
           if (orders.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.inbox, size: 64, color: AppColors.border),
-                  const SizedBox(height: 16),
-                  const Text('У вас нет заказов',
-                      style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
-                  const SizedBox(height: 8),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Создать заказ'),
-                    onPressed: () => context.go('/client/orders/create'),
-                  ),
-                ],
+            return EmptyIllustration(
+              asset: 'assets/images/empty-orders.svg',
+              text: 'У вас пока нет заказов',
+              action: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Создать заказ'),
+                onPressed: () => context.go('/client/orders/create'),
               ),
             );
           }

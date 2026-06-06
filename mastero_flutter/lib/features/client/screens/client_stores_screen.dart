@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/models/product.dart';
 import '../../../shared/theme/app_theme.dart';
+import '../../../shared/widgets/empty_illustration.dart';
 
 final _allProductsProvider = FutureProvider<List<Product>>((ref) async {
   final api = ref.watch(apiClientProvider);
@@ -73,20 +74,9 @@ class _ClientStoresScreenState extends ConsumerState<ClientStoresScreen> {
                         .toList();
 
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.store_mall_directory_outlined,
-                            size: 64, color: AppColors.border),
-                        const SizedBox(height: 16),
-                        Text(
-                          _search.isEmpty ? 'Нет доступных товаров' : 'Ничего не найдено',
-                          style: const TextStyle(
-                              fontSize: 18, color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
+                  return EmptyIllustration(
+                    asset: 'assets/images/empty-shops.svg',
+                    text: _search.isEmpty ? 'Магазины пока не зарегистрированы' : 'Ничего не найдено',
                   );
                 }
 
