@@ -522,11 +522,15 @@ src/app/
 | Транспорт — кто может заказать | Клиент и мастер (оба хранятся как `client_id` в `transport_orders`) |
 | Завершение транспортной заявки | Два шага: сначала «Завершить», потом форма оценки (не одновременно) |
 | Empty state иллюстрации | Freepik pana/bro SVG на всех пустых экранах — сайт и Flutter. `empty-orders.svg` (каменщик), `empty-transport.svg` (грузовик), `empty-shops.svg` (магазин). Все роли охвачены. |
+| Веб — тема | Тёмная тема по умолчанию (`--color-bg: #0F172A`, `--color-primary: #2563EB`), CSS custom properties. Переключатель тёмная/светлая в navbar: pill-кнопка с иконками луны/солнца, выбор сохраняется в `localStorage`, применяется мгновенно (инлайн-скрипт в `index.html`). Оригинальный бежевый дизайн сохранён в `backup/web-original/`. |
+| Веб — пути SVG | Angular SPA разрешает `src="empty-orders.svg"` относительно текущего роута (`/client/empty-orders.svg`), файл не найден. Решение — абсолютные пути: `src="/empty-orders.svg"`. |
+| Flutter — профиль → заказы | Кнопка «Мои заказы» на экране профиля с роль-зависимой навигацией: client→`/client`, master→`/master`, carrier→`/carrier`, store→`/store`. |
 
 ---
 
 ## Следующие шаги
 
+- [ ] **[ЗАВТРА]** Release APK Flutter: сгенерировать keystore, прописать в `android/key.properties`, `flutter build apk --release`
 - [x] Роль перевозчика ✅
 - [x] Роль строительного магазина ✅
 - [x] Responsive UI на Angular ✅
@@ -539,7 +543,7 @@ src/app/
 - [x] Ionic-приложение (Angular + Ionic 8) — протестировано на реальном телефоне ✅
 - [x] Flutter-приложение — вход/регистрация работают на Android ✅
 - [ ] Тест функциональности Flutter: создать заказ, откликнуться, чат
-- [ ] Release APK Flutter (flutter build apk --release) для раздачи
+- [ ] Release APK Flutter (flutter build apk --release, требует keystore)
 - [x] Деплой на VPS (Nginx + PM2 + PostgreSQL + Certbot) ✅
 - [ ] Онлайн-оплата (ЮKassa) — после деплоя
 
@@ -557,6 +561,7 @@ src/app/
 | Портфолио мастера | важно для доверия |
 | iOS / Android (Ionic) | ✅ реализовано 2026-05-31 |
 | iOS / Android (Flutter) | ✅ вход/регистрация работают 2026-06-03 |
+| Переключатель тем (веб) | ✅ реализовано 2026-06-06 — тёмная/светлая, navbar pill-кнопка |
 
 ---
 
@@ -733,3 +738,5 @@ Flutter (APK на Android)    ──┘
 | Login: 404 на все запросы | base URL был `localhost:3001` → исправлено на `localhost:3001/api` |
 | Login: "Ошибка входа" после 200 OK | поле `access_token` → исправлено на `token` |
 | Login: crash при парсинге профиля | `/profiles/me` не возвращал `email` → добавлен `user: { select: { email: true } }` |
+| Release APK требует ключ подписи | `flutter build apk --release` падает без keystore. Временное решение — debug APK (`flutter build apk --debug`), установка через `adb -s 32a18edd install -r` |
+| Навигация с профиля в заказы | Добавлена кнопка «Мои заказы» в `profile_screen.dart` с методом `_ordersRouteForRole()`, использует `go_router` |
