@@ -4,7 +4,10 @@
   @if (loading()) {
     <p class="empty-hint">Загрузка...</p>
   } @else if (stores().length === 0) {
-    <p class="empty-hint">Магазины пока не зарегистрированы.</p>
+    <div class="empty-state">
+      <img src="empty-shops.svg" class="empty-illustration" alt="" aria-hidden="true" />
+      <p class="empty-hint">Магазины пока не зарегистрированы.</p>
+    </div>
   } @else {
     <div class="shops-grid">
       @for (store of stores(); track store.store_id) {
@@ -59,5 +62,7 @@
 .shop-address { font-size: 13px; color: var(--color-text-secondary); }
 .shop-desc { font-size: 14px; color: var(--color-text); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .shop-link { font-size: 13px; font-weight: 500; color: var(--color-primary); margin-top: 4px; }
-.empty-hint { color: var(--color-text-secondary); font-size: 15px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 60px 20px; text-align: center; }
+.empty-illustration { width: 260px; height: auto; opacity: 0.93; }
+.empty-hint { color: var(--color-text-secondary); font-size: 15px; margin: 0; }
 </style>
