@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CarrierService } from '../../../core/services/carrier.service';
-import { TransportOrder, TransportResponse, VehicleType } from '../../../core/models/types';
+import { TransportOrder, TransportResponse, VehicleType, TransportMessage } from '../../../core/models/types';
 
 @Component({
   selector: 'app-transport-order-detail',
@@ -25,7 +25,7 @@ export class ClientTransportOrderDetailComponent implements OnInit, OnDestroy {
   readonly reviewText = signal('');
   readonly starRange = [1, 2, 3, 4, 5];
 
-  readonly chatMessages = signal<any[]>([]);
+  readonly chatMessages = signal<TransportMessage[]>([]);
   readonly chatDraft = signal('');
   readonly chatSending = signal(false);
   currentUserId = '';

@@ -14,7 +14,7 @@
       <div class="form-section">
         <h2 class="section-title">Тип работы</h2>
         <div class="form-field">
-          <label class="form-label">Вид работы <span class="req">*</span></label>
+          <div class="form-label">Вид работы <span class="req">*</span></div>
           <div class="wt-chips-wrap" [class.wt-chips--collapsed]="!showAllChips()">
             <div class="wt-chips">
               @for (wt of workTypes(); track wt.id) {
@@ -38,8 +38,9 @@
 
           @if (isOther()) {
             <div class="form-field" style="margin-top: 12px">
-              <label class="form-label">Опишите вид работы <span class="req">*</span></label>
+              <label class="form-label" for="work-type-custom">Опишите вид работы <span class="req">*</span></label>
               <input
+                id="work-type-custom"
                 formControlName="work_type_custom"
                 type="text"
                 class="form-input"
@@ -51,11 +52,11 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label">
+          <label class="form-label" for="area-sqm">
             {{ isUnitBased() ? 'Количество единиц' : 'Площадь, м²' }}
             <span class="req">*</span>
           </label>
-          <input formControlName="area_sqm" type="number" min="1"
+          <input id="area-sqm" formControlName="area_sqm" type="number" min="1"
                  [step]="isUnitBased() ? 1 : 0.5"
                  class="form-input"
                  [placeholder]="isUnitBased() ? 'например, 3 (шкаф, кровать, стол...)' : 'например, 45'" />
@@ -68,8 +69,8 @@
       <div class="form-section">
         <h2 class="section-title">Адрес и описание</h2>
         <div class="form-field">
-          <label class="form-label">Адрес / район <span class="req">*</span></label>
-          <input formControlName="address" type="text" class="form-input"
+          <label class="form-label" for="address">Адрес / район <span class="req">*</span></label>
+          <input id="address" formControlName="address" type="text" class="form-input"
                  placeholder="например, Грозный, Октябрьский район, ул. Мира 5" />
           @if (form.get('address')?.touched && form.get('address')?.invalid) {
             <span class="field-error">Укажите адрес</span>
@@ -77,8 +78,8 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label">Описание <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
-          <textarea formControlName="description" class="form-input"
+          <label class="form-label" for="description">Описание <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
+          <textarea id="description" formControlName="description" class="form-input"
                     rows="4" placeholder="Опишите детали: материалы, особенности помещения, пожелания..."></textarea>
         </div>
       </div>

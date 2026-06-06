@@ -150,3 +150,13 @@ export interface Response {
   master?: { id: string; name: string; phone: string | null };
   order?: ResponseOrder;
 }
+
+export interface TransportMessage {
+  id: string;
+  order_id?: string;
+  carrier_id?: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  sender?: { id: string; name: string; role: string };
+}

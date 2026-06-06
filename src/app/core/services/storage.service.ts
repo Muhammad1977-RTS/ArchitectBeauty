@@ -19,8 +19,8 @@ export class StorageService {
         })
       );
       return { url: `${this.base}${res.url}` };
-    } catch (e: any) {
-      return { url: null, error: e?.message ?? 'Upload failed' };
+    } catch (e) {
+      return { url: null, error: e instanceof Error ? e.message : 'Upload failed' };
     }
   }
 }

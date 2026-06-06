@@ -150,8 +150,8 @@
   @let r = modalResponse()!;
   @let stats = masterStats()[r.master_id];
 
-  <div class="modal-overlay" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+  <div class="modal-overlay" tabindex="0" (click)="closeModal()" (keyup.escape)="closeModal()">
+    <div class="modal" role="dialog" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
 
       <button class="modal-close" (click)="closeModal()">✕</button>
 

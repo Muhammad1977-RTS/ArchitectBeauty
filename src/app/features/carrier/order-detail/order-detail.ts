@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { CarrierService } from '../../../core/services/carrier.service';
-import { TransportOrder, TransportResponse, VehicleType } from '../../../core/models/types';
+import { TransportOrder, TransportResponse, VehicleType, TransportMessage } from '../../../core/models/types';
 
 @Component({
   selector: 'app-carrier-order-detail',
@@ -22,7 +22,7 @@ export class CarrierOrderDetailComponent implements OnInit, OnDestroy {
   readonly myResponse = signal<TransportResponse | null>(null);
   readonly error = signal<string | null>(null);
 
-  readonly chatMessages = signal<any[]>([]);
+  readonly chatMessages = signal<TransportMessage[]>([]);
   readonly chatDraft = signal('');
   readonly chatSending = signal(false);
   currentUserId = '';

@@ -6,7 +6,7 @@ import { Profile, MasterRate, WorkType } from '../models/types';
 export class ProfileService {
   private api = inject(ApiService);
 
-  async getProfile(userId: string): Promise<Profile | null> {
+  async getProfile(_userId: string): Promise<Profile | null> {
     try {
       return await this.api.get<Profile>('/profiles/me');
     } catch {
@@ -37,7 +37,7 @@ export class ProfileService {
 
   async getMasterRates(masterId: string): Promise<MasterRate[]> {
     try {
-      const profile = await this.api.get<any>(`/profiles/${masterId}`);
+      const profile = await this.api.get<{ master_rates?: MasterRate[] }>(`/profiles/${masterId}`);
       return profile?.master_rates ?? [];
     } catch {
       return [];
@@ -64,7 +64,7 @@ export class ProfileService {
 
   async getMasterById(masterId: string): Promise<(Profile & { master_rates: MasterRate[] }) | null> {
     try {
-      return await this.api.get<any>(`/profiles/${masterId}`);
+      return await this.api.get<Profile & { master_rates: MasterRate[] }>(`/profiles/${masterId}`);
     } catch {
       return null;
     }

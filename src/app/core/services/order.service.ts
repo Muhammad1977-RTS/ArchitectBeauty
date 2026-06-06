@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { Order, OrderStatus } from '../models/types';
+import { Order, OrderStatus, MasterStats } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -28,7 +28,7 @@ export class OrderService {
     }
   }
 
-  async getClientOrders(clientId: string): Promise<Order[]> {
+  async getClientOrders(_clientId: string): Promise<Order[]> {
     try {
       return await this.api.get<Order[]>('/orders/my');
     } catch {
@@ -72,7 +72,7 @@ export class OrderService {
     }
   }
 
-  async getMasterStats(_masterIds: string[]): Promise<any[]> {
+  async getMasterStats(_masterIds: string[]): Promise<MasterStats[]> {
     return [];
   }
 

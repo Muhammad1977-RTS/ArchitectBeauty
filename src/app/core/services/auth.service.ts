@@ -57,7 +57,7 @@ export class AuthService {
       localStorage.setItem('app_user', JSON.stringify(res.user));
       this.appUser.set(res.user);
       return true;
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.error.set(this.mapError(e));
       return false;
     } finally {
@@ -76,7 +76,7 @@ export class AuthService {
       localStorage.setItem('app_user', JSON.stringify(res.user));
       this.appUser.set(res.user);
       return true;
-    } catch (e: any) {
+    } catch (e: unknown) {
       this.error.set(this.mapError(e));
       return false;
     } finally {
@@ -90,8 +90,9 @@ export class AuthService {
     await this.router.navigate(['/auth/login']);
   }
 
-  private mapError(e: any): string {
-    const msg: string = e?.error?.message ?? e?.message ?? '';
+  private mapError(e: unknown): string {
+    const err = e as { error?: { message?: string }; message?: string };
+    const msg: string = err?.error?.message ?? err?.message ?? '';
     if (msg.includes('already registered') || msg.includes('Conflict')) return 'Пользователь с таким email уже существует';
     if (msg.includes('Invalid credentials') || msg.includes('Unauthorized')) return 'Неверный email или пароль';
     if (msg.includes('at least')) return 'Пароль должен содержать минимум 6 символов';

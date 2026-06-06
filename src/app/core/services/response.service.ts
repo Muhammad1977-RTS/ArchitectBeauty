@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { Response } from '../models/types';
+import { Response, MasterRate } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class ResponseService {
@@ -34,7 +34,7 @@ export class ResponseService {
     }
   }
 
-  async getMyResponses(masterId: string): Promise<Response[]> {
+  async getMyResponses(_masterId: string): Promise<Response[]> {
     try {
       return await this.api.get<Response[]>('/responses/my');
     } catch {
@@ -45,7 +45,7 @@ export class ResponseService {
   async getMyResponseForOrder(orderId: string, masterId: string): Promise<Response | null> {
     try {
       const all = await this.api.get<Response[]>(`/responses/by-order/${orderId}`);
-      return all.find((r: any) => r.master_id === masterId) ?? null;
+      return all.find(r => r.master_id === masterId) ?? null;
     } catch {
       return null;
     }
@@ -63,19 +63,19 @@ export class ResponseService {
   async markResponsesSeenForOrder(orderId: string): Promise<void> {
     try {
       await this.api.post(`/responses/order/${orderId}/seen`, {});
-    } catch {}
+    } catch { /* empty */ }
   }
 
   subscribeToNewResponses(_onNew: (orderId: string) => void): null {
     return null;
   }
 
-  unsubscribeFromResponses(_channel: any) {}
+  unsubscribeFromResponses(_channel: unknown): void { return; }
 
   async getMasterRateForWorkType(masterId: string, workTypeId: string): Promise<number | null> {
     try {
-      const profile = await this.api.get<any>(`/profiles/${masterId}`);
-      const rate = profile?.master_rates?.find((r: any) => r.work_type_id === workTypeId);
+      const profile = await this.api.get<{ master_rates?: MasterRate[] }>(`/profiles/${masterId}`);
+      const rate = profile?.master_rates?.find(r => r.work_type_id === workTypeId);
       return rate?.rate_per_sqm ?? null;
     } catch {
       return null;

@@ -28,7 +28,7 @@ export class ChatService {
   async markAsRead(orderId: string, masterId: string): Promise<void> {
     try {
       await this.api.post(`/messages/order/${orderId}/master/${masterId}/read`, {});
-    } catch {}
+    } catch { /* empty */ }
   }
 
   async getUnreadCountsForClient(_clientId: string): Promise<Map<string, number>> {
@@ -60,5 +60,5 @@ export class ChatService {
     return null;
   }
 
-  unsubscribe(_channel: any) {}
+  unsubscribe(_channel: unknown): void { return; }
 }

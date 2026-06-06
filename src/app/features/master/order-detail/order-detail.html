@@ -82,8 +82,8 @@
 
           <form [formGroup]="form" (ngSubmit)="submit()" class="profile-form">
             <div class="form-field">
-              <label class="form-label">Предлагаемая цена, ₽ <span class="req">*</span></label>
-              <input formControlName="proposed_price" type="number" min="1"
+              <label class="form-label" for="proposed-price">Предлагаемая цена, ₽ <span class="req">*</span></label>
+              <input id="proposed-price" formControlName="proposed_price" type="number" min="1"
                      class="form-input" placeholder="например, 16000" />
               <span class="field-hint">Авторасчёт: площадь × ваша ставка. Можете изменить.</span>
               @if (form.get('proposed_price')?.touched && form.get('proposed_price')?.invalid) {
@@ -92,14 +92,14 @@
             </div>
 
             <div class="form-field">
-              <label class="form-label">Срок выполнения, дней <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
-              <input formControlName="estimated_days" type="number" min="1"
+              <label class="form-label" for="estimated-days">Срок выполнения, дней <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
+              <input id="estimated-days" formControlName="estimated_days" type="number" min="1"
                      class="form-input" placeholder="например, 7" />
             </div>
 
             <div class="form-field">
-              <label class="form-label">Комментарий <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
-              <textarea formControlName="comment" class="form-input"
+              <label class="form-label" for="comment">Комментарий <span style="color:var(--color-text-secondary);font-weight:400">(необязательно)</span></label>
+              <textarea id="comment" formControlName="comment" class="form-input"
                         rows="3" placeholder="Расскажите о своём опыте, подходе к работе..."></textarea>
             </div>
 

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
-import { TransportOrder, TransportResponse, CarrierProfile, VehicleType } from '../models/types';
+import { TransportOrder, TransportResponse, CarrierProfile, VehicleType, TransportMessage } from '../models/types';
 
 @Injectable({ providedIn: 'root' })
 export class CarrierService {
@@ -90,10 +90,10 @@ export class CarrierService {
     }
   }
 
-  async getMyResponseForOrder(orderId: string, carrierId: string): Promise<TransportResponse | null> {
+  async getMyResponseForOrder(orderId: string, _carrierId: string): Promise<TransportResponse | null> {
     try {
       const all = await this.api.get<TransportResponse[]>('/transport-responses/my');
-      return all.find((r: any) => r.order_id === orderId) ?? null;
+      return all.find(r => r.order_id === orderId) ?? null;
     } catch {
       return null;
     }
@@ -128,16 +128,16 @@ export class CarrierService {
 
   async getCarrierProfile(_carrierId: string): Promise<CarrierProfile | null> {
     try {
-      const profile = await this.api.get<any>('/profiles/me');
+      const profile = await this.api.get<{ carrier_profile?: CarrierProfile | null }>('/profiles/me');
       return profile?.carrier_profile ?? null;
     } catch {
       return null;
     }
   }
 
-  async loadMessages(orderId: string, carrierId: string): Promise<any[]> {
+  async loadMessages(orderId: string, carrierId: string): Promise<TransportMessage[]> {
     try {
-      return await this.api.get<any[]>(`/transport-messages/order/${orderId}/carrier/${carrierId}`);
+      return await this.api.get<TransportMessage[]>(`/transport-messages/order/${orderId}/carrier/${carrierId}`);
     } catch {
       return [];
     }
@@ -155,7 +155,7 @@ export class CarrierService {
   async markMessagesRead(orderId: string, carrierId: string): Promise<void> {
     try {
       await this.api.post(`/transport-messages/order/${orderId}/carrier/${carrierId}/read`, {});
-    } catch {}
+    } catch { /* empty */ }
   }
 
   async getUnreadMessageCounts(): Promise<Map<string, number>> {
@@ -179,7 +179,7 @@ export class CarrierService {
   async markTransportResponsesSeenForOrder(orderId: string): Promise<void> {
     try {
       await this.api.post(`/transport-responses/order/${orderId}/seen`, {});
-    } catch {}
+    } catch { /* empty */ }
   }
 
   async saveCarrierProfile(profile: CarrierProfile): Promise<boolean> {
