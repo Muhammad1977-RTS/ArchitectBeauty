@@ -22,7 +22,7 @@
     <p class="hint-text">Загружаем заявки...</p>
   } @else if (orders().length === 0) {
     <div class="empty-state">
-      <img src="empty-transport.svg" class="empty-illustration" alt="" aria-hidden="true" />
+      <img src="/empty-transport.svg" class="empty-illustration" alt="" aria-hidden="true" />
       <p class="empty-text">У вас пока нет заявок на перевозку</p>
       <a routerLink="/client/transport-orders/new" class="btn-primary btn-sm">Создать заявку</a>
     </div>
@@ -187,6 +187,6 @@
   text-align: center;
 }
 .empty-icon { color: var(--color-text-secondary); display: block; }
-.empty-illustration { width: 220px; height: auto; opacity: 0.92; }
+.empty-illustration { width: 240px; height: auto; opacity: 0.93; }
 .empty-text { font-size: 16px; color: var(--color-text-secondary); margin: 0; }
 </style>
