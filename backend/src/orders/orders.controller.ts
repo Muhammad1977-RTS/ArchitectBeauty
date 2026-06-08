@@ -13,12 +13,14 @@ class CreateOrderDto {
 }
 
 class SelectMasterDto {
-  @IsUUID() masterId: string;
+  // Flutter sends snake_case — accept both
+  @IsOptional() @IsUUID() master_id?: string;
+  @IsOptional() @IsUUID() masterId?: string;
 }
 
-class CompleteOrderDto {
+class RateOrderDto {
   @IsNumber() @Min(1) rating: number;
-  @IsOptional() @IsString() reviewText?: string;
+  @IsOptional() @IsString() review_text?: string;
 }
 
 @Controller('orders')
@@ -47,12 +49,18 @@ export class OrdersController {
 
   @Patch(':id/select-master')
   selectMaster(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: SelectMasterDto) {
-    return this.svc.selectMaster(id, dto.masterId, user.id);
+    const masterId = dto.master_id ?? dto.masterId ?? '';
+    return this.svc.selectMaster(id, masterId, user.id);
   }
 
   @Patch(':id/complete')
-  complete(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: CompleteOrderDto) {
-    return this.svc.complete(id, user.id, dto.rating, dto.reviewText);
+  complete(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.svc.complete(id, user.id);
+  }
+
+  @Patch(':id/rate')
+  rate(@Param('id') id: string, @CurrentUser() user: any, @Body() dto: RateOrderDto) {
+    return this.svc.rate(id, user.id, dto.rating, dto.review_text);
   }
 
   @Delete(':id')

@@ -72,14 +72,28 @@ export class OrdersService {
     });
   }
 
-  async complete(orderId: string, clientId: string, rating: number, reviewText?: string) {
+  async complete(orderId: string, clientId: string) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException();
     if (order.clientId !== clientId) throw new ForbiddenException();
+    if (order.status !== 'master_selected') throw new BadRequestException('Order is not in progress');
 
     return this.prisma.order.update({
       where: { id: orderId },
-      data: { status: 'completed', rating, reviewText },
+      data: { status: 'completed' },
+      include: ORDER_INCLUDE,
+    });
+  }
+
+  async rate(orderId: string, clientId: string, rating: number, reviewText?: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException();
+    if (order.clientId !== clientId) throw new ForbiddenException();
+    if (order.status !== 'completed') throw new BadRequestException('Order is not completed');
+
+    return this.prisma.order.update({
+      where: { id: orderId },
+      data: { rating, reviewText },
       include: ORDER_INCLUDE,
     });
   }
