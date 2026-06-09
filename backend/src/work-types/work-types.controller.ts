@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { WorkTypesService } from './work-types.service';
 import { AdminGuard } from '../common/admin.guard';
+import { Public } from '../common/public.decorator';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 class CreateWorkTypeDto {
@@ -12,6 +13,7 @@ class CreateWorkTypeDto {
 export class WorkTypesController {
   constructor(private svc: WorkTypesService) {}
 
+  @Public()
   @Get()
   findAll() {
     return this.svc.findAll();
