@@ -138,7 +138,7 @@ class _TransportCardState extends ConsumerState<_TransportCard> {
                     Text('Вес: ${o.cargoWeightKg} кг',
                         style: const TextStyle(color: AppColors.textSecondary)),
                   if (o.transportDate != null)
-                    Text('Дата: ${o.transportDate}',
+                    Text('Дата: ${o.formattedTransportDate}',
                         style: const TextStyle(color: AppColors.textSecondary)),
                   const SizedBox(height: 12),
                   TextField(

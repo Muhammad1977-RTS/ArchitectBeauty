@@ -177,8 +177,13 @@ class _OrderInfoCard extends StatelessWidget {
                     const Icon(Icons.calendar_today,
                         size: 16, color: AppColors.textSecondary),
                     const SizedBox(width: 4),
-                    Text(order.transportDate!,
-                        style: const TextStyle(color: AppColors.textSecondary)),
+                    Flexible(
+                      child: Text(
+                        order.formattedTransportDate,
+                        style: const TextStyle(color: AppColors.textSecondary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ],
               ),

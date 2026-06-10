@@ -143,8 +143,13 @@ class _TransportCard extends StatelessWidget {
                   if (order.transportDate != null) ...[
                     const Icon(Icons.calendar_today, size: 16, color: AppColors.textSecondary),
                     const SizedBox(width: 4),
-                    Text(order.transportDate!,
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                    Flexible(
+                      child: Text(
+                        order.formattedTransportDate,
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                   if (order.cargoWeightKg != null) ...[
                     const Spacer(),

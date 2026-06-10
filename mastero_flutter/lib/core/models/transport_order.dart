@@ -52,6 +52,16 @@ class TransportOrder {
         'cancelled' => 'Отменён',
         _ => status,
       };
+
+  String get formattedTransportDate {
+    if (transportDate == null) return '';
+    try {
+      final d = DateTime.parse(transportDate!);
+      return '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+    } catch (_) {
+      return transportDate!;
+    }
+  }
 }
 
 class TransportResponse {
