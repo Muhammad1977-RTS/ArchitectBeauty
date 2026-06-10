@@ -1,4 +1,4 @@
-import { IsEmail, IsIn, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -23,6 +23,10 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsOptional()
+  @IsIn(['client', 'master', 'carrier', 'store'])
+  role?: string;
 }
 
 export class ForgotPasswordDto {

@@ -12,7 +12,7 @@ async function main() {
   const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
   const prisma = new PrismaClient({ adapter } as any);
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findFirst({
     where: { email },
     include: { profile: true },
   });

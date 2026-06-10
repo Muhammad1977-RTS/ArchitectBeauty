@@ -44,12 +44,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     } catch (_) {}
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password, {String? role}) async {
     state = state.loading();
     try {
       final res = await _api.post('/auth/login', data: {
         'email': email,
         'password': password,
+        if (role != null) 'role': role,
       });
       final token = res.data['token'] as String;
       await _storage.write(key: _tokenKey, value: token);

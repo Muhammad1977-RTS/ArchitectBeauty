@@ -12,14 +12,17 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (exists) throw new ConflictException('Email already registered');
+    const exists = await this.prisma.user.findUnique({
+      where: { email_role: { email: dto.email, role: dto.role } },
+    });
+    if (exists) throw new ConflictException('This email is already registered for this role');
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({
       data: {
         email: dto.email,
+        role: dto.role,
         passwordHash,
         profile: {
           create: {
@@ -35,10 +38,14 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-      include: { profile: true },
-    });
+    // If role provided — find exact match; otherwise find first account for this email
+    const where = dto.role
+      ? { email_role: { email: dto.email, role: dto.role } }
+      : undefined;
+
+    const user = where
+      ? await this.prisma.user.findUnique({ where, include: { profile: true } })
+      : await this.prisma.user.findFirst({ where: { email: dto.email }, include: { profile: true } });
 
     if (!user || !user.profile) throw new UnauthorizedException('Invalid credentials');
 
@@ -49,9 +56,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
-    // Security: always return the same response to prevent user enumeration.
-    // Wire up an actual mailer (Nodemailer / Resend) here when SMTP is configured.
-    await this.prisma.user.findUnique({ where: { email } });
+    await this.prisma.user.findFirst({ where: { email } });
     return { message: 'If this email is registered, a reset link has been sent.' };
   }
 

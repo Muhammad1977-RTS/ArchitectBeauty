@@ -15,7 +15,7 @@ async function main() {
   const prisma = new PrismaClient({ adapter } as any);
 
   for (const [email, expectedRole] of Object.entries(EXPECTED)) {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: { email },
       include: { profile: true },
     });
