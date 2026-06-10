@@ -67,8 +67,8 @@ class _MasterOrderCardState extends ConsumerState<_MasterOrderCard> {
     try {
       final api = ref.read(apiClientProvider);
       await api.post('/responses', data: {
-        'order_id': widget.order.id,
-        'proposed_price': price,
+        'orderId': widget.order.id,
+        'proposedPrice': price,
         'comment': _commentCtrl.text.trim().isEmpty ? null : _commentCtrl.text.trim(),
       });
       ref.invalidate(allOrdersProvider);

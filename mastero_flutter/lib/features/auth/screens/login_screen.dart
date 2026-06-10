@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -81,7 +82,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _passwordCtrl,
                   label: 'Пароль',
                   hint: '••••••',
-                  obscureText: _obscure,
+                  obscureText: kDebugMode ? false : _obscure,
                   validator: (v) => v == null || v.length < 6 ? 'Мин. 6 символов' : null,
                   suffixIcon: IconButton(
                     icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),

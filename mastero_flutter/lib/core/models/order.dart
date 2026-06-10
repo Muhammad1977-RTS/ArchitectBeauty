@@ -76,6 +76,11 @@ class OrderResponse {
   final String? comment;
   final int? estimatedDays;
   final DateTime createdAt;
+  // Embedded from server when fetching master's own responses
+  final String? orderStatus;
+  final String? orderWorkTypeName;
+  final String? orderAddress;
+  final String? orderClientId;
 
   const OrderResponse({
     required this.id,
@@ -86,16 +91,30 @@ class OrderResponse {
     this.comment,
     this.estimatedDays,
     required this.createdAt,
+    this.orderStatus,
+    this.orderWorkTypeName,
+    this.orderAddress,
+    this.orderClientId,
   });
 
-  factory OrderResponse.fromJson(Map<String, dynamic> j) => OrderResponse(
-        id: j['id'] as String,
-        orderId: j['order_id'] as String,
-        masterId: j['master_id'] as String,
-        masterName: (j['master'] as Map<String, dynamic>?)?['name'] as String? ?? '',
-        proposedPrice: (j['proposed_price'] as num).toDouble(),
-        comment: j['comment'] as String?,
-        estimatedDays: j['estimated_days'] as int?,
-        createdAt: DateTime.parse(j['created_at'] as String),
-      );
+  bool get isSelected => orderStatus == 'master_selected' || orderStatus == 'completed';
+
+  factory OrderResponse.fromJson(Map<String, dynamic> j) {
+    final order = j['order'] as Map<String, dynamic>?;
+    final workType = order?['work_type'] as Map<String, dynamic>?;
+    return OrderResponse(
+      id: j['id'] as String,
+      orderId: j['order_id'] as String,
+      masterId: j['master_id'] as String,
+      masterName: (j['master'] as Map<String, dynamic>?)?['name'] as String? ?? '',
+      proposedPrice: (j['proposed_price'] as num).toDouble(),
+      comment: j['comment'] as String?,
+      estimatedDays: j['estimated_days'] as int?,
+      createdAt: DateTime.parse(j['created_at'] as String),
+      orderStatus: order?['status'] as String?,
+      orderWorkTypeName: workType?['name'] as String?,
+      orderAddress: order?['address'] as String?,
+      orderClientId: order?['client_id'] as String?,
+    );
+  }
 }

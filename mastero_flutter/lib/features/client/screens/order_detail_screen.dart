@@ -152,7 +152,8 @@ class _MasterSelectedBanner extends ConsumerWidget {
                         side: const BorderSide(color: AppColors.primary),
                       ),
                       onPressed: order.masterId != null
-                          ? () => context.push('/chat/${order.id}/${order.masterId}')
+                          ? () => context.push(
+                              '/chat/${order.id}/${order.masterId}?name=${Uri.encodeComponent('Мастер')}')
                           : null,
                     ),
                   ),
@@ -356,8 +357,8 @@ class _ResponseCard extends ConsumerWidget {
                       label: const Text('Чат'),
                       style:
                           OutlinedButton.styleFrom(minimumSize: const Size(0, 42)),
-                      onPressed: () =>
-                          context.push('/chat/$orderId/${response.masterId}'),
+                      onPressed: () => context.push(
+                          '/chat/$orderId/${response.masterId}?name=${Uri.encodeComponent(response.masterName.isNotEmpty ? response.masterName : 'Мастер')}'),
                     ),
                   ),
                   const SizedBox(width: 8),

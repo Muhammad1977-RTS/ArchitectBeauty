@@ -165,7 +165,7 @@ class _ResponseCard extends StatelessWidget {
                   side: const BorderSide(color: AppColors.carrier),
                 ),
                 onPressed: () => context.push(
-                    '/chat/${response.orderId}/${response.carrierId}?transport=true'),
+                    '/chat/${response.orderId}/${response.carrierId}?transport=true&name=${Uri.encodeComponent('Клиент')}'),
               ),
             ],
           ],

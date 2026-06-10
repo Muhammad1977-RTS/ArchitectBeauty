@@ -125,6 +125,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           orderId: state.pathParameters['orderId']!,
           otherId: state.pathParameters['otherId']!,
           isTransport: state.uri.queryParameters['transport'] == 'true',
+          otherName: state.uri.queryParameters['name'] ?? '',
         ),
       ),
       GoRoute(

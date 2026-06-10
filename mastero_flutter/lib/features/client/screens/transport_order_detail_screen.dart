@@ -286,7 +286,7 @@ class _ResponseCard extends ConsumerWidget {
                       minimumSize: const Size(0, 42),
                     ),
                     onPressed: () => context.push(
-                        '/chat/$orderId/${response.carrierId}?transport=true'),
+                        '/chat/$orderId/${response.carrierId}?transport=true&name=${Uri.encodeComponent(response.carrierName.isNotEmpty ? response.carrierName : 'Перевозчик')}'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -384,7 +384,7 @@ class _CarrierSelectedBanner extends ConsumerWidget {
                       side: const BorderSide(color: AppColors.carrier),
                     ),
                     onPressed: () => context.push(
-                        '/chat/${order.id}/${order.selectedCarrierId}?transport=true'),
+                        '/chat/${order.id}/${order.selectedCarrierId}?transport=true&name=${Uri.encodeComponent('Перевозчик')}'),
                   ),
                 ),
                 const SizedBox(width: 8),

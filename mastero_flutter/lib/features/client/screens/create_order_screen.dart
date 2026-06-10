@@ -41,8 +41,8 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
     try {
       final api = ref.read(apiClientProvider);
       await api.post('/orders', data: {
-        'work_type_id': _workType!.id,
-        'area_sqm': double.parse(_areaCtrl.text.trim()),
+        'workTypeId': _workType!.id,
+        'areaSqm': double.parse(_areaCtrl.text.trim()),
         'address': _addressCtrl.text.trim(),
         'description': _descCtrl.text.trim().isEmpty ? null : _descCtrl.text.trim(),
       });
@@ -75,17 +75,19 @@ class _CreateOrderScreenState extends ConsumerState<CreateOrderScreen> {
               workTypesAsync.when(
                 loading: () => const CircularProgressIndicator(),
                 error: (e, _) => Text('$e'),
-                data: (types) => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: types.map((t) {
-                    final sel = _workType?.id == t.id;
-                    return FilterChip(
-                      label: Text(t.name),
-                      selected: sel,
-                      onSelected: (_) => setState(() => _workType = t),
-                    );
-                  }).toList(),
+                data: (types) => DropdownButtonFormField<WorkType>(
+                  value: _workType,
+                  hint: const Text('Выберите вид работ'),
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                  items: types.map((t) => DropdownMenuItem(
+                    value: t,
+                    child: Text(t.name),
+                  )).toList(),
+                  onChanged: (t) => setState(() => _workType = t),
                 ),
               ),
               const SizedBox(height: 20),
