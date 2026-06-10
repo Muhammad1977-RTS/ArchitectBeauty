@@ -1,16 +1,22 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { TransportOrdersService } from './transport-orders.service';
 import { CurrentUser } from '../common/current-user.decorator';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class CreateTransportOrderDto {
-  @IsString() @IsNotEmpty() fromAddress: string;
-  @IsString() @IsNotEmpty() toAddress: string;
-  @IsString() @IsNotEmpty() cargoDescription: string;
+  // Flutter sends snake_case — accept both
+  @IsOptional() @IsString() @IsNotEmpty() fromAddress?: string;
+  @IsOptional() @IsString() @IsNotEmpty() from_address?: string;
+  @IsOptional() @IsString() @IsNotEmpty() toAddress?: string;
+  @IsOptional() @IsString() @IsNotEmpty() to_address?: string;
+  @IsOptional() @IsString() @IsNotEmpty() cargoDescription?: string;
+  @IsOptional() @IsString() @IsNotEmpty() cargo_description?: string;
   @IsOptional() @Type(() => Number) @IsNumber() cargoWeightKg?: number;
+  @IsOptional() @Type(() => Number) @IsNumber() cargo_weight_kg?: number;
   @IsOptional() @Type(() => Number) @IsNumber() cargoVolumeM3?: number;
   @IsOptional() @IsString() transportDate?: string;
+  @IsOptional() @IsString() transport_date?: string;
   @IsOptional() @Type(() => Number) @IsNumber() budget?: number;
 }
 
@@ -44,7 +50,21 @@ export class TransportOrdersController {
 
   @Post()
   create(@CurrentUser() user: any, @Body() dto: CreateTransportOrderDto) {
-    return this.svc.create(user.id, dto);
+    const fromAddress = dto.fromAddress ?? dto.from_address;
+    const toAddress = dto.toAddress ?? dto.to_address;
+    const cargoDescription = dto.cargoDescription ?? dto.cargo_description;
+    if (!fromAddress || !toAddress || !cargoDescription) {
+      throw new BadRequestException('from_address, to_address and cargo_description are required');
+    }
+    return this.svc.create(user.id, {
+      fromAddress,
+      toAddress,
+      cargoDescription,
+      cargoWeightKg: dto.cargoWeightKg ?? dto.cargo_weight_kg,
+      cargoVolumeM3: dto.cargoVolumeM3,
+      transportDate: dto.transportDate ?? dto.transport_date,
+      budget: dto.budget,
+    });
   }
 
   @Patch(':id/select-carrier')
