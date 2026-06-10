@@ -50,9 +50,17 @@ export class TransportOrdersService {
       data: {
         ...data,
         clientId,
-        transportDate: data.transportDate ? new Date(data.transportDate) : undefined,
+        transportDate: data.transportDate ? this.parseDate(data.transportDate) : undefined,
       },
     });
+  }
+
+  private parseDate(s: string): Date | undefined {
+    // DD.MM.YYYY → yyyy-mm-dd
+    const dm = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (dm) s = `${dm[3]}-${dm[2].padStart(2, '0')}-${dm[1].padStart(2, '0')}`;
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? undefined : d;
   }
 
   async selectCarrier(orderId: string, carrierId: string, clientId: string) {
