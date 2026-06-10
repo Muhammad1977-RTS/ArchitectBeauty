@@ -180,7 +180,7 @@
 .detail-rows { display: flex; flex-direction: column; gap: 0; }
 .detail-row {
   display: flex; align-items: baseline; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
+  padding: 10px 0; border-bottom: 1px solid var(--color-border);
 }
 .detail-row:last-child { border-bottom: none; }
 .detail-row--column { flex-direction: column; gap: 4px; }
@@ -196,7 +196,7 @@
 .response-sent { display: flex; flex-direction: column; gap: 0; }
 .response-sent__row {
   display: flex; align-items: baseline; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
+  padding: 10px 0; border-bottom: 1px solid var(--color-border);
 }
 .response-sent__row:last-child { border-bottom: none; }
 .response-sent__row--column { flex-direction: column; gap: 4px; }
@@ -228,10 +228,10 @@
 .chat-msg--mine { align-self: flex-end; align-items: flex-end; }
 
 .chat-bubble {
-  background: #F2F0EC;
+  background: var(--color-chat-bubble, #F2F0EC);
   padding: 8px 12px;
   border-radius: 14px; border-bottom-left-radius: 4px;
-  font-size: 14px; color: var(--color-text);
+  font-size: 14px; color: var(--color-chat-bubble-text, #1A1A1A);
   line-height: 1.4; word-break: break-word;
 }
 .chat-msg--mine .chat-bubble {
@@ -244,7 +244,7 @@
 .chat-input-row {
   display: flex; gap: 8px;
   padding: 12px 0 4px;
-  border-top: 1px solid #F0EEEA;
+  border-top: 1px solid var(--color-border);
   margin-top: 4px;
 }
 
@@ -252,7 +252,8 @@
   flex: 1; padding: 8px 12px;
   border: 1.5px solid var(--color-border);
   border-radius: 20px; font-size: 14px;
-  outline: none; transition: border-color 0.15s; background: #fff;
+  color: var(--color-text);
+  outline: none; transition: border-color 0.15s; background: var(--color-surface);
 }
 .chat-input:focus { border-color: var(--color-primary); }
 

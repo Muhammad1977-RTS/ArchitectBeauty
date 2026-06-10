@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit {
   readonly workCategories = [
     { label: 'Сантехника', icon: '🚿' },
     { label: 'Электрика', icon: '⚡' },
-    { label: 'Укладка плитки', icon: '🪟' },
+    { label: 'Укладка плитки', icon: '🧱' },
     { label: 'Малярные работы', icon: '🎨' },
     { label: 'Отделка', icon: '🏗️' },
     { label: 'Двери и окна', icon: '🚪' },

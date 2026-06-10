@@ -1,9 +1,9 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ChatService } from '../../../core/services/chat.service';
 import { OrderService } from '../../../core/services/order.service';
-import { Order } from '../../../core/models/types';
+import { Order, WorkType } from '../../../core/models/types';
 
 @Component({
   selector: 'app-orders-browse',
@@ -18,7 +18,26 @@ export class MasterOrdersBrowseComponent implements OnInit, OnDestroy {
   readonly loading = signal(true);
   readonly orders = signal<Order[]>([]);
   readonly unreadCounts = signal<Map<string, number>>(new Map());
+  readonly workTypeFilter = signal<string>('');
   private badgePollTimer: ReturnType<typeof setInterval> | null = null;
+
+  readonly availableWorkTypes = computed<WorkType[]>(() => {
+    const seen = new Set<string>();
+    const types: WorkType[] = [];
+    for (const o of this.orders()) {
+      if (o.work_type && !seen.has(o.work_type.id)) {
+        seen.add(o.work_type.id);
+        types.push(o.work_type);
+      }
+    }
+    return types.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  });
+
+  readonly filtered = computed(() => {
+    const wt = this.workTypeFilter();
+    if (!wt) return this.orders();
+    return this.orders().filter(o => o.work_type_id === wt);
+  });
 
   async ngOnInit() {
     const user = this.auth.user();
@@ -44,6 +63,10 @@ export class MasterOrdersBrowseComponent implements OnInit, OnDestroy {
 
   unreadCount(orderId: string): number {
     return this.unreadCounts().get(orderId) ?? 0;
+  }
+
+  countByType(workTypeId: string): number {
+    return this.orders().filter(o => o.work_type_id === workTypeId).length;
   }
 
   formatDate(iso: string | null | undefined): string {

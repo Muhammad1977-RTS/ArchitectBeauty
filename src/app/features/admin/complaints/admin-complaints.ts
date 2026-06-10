@@ -7,6 +7,7 @@ type StatusFilter = 'all' | 'pending' | 'reviewed' | 'dismissed';
 
 @Component({
   selector: 'app-admin-complaints',
+  
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './admin-complaints.html',
 })

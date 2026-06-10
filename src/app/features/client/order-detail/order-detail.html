@@ -176,7 +176,7 @@
                 <div class="acc-comment" style="padding: 0 16px 14px">{{ selR.comment }}</div>
               }
 
-              <div class="chat-section" style="border-top: 1px solid #F0EEEA">
+              <div class="chat-section" style="border-top: 1px solid var(--color-border)">
                 <div class="chat-label">Переписка с мастером</div>
                 <div class="chat-messages" [id]="'chat-' + selR.master_id">
                   @if (msgs.length === 0) {
@@ -286,7 +286,7 @@
 .detail-rows { display: flex; flex-direction: column; }
 .detail-row {
   display: flex; align-items: baseline; gap: 12px;
-  padding: 10px 0; border-bottom: 1px solid #F0EEEA;
+  padding: 10px 0; border-bottom: 1px solid var(--color-border);
 }
 .detail-row:last-child { border-bottom: none; }
 .detail-row--column { flex-direction: column; gap: 4px; }
@@ -314,7 +314,7 @@
   overflow: hidden;
   transition: border-color 0.15s;
 }
-.acc-card--selected { border-color: var(--color-primary); background: #FFF8F8; }
+.acc-card--selected { border-color: var(--color-primary); background: var(--color-primary-hover-bg); }
 .acc-card--open:not(.acc-card--selected) { border-color: #C8C2BA; }
 
 .acc-head {
@@ -345,7 +345,7 @@
 .acc-body--open { max-height: 800px; }
 
 .acc-body__inner {
-  border-top: 1px solid #F0EEEA;
+  border-top: 1px solid var(--color-border);
   display: flex; flex-direction: column; gap: 0;
 }
 
@@ -353,7 +353,7 @@
 .acc-response-meta {
   padding: 14px 16px;
   display: flex; flex-direction: column; gap: 10px;
-  border-bottom: 1px solid #F0EEEA;
+  border-bottom: 1px solid var(--color-border);
 }
 .acc-meta { display: flex; gap: 8px; font-size: 13px; }
 .acc-meta__label { color: var(--color-text-secondary); min-width: 40px; }
@@ -397,12 +397,12 @@
 .chat-msg--mine { align-self: flex-end; align-items: flex-end; }
 
 .chat-bubble {
-  background: #F2F0EC;
+  background: var(--color-chat-bubble, #F2F0EC);
   padding: 8px 12px;
   border-radius: 14px;
   border-bottom-left-radius: 4px;
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--color-chat-bubble-text, #1A1A1A);
   line-height: 1.4;
   word-break: break-word;
 }
@@ -422,7 +422,7 @@
 .chat-input-row {
   display: flex; gap: 8px;
   padding: 8px 16px 14px;
-  border-top: 1px solid #F0EEEA;
+  border-top: 1px solid var(--color-border);
 }
 
 .chat-input {
@@ -431,9 +431,10 @@
   border: 1.5px solid var(--color-border);
   border-radius: 20px;
   font-size: 14px;
+  color: var(--color-text);
   outline: none;
   transition: border-color 0.15s;
-  background: #fff;
+  background: var(--color-surface);
 }
 .chat-input:focus { border-color: var(--color-primary); }
 
@@ -468,7 +469,7 @@
 
 .complaint-row {
   padding: 10px 16px;
-  border-top: 1px solid #F0EEEA;
+  border-top: 1px solid var(--color-border);
 }
 .complaint-link {
   background: none; border: none; padding: 0;
@@ -487,7 +488,7 @@
   border: 1.5px solid var(--color-primary);
   border-radius: var(--radius-card);
   overflow: hidden;
-  background: #FFF8F8;
+  background: var(--color-primary-hover-bg);
 }
 .selected-master-head {
   display: flex;
