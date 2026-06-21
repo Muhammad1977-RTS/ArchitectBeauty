@@ -67,4 +67,19 @@ tests/.auth/
 # Flutter APK builds
 mastero_flutter/mastero-release.apk
 mastero_flutter/flutter_*.log
+*.apk
+
+# Test/debug screenshots in project root
+/s*.png
+/t*.png
+/tab*.png
+/fcm*.png
+/fix*.png
+/vpn*.png
+/screen*.png
+/set*.png
+/tap*.png
+/wake*.png
+/test_vpn*.png
+/ui*.xml
 
