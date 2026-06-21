@@ -5,6 +5,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/models/message.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/messages_provider.dart';
+import '../../../core/services/chat_socket_service.dart';
 import '../../../shared/theme/app_theme.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -28,31 +29,45 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _ctrl = TextEditingController();
   final _scrollCtrl = ScrollController();
-  Timer? _refreshTimer;
   bool _sending = false;
 
   @override
   void initState() {
     super.initState();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) => _refresh());
+    _initSocket();
+  }
+
+  Future<void> _initSocket() async {
+    final socketService = ref.read(chatSocketServiceProvider);
+    await socketService.connect();
+    socketService.joinRoom(
+      orderId: widget.orderId,
+      otherId: widget.otherId,
+      isTransport: widget.isTransport,
+    );
+    socketService.onNewMessage(_onNewMessage);
+  }
+
+  void _onNewMessage(dynamic _) {
+    // Invalidate provider to reload messages from server
+    // (message already in DB, socket just notifies us)
+    if (!mounted) return;
+    final key = (orderId: widget.orderId, otherId: widget.otherId);
+    if (widget.isTransport) {
+      ref.invalidate(transportChatMessagesProvider(key));
+    } else {
+      ref.invalidate(chatMessagesProvider(key));
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
   }
 
   @override
   void dispose() {
     _ctrl.dispose();
     _scrollCtrl.dispose();
-    _refreshTimer?.cancel();
+    final socketService = ref.read(chatSocketServiceProvider);
+    socketService.offNewMessage(_onNewMessage);
     super.dispose();
-  }
-
-  void _refresh() {
-    if (widget.isTransport) {
-      ref.invalidate(transportChatMessagesProvider(
-          (orderId: widget.orderId, otherId: widget.otherId)));
-    } else {
-      ref.invalidate(chatMessagesProvider(
-          (orderId: widget.orderId, otherId: widget.otherId)));
-    }
   }
 
   Future<void> _send() async {
@@ -61,20 +76,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _ctrl.clear();
     setState(() => _sending = true);
     try {
-      final api = ref.read(apiClientProvider);
-      final path = widget.isTransport
-          ? '/transport-messages/order/${widget.orderId}/carrier/${widget.otherId}'
-          : '/messages/order/${widget.orderId}/master/${widget.otherId}';
-      await api.post(path, data: {'content': text});
-      _refresh();
-      await Future.delayed(const Duration(milliseconds: 200));
-      _scrollToBottom();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$e'), backgroundColor: AppColors.error),
-        );
-      }
+      final socketService = ref.read(chatSocketServiceProvider);
+      // Send via socket — gateway saves to DB and broadcasts new_message to room
+      socketService.sendMessage(
+        orderId: widget.orderId,
+        otherId: widget.otherId,
+        content: text,
+        isTransport: widget.isTransport,
+      );
+      // Optimistic: reload messages after a short delay
+      await Future.delayed(const Duration(milliseconds: 300));
+      _onNewMessage(null);
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -90,11 +102,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  String get _title {
-    if (widget.otherName.isNotEmpty) return widget.otherName;
-    return 'Чат';
-  }
-
   @override
   Widget build(BuildContext context) {
     final key = (orderId: widget.orderId, otherId: widget.otherId);
@@ -108,14 +115,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            Text(
+              widget.otherName.isNotEmpty ? widget.otherName : 'Чат',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
             Text(
               'Заказ #${widget.orderId.substring(0, 8)}',
               style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                  color: AppColors.textSecondary),
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -129,25 +139,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               error: (e, _) => Center(child: Text('$e')),
               data: (messages) {
                 if (messages.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.chat_bubble_outline,
-                            size: 56, color: AppColors.border),
-                        const SizedBox(height: 12),
-                        const Text('Начните диалог',
-                            style: TextStyle(
-                                color: AppColors.textSecondary, fontSize: 16)),
+                        Icon(Icons.chat_bubble_outline, size: 56, color: AppColors.border),
+                        SizedBox(height: 12),
+                        Text('Начните диалог',
+                            style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
                       ],
                     ),
                   );
                 }
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (_scrollCtrl.hasClients) {
-                    _scrollCtrl.jumpTo(_scrollCtrl.position.maxScrollExtent);
-                  }
-                });
+                WidgetsBinding.instance.addPostFrameCallback(
+                    (_) => _scrollToBottom());
                 return ListView.builder(
                   controller: _scrollCtrl,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -205,8 +210,7 @@ class _DateDivider extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(_format(date),
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary)),
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
             ),
             const Expanded(child: Divider()),
           ],
@@ -218,8 +222,7 @@ class _InputBar extends StatelessWidget {
   final TextEditingController ctrl;
   final bool sending;
   final VoidCallback onSend;
-  const _InputBar(
-      {required this.ctrl, required this.sending, required this.onSend});
+  const _InputBar({required this.ctrl, required this.sending, required this.onSend});
 
   @override
   Widget build(BuildContext context) => Container(
@@ -242,8 +245,7 @@ class _InputBar extends StatelessWidget {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(24)),
                   ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 ),
                 onSubmitted: (_) => onSend(),
               ),
@@ -255,8 +257,7 @@ class _InputBar extends StatelessWidget {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white))
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send),
               style: IconButton.styleFrom(backgroundColor: AppColors.primary),
             ),
@@ -278,8 +279,7 @@ class _MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
@@ -287,9 +287,7 @@ class _MessageBubble extends StatelessWidget {
               radius: 16,
               backgroundColor: AppColors.primary.withOpacity(0.15),
               child: Text(
-                message.senderName.isNotEmpty
-                    ? message.senderName[0].toUpperCase()
-                    : '?',
+                message.senderName.isNotEmpty ? message.senderName[0].toUpperCase() : '?',
                 style: const TextStyle(fontSize: 12, color: AppColors.primary),
               ),
             ),
@@ -310,8 +308,7 @@ class _MessageBubble extends StatelessWidget {
                             fontWeight: FontWeight.w600)),
                   ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: isMe ? AppColors.primary : AppColors.surface,
                     borderRadius: BorderRadius.only(
@@ -334,8 +331,7 @@ class _MessageBubble extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
                   child: Text(
                     _timeStr(message.createdAt),
-                    style: const TextStyle(
-                        fontSize: 10, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
                   ),
                 ),
               ],

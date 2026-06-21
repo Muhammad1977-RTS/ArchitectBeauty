@@ -5,7 +5,7 @@
 # =============================================================
 set -euo pipefail
 
-DOMAIN="nexa.quest"
+DOMAIN="${1:-nexa.quest}"   # передайте домен первым аргументом: sudo bash setup.sh mydomain.ru
 APP_DIR="/var/www/mastero"
 REPO="https://github.com/Muhammad1977-RTS/ArchitectBeauty.git"
 DB_USER="mastero_user"
@@ -105,6 +105,8 @@ pm2 startup systemd -u root --hp /root | tail -1 | bash
 # ── 9. Nginx ─────────────────────────────────────────────────
 log "Настройка Nginx..."
 cp "${APP_DIR}/deploy/nginx.conf" "/etc/nginx/sites-available/${DOMAIN}"
+# Подставляем актуальный домен в конфиг
+sed -i "s/nexa\.quest/${DOMAIN}/g" "/etc/nginx/sites-available/${DOMAIN}"
 ln -sf "/etc/nginx/sites-available/${DOMAIN}" "/etc/nginx/sites-enabled/${DOMAIN}"
 rm -f /etc/nginx/sites-enabled/default
 nginx -t

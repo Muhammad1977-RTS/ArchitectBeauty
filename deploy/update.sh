@@ -35,6 +35,15 @@ log "Frontend: публикация..."
 cp -r dist/ArchitectBeauty/browser/. /var/www/mastero/frontend/
 chown -R www-data:www-data /var/www/mastero/frontend
 
+log "Nginx: обновление конфига и перезагрузка..."
+NGINX_CONF=$(ls /etc/nginx/sites-available/ | grep -v default | head -1)
+if [[ -n "${NGINX_CONF}" ]]; then
+  DOMAIN_IN_USE="${NGINX_CONF}"
+  cp "${APP_DIR}/deploy/nginx.conf" "/etc/nginx/sites-available/${DOMAIN_IN_USE}"
+  sed -i "s/nexa\.quest/${DOMAIN_IN_USE}/g" "/etc/nginx/sites-available/${DOMAIN_IN_USE}"
+fi
+nginx -t && systemctl reload nginx
+
 echo ""
 log "Обновление завершено."
 pm2 status
