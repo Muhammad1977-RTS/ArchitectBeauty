@@ -1,9 +1,15 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ProfilesService } from '../profiles/profiles.service';
 
 @Injectable()
 export class TransportResponsesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+    private profiles: ProfilesService,
+  ) {}
 
   async create(carrierId: string, data: {
     orderId: string;
@@ -16,9 +22,17 @@ export class TransportResponsesService {
     });
     if (exists) throw new ConflictException('Already responded');
 
-    return this.prisma.transportResponse.create({
+    const response = await this.prisma.transportResponse.create({
       data: { ...data, carrierId },
     });
+
+    const order = await this.prisma.transportOrder.findUnique({ where: { id: data.orderId }, select: { clientId: true } });
+    if (order) {
+      const token = await this.profiles.getFcmToken(order.clientId);
+      if (token) await this.notifications.sendToToken(token, 'Новый отклик', 'Перевозчик откликнулся на ваш заказ');
+    }
+
+    return response;
   }
 
   findByCarrier(carrierId: string) {

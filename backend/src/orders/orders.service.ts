@@ -1,5 +1,7 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ProfilesService } from '../profiles/profiles.service';
 
 const ORDER_INCLUDE = {
   workType: true,
@@ -13,7 +15,11 @@ const ORDER_INCLUDE = {
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+    private profiles: ProfilesService,
+  ) {}
 
   findAll() {
     return this.prisma.order.findMany({
@@ -65,11 +71,18 @@ export class OrdersService {
       data: { status: 'selected' },
     });
 
-    return this.prisma.order.update({
+    const result = await this.prisma.order.update({
       where: { id: orderId },
       data: { status: 'master_selected', selectedMasterId: masterId },
       include: ORDER_INCLUDE,
     });
+
+    const token = await this.profiles.getFcmToken(masterId);
+    if (token) {
+      await this.notifications.sendToToken(token, 'Отклик принят', 'Клиент выбрал вас для выполнения заказа');
+    }
+
+    return result;
   }
 
   async complete(orderId: string, clientId: string) {

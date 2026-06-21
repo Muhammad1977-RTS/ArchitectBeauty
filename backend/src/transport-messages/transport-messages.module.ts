@@ -7,5 +7,6 @@ import { PrismaModule } from '../prisma/prisma.module';
   imports: [PrismaModule],
   controllers: [TransportMessagesController],
   providers: [TransportMessagesService],
+  exports: [TransportMessagesService],
 })
 export class TransportMessagesModule {}

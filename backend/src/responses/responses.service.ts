@@ -1,9 +1,15 @@
 import { Injectable, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ProfilesService } from '../profiles/profiles.service';
 
 @Injectable()
 export class ResponsesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+    private profiles: ProfilesService,
+  ) {}
 
   async create(masterId: string, data: {
     orderId: string;
@@ -16,10 +22,20 @@ export class ResponsesService {
     });
     if (exists) throw new ConflictException('Already responded');
 
-    return this.prisma.response.create({
+    const response = await this.prisma.response.create({
       data: { ...data, masterId },
       include: { master: { select: { id: true, name: true } } },
     });
+
+    const order = await this.prisma.order.findUnique({ where: { id: data.orderId }, select: { clientId: true } });
+    if (order) {
+      const token = await this.profiles.getFcmToken(order.clientId);
+      if (token) {
+        await this.notifications.sendToToken(token, 'Новый отклик', `Мастер ${response.master.name} откликнулся на ваш заказ`);
+      }
+    }
+
+    return response;
   }
 
   findByMaster(masterId: string) {
