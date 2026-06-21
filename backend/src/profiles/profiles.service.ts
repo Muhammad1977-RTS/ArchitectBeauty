@@ -26,6 +26,18 @@ export class ProfilesService {
     });
   }
 
+  async updateFcmToken(id: string, fcmToken: string) {
+    return this.prisma.profile.update({
+      where: { id },
+      data: { fcmToken },
+    });
+  }
+
+  async getFcmToken(id: string): Promise<string | null> {
+    const p = await this.prisma.profile.findUnique({ where: { id }, select: { fcmToken: true } });
+    return p?.fcmToken ?? null;
+  }
+
   async upsertCarrierProfile(id: string, data: { vehicleType?: string; pricePerKm?: number; minPrice?: number; maxWeightKg?: number }) {
     return this.prisma.carrierProfile.upsert({
       where: { carrierId: id },

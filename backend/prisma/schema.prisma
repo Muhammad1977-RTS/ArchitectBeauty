@@ -25,6 +25,7 @@ model Profile {
   phone                    String?
   cityDistrict             String?             @map("city_district")
   isAdmin                  Boolean             @default(false) @map("is_admin")
+  fcmToken                 String?             @map("fcm_token")
   createdAt                DateTime            @default(now()) @map("created_at")
   carrierProfile           CarrierProfile?
   complaintsReceived       Complaint[]         @relation("ReportedComplaints")

@@ -4,6 +4,10 @@ import { CurrentUser } from '../common/current-user.decorator';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
+class UpdateFcmTokenDto {
+  @IsString() fcm_token: string;
+}
+
 class UpdateProfileDto {
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsString() phone?: string;
@@ -39,6 +43,11 @@ export class ProfilesController {
   @Patch('me/carrier-profile')
   updateCarrierProfile(@CurrentUser() user: any, @Body() dto: UpdateCarrierProfileDto) {
     return this.svc.upsertCarrierProfile(user.id, dto);
+  }
+
+  @Patch('me/fcm-token')
+  updateFcmToken(@CurrentUser() user: any, @Body() dto: UpdateFcmTokenDto) {
+    return this.svc.updateFcmToken(user.id, dto.fcm_token);
   }
 
   @Get(':id')

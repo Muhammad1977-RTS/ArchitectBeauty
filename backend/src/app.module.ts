@@ -17,6 +17,8 @@ import { ComplaintsModule } from './complaints/complaints.module';
 import { AdminModule } from './admin/admin.module';
 import { MasterRatesModule } from './master-rates/master-rates.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { ChatModule } from './chat/chat.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { JwtAuthGuard } from './common/jwt.guard';
 import { SnakeCaseInterceptor } from './common/snake-case.interceptor';
 
@@ -39,6 +41,8 @@ import { SnakeCaseInterceptor } from './common/snake-case.interceptor';
     AdminModule,
     MasterRatesModule,
     UploadsModule,
+    ChatModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: JwtAuthGuard },
