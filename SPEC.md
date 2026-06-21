@@ -6,7 +6,7 @@
 
 **Запуск:** Чеченская Республика. Архитектура рассчитана на расширение по регионам РФ.
 
-**Стек:** Angular · NestJS (Prisma + PostgreSQL) · JWT Auth · REST API · Ionic · Flutter
+**Стек:** Angular · NestJS (Prisma + PostgreSQL) · JWT Auth · REST API · WebSocket · Ionic · Flutter · Firebase FCM
 
 **Дизайн-система:** [DESIGN.md](DESIGN.md) — единственный источник истины по UI.
 
@@ -113,6 +113,25 @@
 - Витрина: фильтр по категориям, карточки товаров с ценой, единицей, статусом наличия
 - На товарах «В наличии» — кнопка «Позвонить» (tel: ссылка на телефон магазина)
 
+### Push-уведомления (FCM) ✅ реализовано 2026-06-21
+
+**Firebase проект:** `mastero-8570a` (Android app: `com.mastero.app`)
+
+**Backend:** `firebase-admin` npm-пакет, `NotificationsService.sendToToken(token, title, body)`.
+Триггеры отправки push:
+- Мастер откликнулся на заявку → клиент получает уведомление
+- Клиент выбрал мастера → мастер получает уведомление
+- Перевозчик откликнулся на транспортную заявку → заказчик получает уведомление
+- Новое сообщение в чате → получатель получает уведомление
+
+**Flutter:** `firebase_messaging`, `flutter_local_notifications`.
+- При запуске приложения `FcmService.init()` запрашивает разрешение, создаёт канал `mastero_channel`
+- После входа/регистрации FCM-токен отправляется на `PATCH /profiles/me/fcm-token`
+- Уведомления в foreground: через `flutter_local_notifications`
+- Уведомления в background: система показывает автоматически
+
+**`serviceAccountKey.json`** хранится на сервере: `/var/www/mastero/backend/serviceAccountKey.json`
+
 ### Жалобы
 - Клиент и мастер могут подать жалобу из карточки заявки
 - Администратор рассматривает жалобы в `/admin/complaints`
@@ -144,6 +163,7 @@ Seed (19 видов): укладка плитки, малярные работы
 | phone | text |
 | city_district | text |
 | is_admin | bool DEFAULT false |
+| fcm_token | text NULLABLE |
 | created_at | timestamptz DEFAULT now() |
 
 ### `master_rates`
@@ -297,6 +317,7 @@ Seed (19 видов): укладка плитки, малярные работы
 | 018_store.sql | ✅ применено | store_profiles, products |
 | 019_transport_response_seen.sql | ✅ применено | seen boolean на transport_responses |
 | 020_transport_messages.sql | ✅ применено | transport_messages — чат перевозчик ↔ заказчик |
+| 021_fcm_token.sql | ✅ применено | fcm_token TEXT на profiles (raw SQL: ALTER TABLE profiles ADD COLUMN IF NOT EXISTS fcm_token TEXT) |
 
 ---
 
@@ -423,6 +444,7 @@ src/app/
 | PATCH | `/profiles/me` | обновить имя, телефон, район |
 | GET | `/profiles/:id` | профиль по ID |
 | PATCH | `/profiles/me/carrier-profile` | обновить профиль перевозчика |
+| PATCH | `/profiles/me/fcm-token` | сохранить FCM-токен устройства |
 | POST | `/master-rates` | добавить/обновить ставку мастера |
 | DELETE | `/master-rates/:workTypeId` | удалить ставку |
 
@@ -544,6 +566,7 @@ src/app/
 - [x] Flutter-приложение — вход/регистрация работают на Android ✅
 - [ ] Тест функциональности Flutter: создать заказ, откликнуться, чат
 - [ ] Release APK Flutter (flutter build apk --release, требует keystore)
+- [x] Push-уведомления FCM: Firebase Admin на бэкенде, FCM в Flutter, сквозной тест пройден ✅
 - [x] Деплой на VPS (Nginx + PM2 + PostgreSQL + Certbot) ✅
 - [ ] Онлайн-оплата (ЮKassa) — после деплоя
 
@@ -558,6 +581,7 @@ src/app/
 | Мобильная версия (responsive) | ✅ реализовано |
 | Онлайн-оплата | ⏳ после Flutter-релиза |
 | Email-уведомления | NestJS + nodemailer/Resend (триггер: новый отклик, выбор) |
+| Push-уведомления (FCM) | ✅ реализовано 2026-06-21 — Firebase Admin на бэкенде, firebase_messaging + flutter_local_notifications в Flutter |
 | Портфолио мастера | важно для доверия |
 | iOS / Android (Ionic) | ✅ реализовано 2026-05-31 |
 | iOS / Android (Flutter) | ✅ вход/регистрация работают 2026-06-03 |
@@ -593,7 +617,7 @@ MVP запускается **бесплатно** — приоритет наб�
 ```
 backend/src/
 ├── auth/               — регистрация, вход, JWT стратегия
-├── profiles/           — профили пользователей
+├── profiles/           — профили пользователей (+ FCM-токен)
 ├── master-rates/       — ставки мастера
 ├── work-types/         — виды работ
 ├── orders/             — заявки на ремонт
@@ -608,6 +632,8 @@ backend/src/
 ├── uploads/            — загрузка фото (локально в /uploads)
 ├── complaints/         — жалобы
 ├── admin/              — управление пользователями
+├── notifications/      — Firebase Admin SDK, отправка FCM push
+├── chat/               — WebSocket Gateway (JWT auth, real-time чат)
 ├── common/             — jwt.guard, role.guard, snake-case interceptor
 └── prisma/             — PrismaService
 ```
@@ -691,6 +717,8 @@ Ionic (мобилка, порт 4201) ──┘
 | HTTP клиент | Dio 5 + PrettyDioLogger |
 | Бэкенд | NestJS REST API (тот же, что и для веба) |
 | Хранение токена | flutter_secure_storage |
+| Push-уведомления | firebase_core + firebase_messaging + flutter_local_notifications |
+| WebSocket чат | socket_io_client (ChatSocketService) |
 
 ### Расположение
 
@@ -740,3 +768,6 @@ Flutter (APK на Android)    ──┘
 | Login: crash при парсинге профиля | `/profiles/me` не возвращал `email` → добавлен `user: { select: { email: true } }` |
 | Release APK требует ключ подписи | `flutter build apk --release` падает без keystore. Временное решение — debug APK (`flutter build apk --debug`), установка через `adb -s 32a18edd install -r` |
 | Навигация с профиля в заказы | Добавлена кнопка «Мои заказы» в `profile_screen.dart` с методом `_ordersRouteForRole()`, использует `go_router` |
+| flutter_local_notifications требует десугаринг | `coreLibraryDesugaringEnabled true` + `coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")` в `android/app/build.gradle` |
+| Flutter CLI не находит APK (Windows, симлинк) | Собирать через `.\gradlew.bat assembleDebug` напрямую; APK в `android/app/build/outputs/apk/debug/` |
+| VPN (OpenVPN) блокирует запросы к API | `bindProcessToNetwork()` в `MainActivity.onCreate()` привязывает процесс к cellular/WiFi сети. Работает без VPN; с OpenVPN трафик всё равно идёт через VPN (iptables приоритет выше fwmark). Решение — split tunneling в настройках VPN-приложения |
