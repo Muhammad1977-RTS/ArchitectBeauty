@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "695144993951",
+    "project_id": "mastero-8570a",
+    "storage_bucket": "mastero-8570a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695144993951:android:97cd9012bf8782827b7eaa",
+        "android_client_info": {
+          "package_name": "com.mastero.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2u_nj1Wm6EsYRVlx_3vBQ9mQmG6nrTNs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

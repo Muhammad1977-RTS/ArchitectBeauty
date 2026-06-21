@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../api/api_client.dart';
 import '../models/user.dart';
+import '../services/fcm_service.dart';
 
 const _tokenKey = 'auth_token';
 
@@ -27,8 +28,9 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _api;
   final FlutterSecureStorage _storage;
+  final FcmService _fcm;
 
-  AuthNotifier(this._api, this._storage) : super(const AuthState()) {
+  AuthNotifier(this._api, this._storage, this._fcm) : super(const AuthState()) {
     _loadToken();
   }
 
@@ -41,6 +43,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (token == null) return;
       final res = await _api.get('/profiles/me');
       state = AuthState(user: User.fromJson(res.data as Map<String, dynamic>));
+      _fcm.registerToken();
     } catch (_) {}
   }
 
@@ -56,6 +59,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: _tokenKey, value: token);
       final profile = await _api.get('/profiles/me');
       state = AuthState(user: User.fromJson(profile.data as Map<String, dynamic>));
+      _fcm.registerToken();
       return true;
     } on ApiException catch (e) {
       state = state.withError(e.message);
@@ -84,6 +88,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await _storage.write(key: _tokenKey, value: token);
       final profile = await _api.get('/profiles/me');
       state = AuthState(user: User.fromJson(profile.data as Map<String, dynamic>));
+      _fcm.registerToken();
       return true;
     } on ApiException catch (e) {
       state = state.withError(e.message);
@@ -111,6 +116,7 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
     ref.watch(apiClientProvider),
     ref.watch(secureStorageProvider),
+    ref.watch(fcmServiceProvider),
   );
 });
 
