@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/api_client.dart';
 import '../../../core/models/user.dart';
 import '../../../core/providers/auth_provider.dart';
@@ -110,8 +111,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               const SizedBox(height: 12),
               AppTextField(
                 controller: _cityCtrl,
-                label: 'Район города',
-                hint: 'Центральный',
+                label: 'Адрес',
+                hint: 'ул. Пушкина, д. 1',
               ),
               const SizedBox(height: 20),
               LoadingButton(onPressed: _save, isLoading: _saving, label: 'Сохранить'),
@@ -124,11 +125,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ] else ...[
               _InfoTile(Icons.person, 'Имя', user.name),
-              if (user.phone != null) _InfoTile(Icons.phone, 'Телефон', user.phone!),
-              if (user.cityDistrict != null)
-                _InfoTile(Icons.location_city, 'Район', user.cityDistrict!),
+              _InfoTile(Icons.phone, 'Телефон', user.phone ?? 'Не указан'),
+              _InfoTile(Icons.location_on, 'Адрес', user.cityDistrict ?? 'Не указан'),
             ],
             const SizedBox(height: 40),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.language),
+              label: const Text('www.nexa.quest'),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              onPressed: () => launchUrl(
+                Uri.parse('https://nexa.quest'),
+                mode: LaunchMode.externalApplication,
+              ),
+            ),
+            const SizedBox(height: 12),
             OutlinedButton.icon(
               icon: const Icon(Icons.list_alt_outlined),
               label: const Text('Мои заказы'),
@@ -180,7 +192,7 @@ class _InfoTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.border),
       ),
@@ -190,7 +202,7 @@ class _InfoTile extends StatelessWidget {
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(label,
               style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
         ]),
       ]),
     );

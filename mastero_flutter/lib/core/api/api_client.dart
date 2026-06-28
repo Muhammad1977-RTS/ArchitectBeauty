@@ -54,19 +54,45 @@ class ApiClient {
   final Dio _dio;
   ApiClient(this._dio);
 
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) =>
-      _dio.get(path, queryParameters: queryParameters);
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
+    try {
+      return await _dio.get(path, queryParameters: queryParameters);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
+  }
 
-  Future<Response> post(String path, {dynamic data}) =>
-      _dio.post(path, data: data);
+  Future<Response> post(String path, {dynamic data}) async {
+    try {
+      return await _dio.post(path, data: data);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
+  }
 
-  Future<Response> patch(String path, {dynamic data}) =>
-      _dio.patch(path, data: data);
+  Future<Response> patch(String path, {dynamic data}) async {
+    try {
+      return await _dio.patch(path, data: data);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
+  }
 
-  Future<Response> put(String path, {dynamic data}) =>
-      _dio.put(path, data: data);
+  Future<Response> put(String path, {dynamic data}) async {
+    try {
+      return await _dio.put(path, data: data);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
+  }
 
-  Future<Response> delete(String path) => _dio.delete(path);
+  Future<Response> delete(String path) async {
+    try {
+      return await _dio.delete(path);
+    } on DioException catch (e) {
+      throw mapDioError(e);
+    }
+  }
 }
 
 class ApiException implements Exception {

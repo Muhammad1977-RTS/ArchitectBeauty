@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.WindowManager
-import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity() {
@@ -22,29 +21,20 @@ class MainActivity : FlutterActivity() {
     private fun bindToNonVpnNetwork() {
         try {
             val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-            var bound = false
+            var wifiNetwork: android.net.Network? = null
+            var cellNetwork: android.net.Network? = null
             for (network in cm.allNetworks) {
                 val caps = cm.getNetworkCapabilities(network) ?: continue
-                val isVpn = caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
-                val isWifi = caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                val isCellular = caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                val notVpnCap = caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-                Log.d("MasteroNet", "net=$network vpn=$isVpn wifi=$isWifi cell=$isCellular notVpnCap=$notVpnCap")
-                if (!isVpn && (isWifi || isCellular)) {
-                    cm.bindProcessToNetwork(network)
-                    Log.d("MasteroNet", "Bound to: $network")
-                    bound = true
-                    break
-                }
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) continue
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) && wifiNetwork == null) wifiNetwork = network
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) && cellNetwork == null) cellNetwork = network
             }
-            if (!bound) Log.w("MasteroNet", "No non-VPN network found")
-        } catch (e: Exception) {
-            Log.e("MasteroNet", "Error: $e")
-        }
+            val target = wifiNetwork ?: cellNetwork
+            if (target != null) cm.bindProcessToNetwork(target)
+        } catch (_: Exception) {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Показываем поверх экрана блокировки и включаем экран
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
